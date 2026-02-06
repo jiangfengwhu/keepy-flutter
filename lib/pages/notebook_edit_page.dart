@@ -139,7 +139,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [MiaojiColors.primary, Color(0xFF8B5CF6)],
+                  colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),

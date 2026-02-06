@@ -24,7 +24,7 @@ class _MainShellState extends State<MainShell> {
     super.initState();
     _pages = [
       HomePage(key: _homeKey),
-      const SizedBox.shrink(), // 助理 tab 不对应页面，点击弹出 Sheet
+      const SizedBox.shrink(),
       const ProfilePage(),
     ];
   }
@@ -32,7 +32,6 @@ class _MainShellState extends State<MainShell> {
   void _onTabTapped(int index) {
     if (index == 1) {
       showAiChatSheet(context).then((_) {
-        // BottomSheet 关闭后刷新首页笔记本列表
         _homeKey.currentState?.refreshNotebooks();
       });
       return;
@@ -55,7 +54,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-/// 底部导航栏
+/// 底部导航栏 — 纸质边框风格
 class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -69,16 +68,16 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: MiaojiColors.surface,
+        color: MiaojiColors.card,
         border: Border(
           top: BorderSide(
-            color: MiaojiColors.divider.withValues(alpha: 0.4),
+            color: MiaojiColors.divider.withValues(alpha: 0.5),
             width: 0.5,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: const Color(0xFF8B6914).withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -97,17 +96,17 @@ class _BottomNavBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _NavItem(
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home_rounded,
-              label: '首页',
+              icon: Icons.menu_book_outlined,
+              activeIcon: Icons.menu_book_rounded,
+              label: '小本',
               isSelected: currentIndex == 0,
               onTap: () => onTap(0),
             ),
             _NavItem(
-              icon: Icons.auto_awesome_outlined,
-              activeIcon: Icons.auto_awesome,
-              label: '助理',
-              isSelected: false, // 助理 tab 永远不处于选中态
+              icon: Icons.edit_note_outlined,
+              activeIcon: Icons.edit_note_rounded,
+              label: '助手',
+              isSelected: false,
               isSpecial: true,
               onTap: () => onTap(1),
             ),
@@ -161,15 +160,15 @@ class _NavItem extends StatelessWidget {
               decoration: isSpecial
                   ? BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [MiaojiColors.primary, Color(0xFF8B5CF6)],
+                        colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              MiaojiColors.primary.withValues(alpha: 0.3),
+                          color: const Color(0xFF5A4532)
+                              .withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -185,7 +184,7 @@ class _NavItem extends StatelessWidget {
                 isSelected ? activeIcon : icon,
                 size: isSpecial ? 18 : 22,
                 color: isSpecial
-                    ? Colors.white
+                    ? const Color(0xFFD4A24C)
                     : isSelected
                         ? MiaojiColors.primary
                         : MiaojiColors.textTertiary,
@@ -200,7 +199,7 @@ class _NavItem extends StatelessWidget {
                     ? FontWeight.w600
                     : FontWeight.w400,
                 color: isSpecial
-                    ? MiaojiColors.primary
+                    ? MiaojiColors.primaryDark
                     : isSelected
                         ? MiaojiColors.primary
                         : MiaojiColors.textTertiary,

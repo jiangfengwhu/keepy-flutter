@@ -1,57 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Miaoji 设计系统 - 颜色定义
+/// Miaoji 设计系统 - 颜色定义（纸质拟物风格）
 class MiaojiColors {
   MiaojiColors._();
 
-  // 主色调 - 温暖的靛蓝紫
-  static const Color primary = Color(0xFF6366F1);
-  static const Color primaryLight = Color(0xFF818CF8);
-  static const Color primaryDark = Color(0xFF4F46E5);
+  // 主色调 - 温暖的棕褐墨色
+  static const Color primary = Color(0xFF8B6914);
+  static const Color primaryLight = Color(0xFFB8941F);
+  static const Color primaryDark = Color(0xFF6B4F0E);
 
-  // 强调色
-  static const Color accent = Color(0xFFF472B6);
-  static const Color accentLight = Color(0xFFFBCFE8);
+  // 强调色 - 朱砂红
+  static const Color accent = Color(0xFFBF4D28);
+  static const Color accentLight = Color(0xFFE8A990);
 
-  // 语义色
-  static const Color success = Color(0xFF10B981);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color error = Color(0xFFEF4444);
-  static const Color info = Color(0xFF3B82F6);
+  // 语义色 - 柔和版本
+  static const Color success = Color(0xFF5B8C5A);
+  static const Color warning = Color(0xFFD4A24C);
+  static const Color error = Color(0xFFC1553B);
+  static const Color info = Color(0xFF5B7FA5);
 
-  // 中性色 - 背景与表面
-  static const Color background = Color(0xFFF8FAFC);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF1F5F9);
-  static const Color card = Color(0xFFFFFFFF);
+  // 中性色 - 纸张系
+  static const Color background = Color(0xFFF5EFE0); // 老旧纸张底色
+  static const Color surface = Color(0xFFFAF6ED); // 卡片纸面
+  static const Color surfaceVariant = Color(0xFFF0E8D6); // 略深纸面
+  static const Color card = Color(0xFFFCF9F2); // 干净纸面
 
-  // 文字色
-  static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF475569);
-  static const Color textTertiary = Color(0xFF94A3B8);
-  static const Color textHint = Color(0xFFCBD5E1);
+  // 文字色 - 墨色系
+  static const Color textPrimary = Color(0xFF2C2416); // 浓墨
+  static const Color textSecondary = Color(0xFF5C4E3C); // 淡墨
+  static const Color textTertiary = Color(0xFF9C8D78); // 浅墨
+  static const Color textHint = Color(0xFFC4B8A4); // 痕迹
 
-  // 边框与分割线
-  static const Color divider = Color(0xFFE2E8F0);
-  static const Color border = Color(0xFFE2E8F0);
-  static const Color borderLight = Color(0xFFF1F5F9);
+  // 边框与分割线 - 纸边缘
+  static const Color divider = Color(0xFFDDD4C1);
+  static const Color border = Color(0xFFDDD4C1);
+  static const Color borderLight = Color(0xFFECE5D5);
 
   // 兼容旧代码
   static const Color indigo = primary;
 
-  // AI 按钮渐变色
+  // AI 按钮渐变色 - 墨水渐变
   static const List<Color> aiGradient = [
-    Color(0xFF6366F1),
-    Color(0xFF8B5CF6),
-    Color(0xFFA78BFA),
+    Color(0xFF4A3B2A),
+    Color(0xFF6B4F0E),
+    Color(0xFF8B6914),
   ];
 
-  // 卡片悬浮渐变
-  static const List<Color> cardGradient = [
-    Color(0xFFFFFFFF),
-    Color(0xFFF8FAFC),
+  // 纸张微渐变
+  static const List<Color> paperGradient = [
+    Color(0xFFFCF9F2),
+    Color(0xFFF8F2E4),
   ];
+
+  // 书签色系
+  static const Color bookmarkRed = Color(0xFFC1553B);
+  static const Color bookmarkGreen = Color(0xFF5B8C5A);
+  static const Color bookmarkBlue = Color(0xFF5B7FA5);
+  static const Color bookmarkGold = Color(0xFFD4A24C);
 }
 
 /// Miaoji 设计系统 - 间距
@@ -67,63 +73,85 @@ class MiaojiSpacing {
   static const double xxxl = 32;
 }
 
-/// Miaoji 设计系统 - 圆角
+/// Miaoji 设计系统 - 圆角（拟物纸张：更小的圆角）
 class MiaojiRadius {
   MiaojiRadius._();
 
-  static const double sm = 8;
-  static const double md = 12;
-  static const double lg = 16;
-  static const double xl = 20;
-  static const double xxl = 24;
+  static const double sm = 6;
+  static const double md = 10;
+  static const double lg = 14;
+  static const double xl = 18;
+  static const double xxl = 22;
   static const double full = 100;
 }
 
-/// Miaoji 设计系统 - 阴影
+/// Miaoji 设计系统 - 阴影（纸张浮起感）
 class MiaojiShadows {
   MiaojiShadows._();
 
+  // 纸张轻浮
   static List<BoxShadow> get sm => [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.04),
-      blurRadius: 6,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF8B6914).withValues(alpha: 0.06),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          blurRadius: 2,
+          offset: const Offset(0, 1),
+        ),
+      ];
 
+  // 纸张中浮
   static List<BoxShadow> get md => [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.06),
-      blurRadius: 12,
-      offset: const Offset(0, 4),
-    ),
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.02),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF8B6914).withValues(alpha: 0.08),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ];
 
+  // 纸张高浮
   static List<BoxShadow> get lg => [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.08),
-      blurRadius: 24,
-      offset: const Offset(0, 8),
-    ),
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.03),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
+        BoxShadow(
+          color: const Color(0xFF8B6914).withValues(alpha: 0.1),
+          blurRadius: 24,
+          offset: const Offset(0, 8),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  // 纸张边缘阴影（右下侧更重）
+  static List<BoxShadow> get paper => [
+        BoxShadow(
+          color: const Color(0xFF8B6914).withValues(alpha: 0.07),
+          blurRadius: 8,
+          offset: const Offset(2, 3),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          blurRadius: 3,
+          offset: const Offset(1, 1),
+        ),
+      ];
 
   static List<BoxShadow> get glow => [
-    BoxShadow(
-      color: MiaojiColors.primary.withValues(alpha: 0.3),
-      blurRadius: 20,
-      offset: const Offset(0, 4),
-    ),
-  ];
+        BoxShadow(
+          color: MiaojiColors.primary.withValues(alpha: 0.25),
+          blurRadius: 20,
+          offset: const Offset(0, 4),
+        ),
+      ];
 }
 
 /// Miaoji 主题
@@ -134,9 +162,8 @@ class MiaojiTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: null, // 使用系统默认字体
+      fontFamily: null,
 
-      // 颜色方案
       colorScheme: ColorScheme.fromSeed(
         seedColor: MiaojiColors.primary,
         brightness: Brightness.light,
@@ -150,7 +177,6 @@ class MiaojiTheme {
 
       scaffoldBackgroundColor: MiaojiColors.background,
 
-      // AppBar 主题
       appBarTheme: const AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0.5,
@@ -170,7 +196,6 @@ class MiaojiTheme {
         ),
       ),
 
-      // 卡片主题
       cardTheme: CardThemeData(
         elevation: 0,
         color: MiaojiColors.card,
@@ -180,14 +205,11 @@ class MiaojiTheme {
         margin: EdgeInsets.zero,
       ),
 
-      // 输入框主题
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: MiaojiColors.surfaceVariant,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(MiaojiRadius.md),
           borderSide: BorderSide.none,
@@ -198,34 +220,26 @@ class MiaojiTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(MiaojiRadius.md),
-          borderSide: const BorderSide(
-            color: MiaojiColors.primary,
-            width: 1.5,
-          ),
+          borderSide:
+              const BorderSide(color: MiaojiColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(MiaojiRadius.md),
-          borderSide: const BorderSide(
-            color: MiaojiColors.error,
-            width: 1.5,
-          ),
+          borderSide:
+              const BorderSide(color: MiaojiColors.error, width: 1.5),
         ),
         labelStyle: const TextStyle(
           color: MiaojiColors.textSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        hintStyle: const TextStyle(
-          color: MiaojiColors.textHint,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: MiaojiColors.textHint, fontSize: 14),
         floatingLabelStyle: const TextStyle(
           color: MiaojiColors.primary,
           fontWeight: FontWeight.w600,
         ),
       ),
 
-      // 按钮主题
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: MiaojiColors.primary,
@@ -250,94 +264,77 @@ class MiaojiTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(MiaojiRadius.sm),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle:
+              const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
-      // 文字主题
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1.0,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.0,
+            color: MiaojiColors.textPrimary),
         headlineLarge: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+            color: MiaojiColors.textPrimary),
         headlineMedium: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+            color: MiaojiColors.textPrimary),
         titleLarge: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.2,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
+            color: MiaojiColors.textPrimary),
         titleMedium: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: MiaojiColors.textPrimary),
         titleSmall: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: MiaojiColors.textSecondary,
-        ),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: MiaojiColors.textSecondary),
         bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: MiaojiColors.textPrimary,
-          height: 1.5,
-        ),
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: MiaojiColors.textPrimary,
+            height: 1.5),
         bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: MiaojiColors.textSecondary,
-          height: 1.5,
-        ),
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: MiaojiColors.textSecondary,
+            height: 1.5),
         bodySmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: MiaojiColors.textTertiary,
-          height: 1.4,
-        ),
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: MiaojiColors.textTertiary,
+            height: 1.4),
         labelLarge: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.3,
-          color: MiaojiColors.textPrimary,
-        ),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+            color: MiaojiColors.textPrimary),
         labelMedium: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: MiaojiColors.textSecondary,
-        ),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: MiaojiColors.textSecondary),
         labelSmall: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.5,
-          color: MiaojiColors.textTertiary,
-        ),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+            color: MiaojiColors.textTertiary),
       ),
 
-      // 分割线主题
       dividerTheme: const DividerThemeData(
         color: MiaojiColors.divider,
         thickness: 1,
         space: 1,
       ),
 
-      // SnackBar 主题
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: MiaojiColors.textPrimary,
@@ -351,7 +348,6 @@ class MiaojiTheme {
         ),
       ),
 
-      // DropdownMenu 主题
       dropdownMenuTheme: DropdownMenuThemeData(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
@@ -363,7 +359,6 @@ class MiaojiTheme {
         ),
       ),
 
-      // FloatingActionButton 主题
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: MiaojiColors.primary,
         foregroundColor: Colors.white,
@@ -373,13 +368,10 @@ class MiaojiTheme {
         ),
       ),
 
-      // BottomSheet 主题
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: MiaojiColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
     );

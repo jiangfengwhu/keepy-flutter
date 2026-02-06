@@ -1,4 +1,4 @@
-import '../models/notebook.dart';
+import '../services/tool_executor.dart';
 
 /// 匹配后端协议的聊天消息模型
 class ChatMessage {
@@ -10,8 +10,8 @@ class ChatMessage {
   // UI 辅助字段（不序列化）
   bool isStreaming;
 
-  /// tool call 创建的笔记本（用于 UI 展示，不序列化）
-  Notebook? createdNotebook;
+  /// Tool call 执行结果（UI 展示用，不序列化）
+  List<ToolResult>? toolResults;
 
   ChatMessage({
     required this.role,
@@ -19,7 +19,7 @@ class ChatMessage {
     this.toolCallId,
     this.toolCalls,
     this.isStreaming = false,
-    this.createdNotebook,
+    this.toolResults,
   });
 
   bool get isUser => role == 'user';
@@ -29,10 +29,7 @@ class ChatMessage {
 
   /// 转为后端 API JSON 格式
   Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{
-      'role': role,
-      'content': content,
-    };
+    final json = <String, dynamic>{'role': role, 'content': content};
     if (toolCallId != null) {
       json['tool_call_id'] = toolCallId;
     }
@@ -64,6 +61,13 @@ class ChatMessage {
   /// 创建空的 assistant 消息（用于流式填充）
   factory ChatMessage.assistantStreaming() =>
       ChatMessage(role: 'assistant', isStreaming: true);
+
+  /// 创建 tool response 消息
+  factory ChatMessage.tool({
+    required String content,
+    required String toolCallId,
+  }) =>
+      ChatMessage(role: 'tool', content: content, toolCallId: toolCallId);
 }
 
 /// Tool call 信息
@@ -75,14 +79,16 @@ class ToolCallInfo {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'type': 'function',
         'function': function.toJson(),
       };
 
   factory ToolCallInfo.fromJson(Map<String, dynamic> json) {
     return ToolCallInfo(
       id: json['id'] as String,
-      function:
-          ToolCallFunction.fromJson(json['function'] as Map<String, dynamic>),
+      function: ToolCallFunction.fromJson(
+        json['function'] as Map<String, dynamic>,
+      ),
     );
   }
 }
@@ -94,10 +100,7 @@ class ToolCallFunction {
 
   const ToolCallFunction({required this.name, required this.arguments});
 
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'arguments': arguments,
-      };
+  Map<String, dynamic> toJson() => {'name': name, 'arguments': arguments};
 
   factory ToolCallFunction.fromJson(Map<String, dynamic> json) {
     return ToolCallFunction(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/miaoji_theme.dart';
 
-/// 聊天输入栏组件
+/// 聊天输入栏组件 — 纸质质感
 class ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -27,7 +27,7 @@ class ChatInputBar extends StatelessWidget {
         bottomInset > 0 ? bottomInset + 8 : safePadding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: MiaojiColors.surface,
+        color: MiaojiColors.card,
         border: Border(
           top: BorderSide(
             color: MiaojiColors.divider.withValues(alpha: 0.5),
@@ -38,7 +38,7 @@ class ChatInputBar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // 输入框
+          // 输入框 — 纸面凹槽
           Expanded(
             child: Container(
               constraints: const BoxConstraints(maxHeight: 120),
@@ -46,7 +46,7 @@ class ChatInputBar extends StatelessWidget {
                 color: MiaojiColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(MiaojiRadius.xl),
                 border: Border.all(
-                  color: MiaojiColors.borderLight,
+                  color: MiaojiColors.border.withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
@@ -62,7 +62,7 @@ class ChatInputBar extends StatelessWidget {
                   height: 1.4,
                 ),
                 decoration: const InputDecoration(
-                  hintText: '输入消息...',
+                  hintText: '写点什么...',
                   hintStyle: TextStyle(
                     color: MiaojiColors.textHint,
                     fontSize: 15,
@@ -78,7 +78,7 @@ class ChatInputBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // 发送按钮
+          // 发送按钮 — 蜡封章风格
           GestureDetector(
             onTap: onSend,
             child: Container(
@@ -86,23 +86,26 @@ class ChatInputBar extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [MiaojiColors.primary, Color(0xFF8B5CF6)],
+                  colors: [
+                    Color(0xFF8B6914),
+                    Color(0xFFB8941F),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: MiaojiColors.primary.withValues(alpha: 0.3),
+                    color: MiaojiColors.primary.withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: const Icon(
-                Icons.arrow_upward_rounded,
+                Icons.send_rounded,
                 color: Colors.white,
-                size: 22,
+                size: 20,
               ),
             ),
           ),

@@ -5,6 +5,7 @@ import '../theme/miaoji_theme.dart';
 import '../widgets/ai_assistant_card.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/notebook_tile.dart';
+import 'notebook_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -73,6 +74,16 @@ class HomePageState extends State<HomePage>
     _loadNotebooks();
   }
 
+  void _openNotebook(NotebookItem item) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => NotebookDetailPage(notebookItem: item),
+          ),
+        )
+        .then((_) => _loadNotebooks());
+  }
+
   @override
   Widget build(BuildContext context) {
     final safePadding = MediaQuery.of(context).padding;
@@ -95,7 +106,8 @@ class HomePageState extends State<HomePage>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
               child: _buildAnimated(
-                interval: const Interval(0.1, 0.6, curve: Curves.easeOutCubic),
+                interval:
+                    const Interval(0.1, 0.6, curve: Curves.easeOutCubic),
                 fadeInterval: const Interval(0.1, 0.5),
                 child: AiAssistantCard(onTap: () {}),
               ),
@@ -115,7 +127,8 @@ class HomePageState extends State<HomePage>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
               child: _buildAnimated(
-                interval: const Interval(0.3, 0.75, curve: Curves.easeOutCubic),
+                interval:
+                    const Interval(0.3, 0.75, curve: Curves.easeOutCubic),
                 fadeInterval: const Interval(0.3, 0.65),
                 child: CategoryTabs(
                   tabs: _tabs,
@@ -131,7 +144,10 @@ class HomePageState extends State<HomePage>
           if (_isLoading)
             const SliverFillRemaining(
               child: Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: MiaojiColors.primary,
+                ),
               ),
             )
           else if (_notebooks.isEmpty)
@@ -148,15 +164,15 @@ class HomePageState extends State<HomePage>
                     final end = (delay + 0.4).clamp(0.0, 1.0);
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: index < _notebooks.length - 1 ? 12 : 0,
+                        bottom: index < _notebooks.length - 1 ? 14 : 0,
                       ),
                       child: _buildAnimated(
-                        interval:
-                            Interval(delay, end, curve: Curves.easeOutCubic),
+                        interval: Interval(delay, end,
+                            curve: Curves.easeOutCubic),
                         fadeInterval: Interval(delay, end - 0.05),
                         child: NotebookTile(
                           item: _notebooks[index],
-                          onTap: () {},
+                          onTap: () => _openNotebook(_notebooks[index]),
                         ),
                       ),
                     );
@@ -177,20 +193,26 @@ class HomePageState extends State<HomePage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 空白笔记本图标
           Container(
-            width: 72,
-            height: 72,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              color: MiaojiColors.primary.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(22),
+              color: MiaojiColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: MiaojiColors.borderLight,
+                width: 1.5,
+              ),
+              boxShadow: MiaojiShadows.paper,
             ),
-            child: Icon(
-              Icons.book_outlined,
-              size: 32,
-              color: MiaojiColors.primary.withValues(alpha: 0.4),
+            child: const Icon(
+              Icons.menu_book_rounded,
+              size: 36,
+              color: MiaojiColors.textHint,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           const Text(
             '还没有小本',
             style: TextStyle(
@@ -204,7 +226,7 @@ class HomePageState extends State<HomePage>
             '试试和 AI 助手说「帮我创建一个读书记录小本」',
             style: TextStyle(
               fontSize: 13,
-              color: MiaojiColors.textHint.withValues(alpha: 0.7),
+              color: MiaojiColors.textTertiary.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -224,9 +246,11 @@ class HomePageState extends State<HomePage>
       position: Tween<Offset>(
         begin: const Offset(0, 0.15),
         end: Offset.zero,
-      ).animate(CurvedAnimation(parent: _enterController, curve: interval)),
+      ).animate(
+          CurvedAnimation(parent: _enterController, curve: interval)),
       child: FadeTransition(
-        opacity: CurvedAnimation(parent: _enterController, curve: fadeInterval),
+        opacity: CurvedAnimation(
+            parent: _enterController, curve: fadeInterval),
         child: child,
       ),
     );
@@ -240,16 +264,24 @@ class HomePageState extends State<HomePage>
       fadeInterval: const Interval(0.0, 0.4),
       child: Row(
         children: [
+          // 品牌名 — 笔墨书法感
           Text(
-            'Miaoji',
+            '小本',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                  foreground: Paint()
-                    ..shader = const LinearGradient(
-                      colors: [MiaojiColors.primary, Color(0xFF8B5CF6)],
-                    ).createShader(const Rect.fromLTWH(0, 0, 100, 32)),
+                  letterSpacing: 1.0,
+                  color: MiaojiColors.textPrimary,
                 ),
+          ),
+          const SizedBox(width: 6),
+          // 小墨点装饰
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: MiaojiColors.primary.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
           ),
           const Spacer(),
           _IconButton(
@@ -260,7 +292,7 @@ class HomePageState extends State<HomePage>
           _IconButton(
             icon: Icons.person_outline_rounded,
             onTap: () {},
-            gradient: true,
+            accent: true,
           ),
         ],
       ),
@@ -276,12 +308,26 @@ class HomePageState extends State<HomePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '我的小本',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
+          Row(
+            children: [
+              // 小装饰线
+              Container(
+                width: 3,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: MiaojiColors.primary,
+                  borderRadius: BorderRadius.circular(1.5),
                 ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '我的小本',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
+                    ),
+              ),
+            ],
           ),
           GestureDetector(
             onTap: () {},
@@ -300,16 +346,16 @@ class HomePageState extends State<HomePage>
   }
 }
 
-/// 顶部栏图标按钮
+/// 顶部栏图标按钮 — 纸质风格
 class _IconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  final bool gradient;
+  final bool accent;
 
   const _IconButton({
     required this.icon,
     required this.onTap,
-    this.gradient = false,
+    this.accent = false,
   });
 
   @override
@@ -320,29 +366,23 @@ class _IconButton extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: gradient ? null : MiaojiColors.surface,
-          gradient: gradient
-              ? LinearGradient(
-                  colors: [
-                    MiaojiColors.primary.withValues(alpha: 0.15),
-                    MiaojiColors.accent.withValues(alpha: 0.15),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+          color: accent
+              ? MiaojiColors.primary.withValues(alpha: 0.08)
+              : MiaojiColors.card,
           borderRadius: BorderRadius.circular(13),
-          boxShadow: gradient ? null : MiaojiShadows.sm,
+          boxShadow: accent ? null : MiaojiShadows.sm,
           border: Border.all(
-            color: gradient
+            color: accent
                 ? MiaojiColors.primary.withValues(alpha: 0.2)
                 : MiaojiColors.borderLight,
-            width: gradient ? 1.5 : 1,
+            width: 1,
           ),
         ),
         child: Icon(
           icon,
-          color: gradient ? MiaojiColors.primary : MiaojiColors.textSecondary,
+          color: accent
+              ? MiaojiColors.primary
+              : MiaojiColors.textSecondary,
           size: 20,
         ),
       ),

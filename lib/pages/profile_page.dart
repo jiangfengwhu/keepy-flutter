@@ -53,28 +53,39 @@ class ProfilePage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: MiaojiColors.surface,
+        gradient: const LinearGradient(
+          colors: MiaojiColors.paperGradient,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
         borderRadius: BorderRadius.circular(MiaojiRadius.xl),
-        boxShadow: MiaojiShadows.md,
+        boxShadow: MiaojiShadows.paper,
         border: Border.all(color: MiaojiColors.borderLight, width: 1),
       ),
       child: Row(
         children: [
-          // 头像
+          // 头像 — 印章风格
           Container(
             width: 56,
             height: 56,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [MiaojiColors.primary, Color(0xFF8B5CF6)],
+                colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF5A4532).withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: const Icon(
               Icons.person_rounded,
-              color: Colors.white,
+              color: Color(0xFFD4A24C),
               size: 28,
             ),
           ),
@@ -115,16 +126,19 @@ class ProfilePage extends StatelessWidget {
   Widget _buildSettingsSection(BuildContext context) {
     final items = [
       _SettingItem(Icons.palette_outlined, '主题', MiaojiColors.primary),
-      _SettingItem(Icons.notifications_outlined, '通知', const Color(0xFFF59E0B)),
-      _SettingItem(Icons.cloud_outlined, '数据备份', const Color(0xFF10B981)),
-      _SettingItem(Icons.info_outline_rounded, '关于', const Color(0xFF8B5CF6)),
+      _SettingItem(
+          Icons.notifications_outlined, '通知', MiaojiColors.warning),
+      _SettingItem(
+          Icons.cloud_outlined, '数据备份', MiaojiColors.success),
+      _SettingItem(
+          Icons.info_outline_rounded, '关于', const Color(0xFF8B6BAD)),
     ];
 
     return Container(
       decoration: BoxDecoration(
-        color: MiaojiColors.surface,
+        color: MiaojiColors.card,
         borderRadius: BorderRadius.circular(MiaojiRadius.xl),
-        boxShadow: MiaojiShadows.sm,
+        boxShadow: MiaojiShadows.paper,
         border: Border.all(color: MiaojiColors.borderLight, width: 1),
       ),
       child: Column(
@@ -136,8 +150,8 @@ class ProfilePage extends StatelessWidget {
                 onTap: () {},
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 16),
                   child: Row(
                     children: [
                       Container(
@@ -146,8 +160,13 @@ class ProfilePage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: item.color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: item.color.withValues(alpha: 0.15),
+                            width: 1,
+                          ),
                         ),
-                        child: Icon(item.icon, color: item.color, size: 20),
+                        child:
+                            Icon(item.icon, color: item.color, size: 20),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
