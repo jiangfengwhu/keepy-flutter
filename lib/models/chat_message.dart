@@ -1,0 +1,12 @@
+/// AI 聊天消息模型
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final DateTime time;
+
+  const ChatMessage({
+    required this.text,
+    required this.isUser,
+    required this.time,
+  });
+}
