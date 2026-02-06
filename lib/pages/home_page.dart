@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/notebook_item.dart';
+import '../services/database_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/ai_assistant_card.dart';
 import '../widgets/category_tabs.dart';
@@ -9,61 +10,67 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _enterController;
   int _selectedTabIndex = 0;
+  final DatabaseService _dbService = DatabaseService();
 
   final List<String> _tabs = ['全部', '个人', '工作', '健康', '财务'];
 
-  final List<NotebookItem> _notebooks = const [
-    NotebookItem(
-      icon: Icons.directions_run_rounded,
-      iconColor: Color(0xFFEF4444),
-      iconBg: Color(0xFFFEE2E2),
-      title: '健身记录',
-      subtitle: '上次记录：15 分钟前 · 跑步 5km',
-    ),
-    NotebookItem(
-      icon: Icons.auto_stories_rounded,
-      iconColor: Color(0xFF8B5CF6),
-      iconBg: Color(0xFFEDE9FE),
-      title: '阅读清单',
-      subtitle: '正在阅读：三体',
-    ),
-    NotebookItem(
-      icon: Icons.medication_rounded,
-      iconColor: Color(0xFF10B981),
-      iconBg: Color(0xFFD1FAE5),
-      title: '用药记录',
-      subtitle: '已服用：08:00 AM',
-    ),
-    NotebookItem(
-      icon: Icons.payments_rounded,
-      iconColor: Color(0xFFF59E0B),
-      iconBg: Color(0xFFFEF3C7),
-      title: '消费记录',
-      subtitle: '咖啡：¥32.00',
-    ),
-  ];
+  List<NotebookItem> _notebooks = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _enterController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _enterController.forward();
+    _loadNotebooks();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _enterController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadNotebooks();
+    }
+  }
+
+  Future<void> _loadNotebooks() async {
+    try {
+      final notebooks = await _dbService.getAllNotebooks();
+      if (!mounted) return;
+      setState(() {
+        _notebooks =
+            notebooks.map((nb) => NotebookItem.fromNotebook(nb)).toList();
+        _isLoading = false;
+      });
+      if (!_enterController.isCompleted) {
+        _enterController.forward();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _enterController.forward();
+    }
+  }
+
+  /// 外部调用刷新笔记本列表
+  void refreshNotebooks() {
+    _loadNotebooks();
   }
 
   @override
@@ -120,31 +127,86 @@ class _HomePageState extends State<HomePage>
             ),
           ),
 
-          // 笔记本列表
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final delay = 0.35 + index * 0.08;
-                  final end = (delay + 0.4).clamp(0.0, 1.0);
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: index < _notebooks.length - 1 ? 12 : 0,
-                    ),
-                    child: _buildAnimated(
-                      interval: Interval(delay, end, curve: Curves.easeOutCubic),
-                      fadeInterval: Interval(delay, end - 0.05),
-                      child: NotebookTile(
-                        item: _notebooks[index],
-                        onTap: () {},
+          // 笔记本列表 / 空状态 / 加载中
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (_notebooks.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmptyNotebooks(),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final delay = 0.35 + index * 0.08;
+                    final end = (delay + 0.4).clamp(0.0, 1.0);
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index < _notebooks.length - 1 ? 12 : 0,
                       ),
-                    ),
-                  );
-                },
-                childCount: _notebooks.length,
+                      child: _buildAnimated(
+                        interval:
+                            Interval(delay, end, curve: Curves.easeOutCubic),
+                        fadeInterval: Interval(delay, end - 0.05),
+                        child: NotebookTile(
+                          item: _notebooks[index],
+                          onTap: () {},
+                        ),
+                      ),
+                    );
+                  },
+                  childCount: _notebooks.length,
+                ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  // ── 空状态 ──────────────────────────────────
+
+  Widget _buildEmptyNotebooks() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: MiaojiColors.primary.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Icon(
+              Icons.book_outlined,
+              size: 32,
+              color: MiaojiColors.primary.withValues(alpha: 0.4),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '还没有小本',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: MiaojiColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '试试和 AI 助手说「帮我创建一个读书记录小本」',
+            style: TextStyle(
+              fontSize: 13,
+              color: MiaojiColors.textHint.withValues(alpha: 0.7),
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/chat_message.dart';
+import '../models/notebook.dart';
+import '../services/ai_service.dart';
+import '../services/database_service.dart';
 import '../theme/miaoji_theme.dart';
 import 'chat_input_bar.dart';
 import 'chat_message_bubble.dart';
 
-/// 显示全局 AI 聊天 BottomSheet
-void showAiChatSheet(BuildContext context) {
-  showModalBottomSheet(
+/// 显示全局 AI 聊天 BottomSheet，返回 Future 用于关闭后回调
+Future<void> showAiChatSheet(BuildContext context) {
+  return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -27,20 +31,32 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  final AiService _aiService = AiService();
+  final DatabaseService _dbService = DatabaseService();
 
-  final List<ChatMessage> _messages = [
-    ChatMessage(
-      text: '你好！我是 Miaoji AI 助手，可以帮你创建小本、整理数据结构，或者回答任何问题。试试告诉我你想记录什么吧！',
-      isUser: false,
-      time: DateTime.now().subtract(const Duration(minutes: 1)),
+  bool _isSending = false;
+  StreamSubscription<StreamEvent>? _streamSub;
+
+  /// 完整对话历史（包含 system 消息，用于发送给后端）
+  final List<ChatMessage> _chatHistory = [
+    ChatMessage.system(
+      'You are a helpful assistant for Miaoji note-taking app. '
+      'You can help users create data schemas (notebooks) and manage records. '
+      'Respond in the same language the user uses.',
     ),
   ];
 
+  /// UI 显示的消息列表（不包含 system）
+  List<ChatMessage> get _displayMessages =>
+      _chatHistory.where((m) => !m.isSystem).toList();
+
   @override
   void dispose() {
+    _streamSub?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
+    _aiService.dispose();
     super.dispose();
   }
 
@@ -56,34 +72,134 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
     });
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
     HapticFeedback.lightImpact();
+
+    // 1. 添加用户消息
     setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true, time: DateTime.now()));
+      _chatHistory.add(ChatMessage.user(text));
+      _isSending = true;
     });
     _controller.clear();
     _scrollToBottom();
 
-    // 模拟 AI 回复
-    Future.delayed(const Duration(milliseconds: 800), () {
+    // 2. 添加空的 assistant 占位消息（流式填充）
+    final assistantMsg = ChatMessage.assistantStreaming();
+    setState(() {
+      _chatHistory.add(assistantMsg);
+    });
+    _scrollToBottom();
+
+    // 3. 发送请求并处理流式响应
+    _streamSub = _aiService.sendMessage(_chatHistory).listen(
+      (event) {
+        if (!mounted) return;
+
+        switch (event) {
+          case TextEvent(:final text):
+            setState(() {
+              assistantMsg.content += text;
+            });
+            _scrollToBottom();
+
+          case ToolCallStartEvent():
+            // tool call 开始，等待完整数据
+            break;
+
+          case ToolCallEvent(:final name, :final args):
+            // 拦截 create_data_schema，存入本地数据库
+            if (name == 'create_data_schema') {
+              _handleCreateSchema(assistantMsg, args);
+            } else {
+              setState(() {
+                assistantMsg.toolCalls ??= [];
+                assistantMsg.toolCalls!.add(
+                  ToolCallInfo(
+                    id: 'call_${DateTime.now().microsecondsSinceEpoch}',
+                    function: ToolCallFunction(name: name, arguments: args),
+                  ),
+                );
+              });
+            }
+            _scrollToBottom();
+
+          case StreamDoneEvent():
+            setState(() {
+              assistantMsg.isStreaming = false;
+              _isSending = false;
+            });
+
+          case StreamErrorEvent(:final message):
+            setState(() {
+              if (assistantMsg.content.isEmpty) {
+                assistantMsg.content = '抱歉，出错了：$message';
+              }
+              assistantMsg.isStreaming = false;
+              _isSending = false;
+            });
+            _scrollToBottom();
+        }
+      },
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          assistantMsg.content = '请求失败：$error';
+          assistantMsg.isStreaming = false;
+          _isSending = false;
+        });
+      },
+      onDone: () {
+        if (!mounted) return;
+        setState(() {
+          assistantMsg.isStreaming = false;
+          _isSending = false;
+        });
+      },
+    );
+  }
+
+  /// 处理 create_data_schema tool call：解析 args → 存 DB → 更新 UI
+  Future<void> _handleCreateSchema(
+      ChatMessage assistantMsg, String argsJson) async {
+    try {
+      final notebook = Notebook.fromToolCallArgs(argsJson);
+      final insertedId = await _dbService.createNotebook(notebook);
+      final savedNotebook = await _dbService.getNotebook(insertedId);
+
       if (!mounted) return;
       setState(() {
-        _messages.add(ChatMessage(
-          text: '收到！让我想想怎么帮你处理「$text」...',
-          isUser: false,
-          time: DateTime.now(),
-        ));
+        assistantMsg.createdNotebook = savedNotebook ?? notebook;
+        assistantMsg.toolCalls ??= [];
+        assistantMsg.toolCalls!.add(
+          ToolCallInfo(
+            id: 'call_${DateTime.now().microsecondsSinceEpoch}',
+            function: ToolCallFunction(
+                name: 'create_data_schema', arguments: argsJson),
+          ),
+        );
       });
-      _scrollToBottom();
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        assistantMsg.toolCalls ??= [];
+        assistantMsg.toolCalls!.add(
+          ToolCallInfo(
+            id: 'call_${DateTime.now().microsecondsSinceEpoch}',
+            function: ToolCallFunction(
+                name: 'create_data_schema', arguments: argsJson),
+          ),
+        );
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final displayMessages = _displayMessages;
 
     return Container(
       height: screenHeight * 0.85,
@@ -95,14 +211,14 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
         children: [
           _buildHeader(),
           Expanded(
-            child: _messages.isEmpty
+            child: displayMessages.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    itemCount: _messages.length,
+                    itemCount: displayMessages.length,
                     itemBuilder: (_, i) =>
-                        ChatMessageBubble(message: _messages[i]),
+                        ChatMessageBubble(message: displayMessages[i]),
                   ),
           ),
           ChatInputBar(
@@ -130,7 +246,6 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
       ),
       child: Column(
         children: [
-          // 拖拽把手
           Center(
             child: Container(
               width: 36,
@@ -162,11 +277,11 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'AI 助手',
                       style: TextStyle(
                         fontSize: 16,
@@ -175,10 +290,12 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                       ),
                     ),
                     Text(
-                      '随时准备帮助你',
+                      _isSending ? '正在思考...' : '随时准备帮助你',
                       style: TextStyle(
                         fontSize: 12,
-                        color: MiaojiColors.textTertiary,
+                        color: _isSending
+                            ? MiaojiColors.primary
+                            : MiaojiColors.textTertiary,
                       ),
                     ),
                   ],
@@ -232,6 +349,14 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: MiaojiColors.textTertiary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '试试说「我要创建一个读书记录小本」',
+            style: TextStyle(
+              fontSize: 13,
+              color: MiaojiColors.textHint,
             ),
           ),
         ],

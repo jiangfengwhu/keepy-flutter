@@ -15,15 +15,26 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    SizedBox.shrink(), // 助理 tab 不对应页面，点击弹出 Sheet
-    ProfilePage(),
-  ];
+  final GlobalKey<HomePageState> _homeKey = GlobalKey<HomePageState>();
+
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomePage(key: _homeKey),
+      const SizedBox.shrink(), // 助理 tab 不对应页面，点击弹出 Sheet
+      const ProfilePage(),
+    ];
+  }
 
   void _onTabTapped(int index) {
     if (index == 1) {
-      showAiChatSheet(context);
+      showAiChatSheet(context).then((_) {
+        // BottomSheet 关闭后刷新首页笔记本列表
+        _homeKey.currentState?.refreshNotebooks();
+      });
       return;
     }
     setState(() => _currentIndex = index);

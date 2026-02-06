@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/notebook.dart';
+import '../services/database_service.dart';
 import '../theme/miaoji_theme.dart';
 
 class NotebookEditPage extends StatefulWidget {
@@ -53,7 +54,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
     });
   }
 
-  void _saveNotebook() {
+  Future<void> _saveNotebook() async {
     if (_formKey.currentState!.validate()) {
       if (_fields.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,17 +66,22 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       final notebook = Notebook(
         name: _nameController.text,
         description: _descController.text,
-        structure: _fields,
+        schema: _fields.map((f) => f.toSchemaField()).toList(),
       );
 
-      debugPrint(
-        'Saved Notebook: ${notebook.name} with ${_fields.length} fields',
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('小本已保存')),
-      );
-      Navigator.of(context).pop();
+      try {
+        await DatabaseService().createNotebook(notebook);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('小本已保存')),
+        );
+        Navigator.of(context).pop();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败: $e')),
+        );
+      }
     }
   }
 
