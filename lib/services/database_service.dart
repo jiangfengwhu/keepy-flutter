@@ -23,7 +23,7 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -51,6 +51,12 @@ class DatabaseService {
         updated_at TEXT NOT NULL,
         reminder_at TEXT DEFAULT '',
         reminder_sent INTEGER DEFAULT 0
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS kv_store (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
       )
     ''');
   }
@@ -81,6 +87,33 @@ class DatabaseService {
       await db.execute(
           'ALTER TABLE notebooks ADD COLUMN color_value INTEGER');
     }
+    if (oldVersion < 5) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS kv_store (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      ''');
+    }
+  }
+
+  // ── KV Store ────────────────────────────
+
+  Future<String?> getKv(String key) async {
+    final db = await database;
+    final rows =
+        await db.query('kv_store', where: 'key = ?', whereArgs: [key]);
+    if (rows.isEmpty) return null;
+    return rows.first['value'] as String?;
+  }
+
+  Future<void> setKv(String key, String value) async {
+    final db = await database;
+    await db.insert(
+      'kv_store',
+      {'key': key, 'value': value},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   // ── Notebook CRUD ────────────────────────────
@@ -373,6 +406,19 @@ class DatabaseService {
       [notebookName],
     );
     return result.first['count'] as int;
+  }
+
+  /// 批量获取每个小本的记录数量
+  Future<Map<String, int>> getRecordCountsAll() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      'SELECT notebook_name, COUNT(*) as count FROM records GROUP BY notebook_name',
+    );
+    final map = <String, int>{};
+    for (final row in rows) {
+      map[row['notebook_name'] as String] = row['count'] as int;
+    }
+    return map;
   }
 
   /// 搜索记录（同时匹配 data_json 和 notebook_name）

@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import '../models/notebook_item.dart';
+import '../theme/miaoji_theme.dart';
+import '../widgets/notebook_tile.dart';
+import 'notebook_detail_page.dart';
+
+/// 全部妙计本页面
+class AllNotebooksPage extends StatelessWidget {
+  final List<NotebookItem> notebooks;
+
+  const AllNotebooksPage({super.key, required this.notebooks});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: MiaojiColors.background,
+      appBar: AppBar(
+        backgroundColor: MiaojiColors.background,
+        title: Text(
+          '全部妙计本',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, size: 22),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Text(
+                '${notebooks.length} 个',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: MiaojiColors.textHint,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: notebooks.isEmpty
+          ? const Center(
+              child: Text(
+                '还没有妙计本',
+                style: TextStyle(
+                    fontSize: 15, color: MiaojiColors.textTertiary),
+              ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              physics: const BouncingScrollPhysics(),
+              itemCount: notebooks.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              itemBuilder: (context, index) {
+                final item = notebooks[index];
+                return NotebookTile(
+                  item: item,
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                NotebookDetailPage(notebookItem: item),
+                          ),
+                        )
+                        .then((_) => Navigator.of(context).pop());
+                  },
+                );
+              },
+            ),
+    );
+  }
+}

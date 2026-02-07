@@ -9,6 +9,7 @@ class NotebookItem {
   final Color iconBg;
   final String title;
   final String subtitle;
+  final int recordCount; // 记录数
 
   const NotebookItem({
     this.dbId,
@@ -17,6 +18,7 @@ class NotebookItem {
     required this.iconBg,
     required this.title,
     required this.subtitle,
+    this.recordCount = 0,
   });
 
   /// 可选图标集合（icon codePoint -> 显示名称）
@@ -100,6 +102,17 @@ class NotebookItem {
       subtitle: subtitle,
     );
   }
+
+  /// 复制并替换 recordCount
+  NotebookItem withRecordCount(int count) => NotebookItem(
+        dbId: dbId,
+        icon: icon,
+        iconColor: iconColor,
+        iconBg: iconBg,
+        title: title,
+        subtitle: subtitle,
+        recordCount: count,
+      );
 
   /// 根据图标名称解析 IconData
   static IconData resolveIcon(String name) {

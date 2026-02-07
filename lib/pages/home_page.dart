@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/data_record.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
+import '../services/summary_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/notebook_tile.dart';
+import 'all_notebooks_page.dart';
 import 'notebook_detail_page.dart';
 import 'search_page.dart';
 
@@ -18,10 +21,15 @@ class HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _enterController;
   final DatabaseService _dbService = DatabaseService();
+  final SummaryService _summaryService = SummaryService();
 
   List<NotebookItem> _notebooks = [];
   List<DataRecord> _upcomingReminders = [];
   bool _isLoading = true;
+
+  /// AI 周报内容
+  String? _summaryText;
+  bool _summaryLoading = false;
 
   @override
   void initState() {
@@ -52,16 +60,21 @@ class HomePageState extends State<HomePage>
     try {
       final notebooks = await _dbService.getAllNotebooks();
       final reminders = await _dbService.getUpcomingReminders();
+      final counts = await _dbService.getRecordCountsAll();
       if (!mounted) return;
       setState(() {
-        _notebooks =
-            notebooks.map((nb) => NotebookItem.fromNotebook(nb)).toList();
+        _notebooks = notebooks.map((nb) {
+          final item = NotebookItem.fromNotebook(nb);
+          return item.withRecordCount(counts[nb.name] ?? 0);
+        }).toList();
         _upcomingReminders = reminders;
         _isLoading = false;
       });
       if (!_enterController.isCompleted) {
         _enterController.forward();
       }
+      // 异步加载 AI 周报（不阻塞主界面）
+      _loadSummary();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -69,9 +82,38 @@ class HomePageState extends State<HomePage>
     }
   }
 
+  Future<void> _loadSummary() async {
+    if (_notebooks.isEmpty) return;
+    setState(() => _summaryLoading = true);
+    try {
+      final text = await _summaryService.getSummary(
+        onStreaming: (partial) {
+          if (mounted) setState(() => _summaryText = partial);
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        _summaryText = text;
+        _summaryLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _summaryLoading = false);
+    }
+  }
+
   /// 外部调用刷新笔记本列表
   void refreshNotebooks() {
     _loadData();
+  }
+
+  void _openAllNotebooks() {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (_) => AllNotebooksPage(notebooks: _notebooks),
+          ),
+        )
+        .then((_) => _loadData());
   }
 
   void _openNotebook(NotebookItem item) {
@@ -176,12 +218,29 @@ class HomePageState extends State<HomePage>
                       child: _buildMiniSectionTitle(
                           Icons.menu_book_rounded, '妙计本'),
                     ),
-                    Text(
-                      '${_notebooks.length} 个',
-                      style: const TextStyle(
-                        color: MiaojiColors.textHint,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: _notebooks.length > 6
+                          ? () => _openAllNotebooks()
+                          : null,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${_notebooks.length} 个',
+                            style: TextStyle(
+                              color: _notebooks.length > 6
+                                  ? MiaojiColors.primary
+                                  : MiaojiColors.textHint,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (_notebooks.length > 6) ...[
+                            const SizedBox(width: 2),
+                            Icon(Icons.chevron_right_rounded,
+                                size: 18, color: MiaojiColors.primary),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -204,17 +263,20 @@ class HomePageState extends State<HomePage>
             SliverFillRemaining(
               child: _buildEmptyNotebooks(),
             )
-          else
+          else ...[
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final delay = 0.35 + index * 0.08;
                     final end = (delay + 0.4).clamp(0.0, 1.0);
+                    final displayCount = _notebooks.length > 6
+                        ? 6
+                        : _notebooks.length;
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: index < _notebooks.length - 1 ? 14 : 0,
+                        bottom: index < displayCount - 1 ? 14 : 0,
                       ),
                       child: _buildAnimated(
                         interval: Interval(delay, end,
@@ -227,10 +289,51 @@ class HomePageState extends State<HomePage>
                       ),
                     );
                   },
-                  childCount: _notebooks.length,
+                  childCount:
+                      _notebooks.length > 6 ? 6 : _notebooks.length,
                 ),
               ),
             ),
+            // "查看全部" 按钮（超过 6 个时显示）
+            if (_notebooks.length > 6)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+                  child: GestureDetector(
+                    onTap: _openAllNotebooks,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: MiaojiColors.card,
+                        borderRadius:
+                            BorderRadius.circular(MiaojiRadius.md),
+                        border: Border.all(
+                            color: MiaojiColors.borderLight, width: 1),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '查看全部 ${_notebooks.length} 个妙计本',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: MiaojiColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.arrow_forward_rounded,
+                              size: 16, color: MiaojiColors.primary),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              const SliverToBoxAdapter(
+                  child: SizedBox(height: 24)),
+          ],
         ],
       ),
     );
@@ -438,23 +541,9 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  // ── AI 建议卡片（mock 数据） ──
+  // ── AI 周报卡片 ──
 
   Widget _buildAiSuggestionCard() {
-    // Mock 数据：模拟根据近一周数据生成的建议
-    final mockSuggestions = [
-      _AiSuggestion(
-        icon: Icons.trending_up_rounded,
-        iconColor: const Color(0xFF10B981),
-        text: '本周你记录了 12 条数据，比上周多 3 条，保持得不错！',
-      ),
-      _AiSuggestion(
-        icon: Icons.lightbulb_outline_rounded,
-        iconColor: const Color(0xFFF59E0B),
-        text: '「读书笔记」已经 5 天没更新了，要不要补一条？',
-      ),
-    ];
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -495,7 +584,8 @@ class HomePageState extends State<HomePage>
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.auto_awesome, size: 12, color: Color(0xFFD4A24C)),
+                    Icon(Icons.auto_awesome,
+                        size: 12, color: Color(0xFFD4A24C)),
                     SizedBox(width: 4),
                     Text(
                       'AI 周报',
@@ -519,26 +609,100 @@ class HomePageState extends State<HomePage>
             ],
           ),
           const SizedBox(height: 14),
-          ...mockSuggestions.map((s) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(s.icon, size: 16, color: s.iconColor),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        s.text,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: const Color(0xFFF5EFE0).withValues(alpha: 0.85),
-                          height: 1.45,
-                        ),
-                      ),
-                    ),
-                  ],
+          // 内容区域
+          if (_summaryLoading && _summaryText == null)
+            // 首次加载中
+            Row(
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: const Color(0xFFD4A24C).withValues(alpha: 0.6),
+                  ),
                 ),
-              )),
+                const SizedBox(width: 10),
+                Text(
+                  '正在生成周报…',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            )
+          else if (_summaryText != null && _summaryText!.isNotEmpty)
+            // Markdown 渲染周报内容
+            MarkdownBody(
+              data: _summaryText!,
+              styleSheet: MarkdownStyleSheet(
+                p: TextStyle(
+                  fontSize: 13,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.85),
+                  height: 1.8,
+                ),
+                h1: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                ),
+                h2: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                ),
+                h3: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                ),
+                strong: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFD4A24C).withValues(alpha: 0.9),
+                ),
+                listBullet: TextStyle(
+                  fontSize: 13,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
+                ),
+                blockSpacing: 8,
+              ),
+              shrinkWrap: true,
+            )
+          else
+            // 无内容或请求失败
+            Text(
+              '暂无周报数据，记录更多数据后自动生成',
+              style: TextStyle(
+                fontSize: 13,
+                color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
+              ),
+            ),
+          // 流式加载中提示
+          if (_summaryLoading && _summaryText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 10,
+                    height: 10,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.2,
+                      color: const Color(0xFFD4A24C).withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '生成中…',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: const Color(0xFFF5EFE0).withValues(alpha: 0.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -767,18 +931,6 @@ class _IconButton extends StatelessWidget {
 }
 
 // ── 内部数据模型 ──
-
-class _AiSuggestion {
-  final IconData icon;
-  final Color iconColor;
-  final String text;
-
-  const _AiSuggestion({
-    required this.icon,
-    required this.iconColor,
-    required this.text,
-  });
-}
 
 class _FeatureItem {
   final IconData icon;

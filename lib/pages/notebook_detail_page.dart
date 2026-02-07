@@ -137,8 +137,6 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
 
   @override
   Widget build(BuildContext context) {
-    final safePadding = MediaQuery.of(context).padding;
-
     return Scaffold(
       backgroundColor: MiaojiColors.background,
       body: _isLoading
@@ -148,11 +146,19 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
           : CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // 顶部 AppBar
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        20, safePadding.top + 8, 20, 0),
+                // 吸顶 AppBar
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  toolbarHeight: 56,
+                  backgroundColor: MiaojiColors.background,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  scrolledUnderElevation: 0.5,
+                  automaticallyImplyLeading: false,
+                  titleSpacing: 0,
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: _buildAppBar(),
                   ),
                 ),
@@ -590,7 +596,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
           painter: _LinedPaperPainter(
             lineColor: MiaojiColors.divider.withValues(alpha: 0.5),
             lineSpacing: 28.0,
-            topOffset: 44.0,
+            topOffset: 46.5,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,23 +615,19 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                 ),
                 child: Row(
                   children: [
-                    // 编号标签
+                    // 小本图标标签
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
+                      width: 26,
+                      height: 26,
                       decoration: BoxDecoration(
                         color:
                             _item.iconColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(7),
                       ),
-                      child: Text(
-                        '#${record.id}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: _item.iconColor,
-                          fontFamily: 'monospace',
-                        ),
+                      child: Icon(
+                        _item.icon,
+                        size: 14,
+                        color: _item.iconColor,
                       ),
                     ),
                     // 提醒状态标签
@@ -1010,7 +1012,7 @@ class _LinedPaperPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     canvas.drawLine(
-      Offset(12, topOffset - 4),
+      Offset(12, topOffset - 10),
       Offset(12, size.height),
       redLinePaint,
     );

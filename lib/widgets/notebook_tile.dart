@@ -18,24 +18,18 @@ class NotebookTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          // 底层纸张（微偏移产生纸叠感）
+          // 底层纸张（微偏移产生纸叠感，无阴影避免四角溢出）
           Positioned(
             left: 3,
-            right: 0,
+            right: -3,
             top: 3,
-            bottom: 0,
+            bottom: -3,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFF3ECCA),
                 borderRadius: BorderRadius.circular(MiaojiRadius.lg),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 4,
-                    offset: const Offset(1, 2),
-                  ),
-                ],
               ),
             ),
           ),
@@ -100,14 +94,37 @@ class NotebookTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        item.subtitle,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: MiaojiColors.textTertiary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              item.subtitle,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: MiaojiColors.textTertiary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            width: 3,
+                            height: 3,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: MiaojiColors.textHint.withValues(alpha: 0.4),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          Text(
+                            '${item.recordCount} 条',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: item.iconColor.withValues(alpha: 0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
