@@ -23,7 +23,7 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -36,6 +36,8 @@ class DatabaseService {
         name TEXT NOT NULL,
         description TEXT DEFAULT '',
         schema_json TEXT NOT NULL,
+        icon_name TEXT DEFAULT '',
+        color_value INTEGER,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )
@@ -46,7 +48,9 @@ class DatabaseService {
         notebook_name TEXT NOT NULL,
         data_json TEXT NOT NULL,
         created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
+        updated_at TEXT NOT NULL,
+        reminder_at TEXT DEFAULT '',
+        reminder_sent INTEGER DEFAULT 0
       )
     ''');
   }
@@ -62,6 +66,20 @@ class DatabaseService {
           updated_at TEXT NOT NULL
         )
       ''');
+    }
+    if (oldVersion < 3) {
+      // 新增提醒相关列
+      await db.execute(
+          "ALTER TABLE records ADD COLUMN reminder_at TEXT DEFAULT ''");
+      await db.execute(
+          'ALTER TABLE records ADD COLUMN reminder_sent INTEGER DEFAULT 0');
+    }
+    if (oldVersion < 4) {
+      // 新增图标和颜色列
+      await db.execute(
+          "ALTER TABLE notebooks ADD COLUMN icon_name TEXT DEFAULT ''");
+      await db.execute(
+          'ALTER TABLE notebooks ADD COLUMN color_value INTEGER');
     }
   }
 
@@ -120,6 +138,94 @@ class DatabaseService {
     await db.update('notebooks', updates,
         where: 'id = ?', whereArgs: [existing.id]);
     return getNotebook(existing.id!);
+  }
+
+  /// 完整更新笔记本（含记录数据迁移）
+  ///
+  /// [renamedFields] 旧字段名 -> 新字段名 的映射
+  /// [removedFields] 要删除的字段名列表
+  Future<Notebook?> updateNotebookFull({
+    required int notebookId,
+    required String oldName,
+    String? newName,
+    String? newDescription,
+    List<SchemaField>? newSchema,
+    String? newIconName,
+    int? newColorValue,
+    Map<String, String> renamedFields = const {},
+    List<String> removedFields = const [],
+  }) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // 1. 更新笔记本本身
+      final updates = <String, dynamic>{
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      if (newName != null) updates['name'] = newName;
+      if (newDescription != null) updates['description'] = newDescription;
+      if (newSchema != null) {
+        updates['schema_json'] =
+            jsonEncode(newSchema.map((f) => f.toJson()).toList());
+      }
+      if (newIconName != null) updates['icon_name'] = newIconName;
+      if (newColorValue != null) updates['color_value'] = newColorValue;
+      await txn.update('notebooks', updates,
+          where: 'id = ?', whereArgs: [notebookId]);
+
+      // 2. 若名称变更，更新所有记录的 notebook_name
+      if (newName != null && newName != oldName) {
+        await txn.update(
+          'records',
+          {'notebook_name': newName},
+          where: 'notebook_name = ?',
+          whereArgs: [oldName],
+        );
+      }
+
+      // 3. 批量迁移记录中的字段数据（重命名 / 删除）
+      if (renamedFields.isNotEmpty || removedFields.isNotEmpty) {
+        final targetName = newName ?? oldName;
+        final rows = await txn.query('records',
+            where: 'notebook_name = ?', whereArgs: [targetName]);
+
+        for (final row in rows) {
+          final data =
+              jsonDecode(row['data_json'] as String) as Map<String, dynamic>;
+          var changed = false;
+
+          // 重命名字段
+          for (final entry in renamedFields.entries) {
+            if (data.containsKey(entry.key)) {
+              data[entry.value] = data.remove(entry.key);
+              changed = true;
+            }
+          }
+
+          // 删除字段
+          for (final field in removedFields) {
+            if (data.containsKey(field)) {
+              data.remove(field);
+              changed = true;
+            }
+          }
+
+          if (changed) {
+            await txn.update(
+              'records',
+              {
+                'data_json': jsonEncode(data),
+                'updated_at': DateTime.now().toIso8601String(),
+              },
+              where: 'id = ?',
+              whereArgs: [row['id']],
+            );
+          }
+        }
+      }
+    });
+
+    return getNotebook(notebookId);
   }
 
   /// 删除笔记本
@@ -196,15 +302,13 @@ class DatabaseService {
     return DataRecord.fromDbRow(rows.first);
   }
 
-  /// 更新记录
+  /// 更新记录数据（合并）
   Future<int> updateRecord(int id, Map<String, dynamic> newData) async {
     final db = await database;
 
-    // 先获取现有记录
     final existing = await getRecord(id);
     if (existing == null) return 0;
 
-    // 合并数据
     final merged = Map<String, dynamic>.from(existing.data)..addAll(newData);
 
     return db.update(
@@ -216,6 +320,43 @@ class DatabaseService {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  /// 更新记录的提醒时间
+  Future<int> updateRecordReminder(int id, DateTime? reminderAt) async {
+    final db = await database;
+    return db.update(
+      'records',
+      {
+        'reminder_at': reminderAt?.toIso8601String() ?? '',
+        'reminder_sent': 0, // 重新设置后标记为未发送
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// 标记提醒已发送
+  Future<int> markReminderSent(int id) async {
+    final db = await database;
+    return db.update(
+      'records',
+      {'reminder_sent': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// 获取所有待发送提醒的记录（提醒时间不为空、未发送）
+  Future<List<DataRecord>> getPendingReminders() async {
+    final db = await database;
+    final rows = await db.query(
+      'records',
+      where: "reminder_at != '' AND reminder_sent = 0",
+      orderBy: 'reminder_at ASC',
+    );
+    return rows.map((row) => DataRecord.fromDbRow(row)).toList();
   }
 
   /// 删除记录
@@ -232,5 +373,45 @@ class DatabaseService {
       [notebookName],
     );
     return result.first['count'] as int;
+  }
+
+  /// 搜索记录（同时匹配 data_json 和 notebook_name）
+  Future<List<DataRecord>> searchRecords(String keyword,
+      {int limit = 50}) async {
+    final db = await database;
+    final rows = await db.query(
+      'records',
+      where: 'data_json LIKE ? OR notebook_name LIKE ?',
+      whereArgs: ['%$keyword%', '%$keyword%'],
+      orderBy: 'updated_at DESC',
+      limit: limit,
+    );
+    return rows.map((row) => DataRecord.fromDbRow(row)).toList();
+  }
+
+  /// 获取即将到来的提醒（未来 7 天内）
+  Future<List<DataRecord>> getUpcomingReminders({int days = 7}) async {
+    final db = await database;
+    final now = DateTime.now().toIso8601String();
+    final end = DateTime.now().add(Duration(days: days)).toIso8601String();
+    final rows = await db.query(
+      'records',
+      where: "reminder_at != '' AND reminder_at >= ? AND reminder_at <= ? AND reminder_sent = 0",
+      whereArgs: [now, end],
+      orderBy: 'reminder_at ASC',
+      limit: 10,
+    );
+    return rows.map((row) => DataRecord.fromDbRow(row)).toList();
+  }
+
+  /// 获取最近更新的记录
+  Future<List<DataRecord>> getRecentRecords({int limit = 5}) async {
+    final db = await database;
+    final rows = await db.query(
+      'records',
+      orderBy: 'updated_at DESC',
+      limit: limit,
+    );
+    return rows.map((row) => DataRecord.fromDbRow(row)).toList();
   }
 }

@@ -52,12 +52,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   Future<void> _initSystemMessage() async {
     final notebooks = await _dbService.getAllNotebooks();
 
-    final buffer = StringBuffer()
-      ..writeln('You are a helpful assistant for Miaoji note-taking app.')
-      ..writeln(
-          'You can help users create data schemas (notebooks) and manage records.')
-      ..writeln('Respond in the same language the user uses.')
-      ..writeln();
+    final buffer = StringBuffer();
 
     if (notebooks.isNotEmpty) {
       buffer.writeln(
@@ -73,10 +68,6 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
         }
       }
       buffer.writeln();
-      buffer.writeln(
-          'When the user wants to add records, use the existing notebook schemas above. '
-          'Do NOT create a new schema if a suitable one already exists. '
-          'When calling add_data_record, use the notebook name as the "type" field.');
     } else {
       buffer.writeln(
           'The user has no notebooks yet. Help them create one if they want to start recording data.');
@@ -92,12 +83,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   /// 刷新 system message 中的小本信息（新建小本后调用）
   Future<void> _refreshSystemMessage() async {
     final notebooks = await _dbService.getAllNotebooks();
-    final buffer = StringBuffer()
-      ..writeln('You are a helpful assistant for Miaoji note-taking app.')
-      ..writeln(
-          'You can help users create data schemas (notebooks) and manage records.')
-      ..writeln('Respond in the same language the user uses.')
-      ..writeln();
+    final buffer = StringBuffer();
 
     if (notebooks.isNotEmpty) {
       buffer.writeln(
@@ -110,11 +96,9 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
           buffer.writeln('  Description: ${nb.description}');
         }
       }
-      buffer.writeln();
+    } else {
       buffer.writeln(
-          'When the user wants to add records, use the existing notebook schemas above. '
-          'Do NOT create a new schema if a suitable one already exists. '
-          'When calling add_data_record, use the notebook name as the "type" field.');
+          'The user has no notebooks yet. Help them create one if they want to start recording data.');
     }
 
     if (!mounted) return;
@@ -160,8 +144,20 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
 
     HapticFeedback.lightImpact();
 
+    // 在发给 AI 的消息前附上当前时间，但 UI 只显示原始文本
+    final now = DateTime.now();
+    final timePrefix =
+        '[当前时间: ${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}]\n';
+
+    final userMsg = ChatMessage(
+      role: 'user',
+      content: '$timePrefix$text',   // 发给 AI（带时间）
+      displayContent: text,           // UI 显示（原始文本）
+    );
+
     setState(() {
-      _chatHistory.add(ChatMessage.user(text));
+      _chatHistory.add(userMsg);
       _isSending = true;
     });
     _controller.clear();

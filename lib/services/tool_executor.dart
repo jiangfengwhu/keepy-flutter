@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/data_record.dart';
 import '../models/notebook.dart';
+import '../models/notebook_item.dart';
 import 'database_service.dart';
+import 'notification_service.dart';
 
 /// Tool 执行结果
 class ToolResult {
@@ -22,6 +24,7 @@ class ToolResult {
 /// 本地 Tool 执行器
 class ToolExecutor {
   final DatabaseService _db = DatabaseService();
+  final NotificationService _notify = NotificationService();
 
   /// 根据 tool name 和 args 执行对应操作
   Future<ToolResult> execute(String name, String argsJson) async {
@@ -58,9 +61,94 @@ class ToolExecutor {
     }
   }
 
+  // ── 提醒时间解析辅助 ──────────────────────────
+
+  /// 从 tool call 参数中解析提醒时间
+  /// 支持 args 中的 reminder_at / reminder_time 字段，
+  /// 也支持从 data 对象中提取同名字段
+  DateTime? _parseReminderTime(Map<String, dynamic> args,
+      [Map<String, dynamic>? data]) {
+    // 先从顶层 args 中查找
+    final directReminder = args['reminder_at'] ?? args['reminder_time'];
+    if (directReminder != null) {
+      final parsed = DateTime.tryParse(directReminder.toString());
+      if (parsed != null) return parsed;
+    }
+
+    // 再从 data 中查找
+    if (data != null) {
+      for (final key in [
+        'reminder_at',
+        'reminder_time',
+        '提醒时间',
+        'remind_at',
+        'due_date',
+        'deadline',
+      ]) {
+        final val = data[key];
+        if (val != null) {
+          final parsed = DateTime.tryParse(val.toString());
+          if (parsed != null) return parsed;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// 为记录调度通知提醒
+  Future<void> _scheduleReminderIfNeeded(
+      DataRecord record, DateTime? reminderAt) async {
+    if (reminderAt == null || record.id == null) return;
+
+    // 更新数据库中的提醒时间
+    await _db.updateRecordReminder(record.id!, reminderAt);
+
+    // 从 data 提取摘要作为通知标题
+    final summary = _buildNotifySummary(record);
+
+    // 调度通知
+    await _notify.scheduleReminder(
+      recordId: record.id!,
+      reminderAt: reminderAt,
+      notebookName: record.notebookName,
+      title: summary,
+    );
+  }
+
+  /// 提取记录摘要用于通知
+  String _buildNotifySummary(DataRecord record) {
+    final data = record.data;
+    for (final key in [
+      'title',
+      'name',
+      '标题',
+      '名称',
+      '事项',
+      '内容',
+      'task',
+      'content',
+    ]) {
+      if (data.containsKey(key) && data[key] != null) {
+        return data[key].toString();
+      }
+    }
+    if (data.isNotEmpty) {
+      final first = data.values.first;
+      if (first != null) return first.toString();
+    }
+    return '你有一条提醒';
+  }
+
+  // ── Tool 实现 ────────────────────────────────
+
   /// create_data_schema: 创建笔记本
   Future<ToolResult> _createDataSchema(String argsJson) async {
-    final notebook = Notebook.fromToolCallArgs(argsJson);
+    var notebook = Notebook.fromToolCallArgs(argsJson);
+    // 如果 AI 没指定 icon/color，按名称 hash 自动分配
+    if (notebook.iconName == null || notebook.colorValue == null) {
+      notebook = _withDefaultAppearance(notebook);
+    }
     final insertedId = await _db.createNotebook(notebook);
     final saved = await _db.getNotebook(insertedId);
 
@@ -69,7 +157,8 @@ class ToolExecutor {
       success: true,
       responseForAi: jsonEncode({
         'status': 'success',
-        'message': 'Schema "${notebook.name}" created successfully with id $insertedId',
+        'message':
+            'Schema "${notebook.name}" created successfully with id $insertedId',
         'id': insertedId,
         'name': notebook.name,
         'fields': notebook.schema.map((f) => f.field).toList(),
@@ -131,6 +220,17 @@ class ToolExecutor {
     final name = args['name'] as String? ?? '';
 
     final existing = await _db.getNotebookByName(name);
+
+    // 删除笔记本前，取消所有关联记录的提醒
+    if (existing != null) {
+      final records = await _db.getRecords(notebookName: name);
+      for (final r in records) {
+        if (r.id != null && r.hasPendingReminder) {
+          await _notify.cancelReminder(r.id!);
+        }
+      }
+    }
+
     final deleted = await _db.deleteNotebookByName(name);
 
     if (!deleted) {
@@ -146,7 +246,8 @@ class ToolExecutor {
       success: true,
       responseForAi: jsonEncode({
         'status': 'success',
-        'message': 'Schema "$name" and all its records deleted successfully',
+        'message':
+            'Schema "$name" and all its records deleted successfully',
       }),
       uiData: {
         'action': 'delete_schema',
@@ -166,7 +267,6 @@ class ToolExecutor {
     try {
       data = jsonDecode(dataStr) as Map<String, dynamic>;
     } catch (_) {
-      // 如果 data 不是 JSON 字符串，尝试直接当 Map 用
       if (args['data'] is Map) {
         data = Map<String, dynamic>.from(args['data'] as Map);
       } else {
@@ -174,9 +274,21 @@ class ToolExecutor {
       }
     }
 
-    final record = DataRecord(notebookName: type, data: data);
+    // 解析提醒时间
+    final reminderAt = _parseReminderTime(args, data);
+
+    final record = DataRecord(
+      notebookName: type,
+      data: data,
+      reminderAt: reminderAt,
+    );
     final insertedId = await _db.createRecord(record);
     final saved = await _db.getRecord(insertedId);
+
+    // 如果有提醒时间，调度通知
+    if (saved != null && reminderAt != null) {
+      await _scheduleReminderIfNeeded(saved, reminderAt);
+    }
 
     return ToolResult(
       toolName: 'add_data_record',
@@ -187,11 +299,14 @@ class ToolExecutor {
         'id': insertedId.toString(),
         'type': type,
         'data': data,
+        if (reminderAt != null)
+          'reminder_at': reminderAt.toIso8601String(),
       }),
       uiData: {
         'action': 'add_record',
         'record': saved ?? record,
         'type': type,
+        if (reminderAt != null) 'reminder_at': reminderAt,
       },
     );
   }
@@ -237,6 +352,23 @@ class ToolExecutor {
 
     final updated = await _db.getRecord(id);
 
+    // 检查是否有新的提醒时间
+    final reminderAt = _parseReminderTime(args, newData);
+    if (updated != null && reminderAt != null) {
+      // 先取消旧提醒
+      await _notify.cancelReminder(id);
+      await _scheduleReminderIfNeeded(updated, reminderAt);
+    }
+
+    // 如果 args 中显式清除提醒
+    if (args['clear_reminder'] == true || args['remove_reminder'] == true) {
+      await _notify.cancelReminder(id);
+      await _db.updateRecordReminder(id, null);
+    }
+
+    // 重新获取最新数据
+    final finalRecord = await _db.getRecord(id);
+
     return ToolResult(
       toolName: 'update_data_record',
       success: true,
@@ -245,11 +377,13 @@ class ToolExecutor {
         'message': 'Record $id updated successfully',
         'id': id.toString(),
         'updated_fields': newData.keys.toList(),
-        'data': updated?.data,
+        'data': finalRecord?.data,
+        if (finalRecord?.reminderAt != null)
+          'reminder_at': finalRecord!.reminderAt!.toIso8601String(),
       }),
       uiData: {
         'action': 'update_record',
-        'record': updated,
+        'record': finalRecord,
         'updated_fields': newData.keys.toList(),
       },
     );
@@ -269,8 +403,14 @@ class ToolExecutor {
       );
     }
 
-    // 先获取记录信息（用于 UI）
+    // 先获取记录信息（用于 UI 和取消提醒）
     final record = await _db.getRecord(id);
+
+    // 取消该记录的提醒
+    if (record != null && record.hasPendingReminder) {
+      await _notify.cancelReminder(id);
+    }
+
     final affected = await _db.deleteRecord(id);
 
     if (affected == 0) {
@@ -325,7 +465,10 @@ class ToolExecutor {
             'message': 'Record not found',
             'records': [],
           }),
-          uiData: {'action': 'get_record', 'records': <DataRecord>[]},
+          uiData: {
+            'action': 'get_record',
+            'records': <DataRecord>[],
+          },
         );
       }
 
@@ -364,6 +507,25 @@ class ToolExecutor {
         'query': query,
         'type': type,
       },
+    );
+  }
+
+  /// 根据名称 hash 为笔记本分配默认图标和颜色
+  Notebook _withDefaultAppearance(Notebook nb) {
+    final hash = nb.name.hashCode.abs();
+    final icons = NotebookItem.availableIcons;
+    final colors = NotebookItem.availableColors;
+    final icon = icons[hash % icons.length];
+    final color = colors[hash % colors.length];
+    return Notebook(
+      id: nb.id,
+      name: nb.name,
+      description: nb.description,
+      schema: nb.schema,
+      iconName: nb.iconName ?? icon.icon.codePoint.toString(),
+      colorValue: nb.colorValue ?? color.value,
+      createdAt: nb.createdAt,
+      updatedAt: nb.updatedAt,
     );
   }
 }

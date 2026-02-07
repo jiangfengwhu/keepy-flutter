@@ -5,8 +5,7 @@ import 'dart:convert';
 enum DataFieldType {
   text,
   number,
-  date,
-  checkbox;
+  date;
 
   String get displayName {
     switch (this) {
@@ -16,8 +15,6 @@ enum DataFieldType {
         return '数字';
       case DataFieldType.date:
         return '日期';
-      case DataFieldType.checkbox:
-        return '选项';
     }
   }
 
@@ -30,8 +27,6 @@ enum DataFieldType {
         return 'number';
       case DataFieldType.date:
         return 'date';
-      case DataFieldType.checkbox:
-        return 'boolean';
     }
   }
 }
@@ -42,12 +37,39 @@ class DataFieldDefinition {
   DataFieldType type;
   String description;
 
+  /// 编辑已有字段时记录原始名称，用于检测重命名
+  final String? originalName;
+
+  /// 编辑模式下标记是否为已有字段（类型不可变更）
+  final bool isExisting;
+
   DataFieldDefinition({
     String? id,
     required this.name,
     required this.type,
     this.description = '',
+    this.originalName,
+    this.isExisting = false,
   }) : id = id ?? DateTime.now().microsecondsSinceEpoch.toString();
+
+  /// 从 SchemaField 创建（编辑模式用）
+  factory DataFieldDefinition.fromSchemaField(SchemaField field) {
+    return DataFieldDefinition(
+      name: field.field,
+      type: _parseType(field.type),
+      description: field.description,
+      originalName: field.field,
+      isExisting: true,
+    );
+  }
+
+  static DataFieldType _parseType(String type) {
+    return switch (type) {
+      'number' => DataFieldType.number,
+      'date' => DataFieldType.date,
+      _ => DataFieldType.text,
+    };
+  }
 
   /// 转为 SchemaField
   SchemaField toSchemaField() => SchemaField(
@@ -65,6 +87,8 @@ class Notebook {
   final String name;
   final String description;
   final List<SchemaField> schema;
+  final String? iconName;   // Material Icon 名称（如 'auto_stories_rounded'）
+  final int? colorValue;    // 颜色值（如 0xFF8B5CF6）
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -73,6 +97,8 @@ class Notebook {
     required this.name,
     this.description = '',
     required this.schema,
+    this.iconName,
+    this.colorValue,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -100,6 +126,8 @@ class Notebook {
       schema: (jsonDecode(row['schema_json'] as String) as List)
           .map((f) => SchemaField.fromJson(f as Map<String, dynamic>))
           .toList(),
+      iconName: _nonEmpty(row['icon_name']),
+      colorValue: row['color_value'] as int?,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),
     );
@@ -112,9 +140,17 @@ class Notebook {
       'name': name,
       'description': description,
       'schema_json': jsonEncode(schema.map((f) => f.toJson()).toList()),
+      'icon_name': iconName ?? '',
+      'color_value': colorValue,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
+  }
+
+  static String? _nonEmpty(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString();
+    return s.isEmpty ? null : s;
   }
 }
 
@@ -153,8 +189,6 @@ class SchemaField {
         return '数字';
       case 'date':
         return '日期';
-      case 'boolean':
-        return '选项';
       default:
         return type;
     }

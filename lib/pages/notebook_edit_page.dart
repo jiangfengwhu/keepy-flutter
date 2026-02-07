@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/notebook.dart';
+import '../models/notebook_item.dart';
 import '../services/database_service.dart';
 import '../theme/miaoji_theme.dart';
 
+/// 编辑结果，包含 schema 变更信息
+class NotebookEditResult {
+  final Notebook notebook;
+  final Map<String, String> renamedFields; // oldName -> newName
+  final List<String> removedFields;
+
+  const NotebookEditResult({
+    required this.notebook,
+    this.renamedFields = const {},
+    this.removedFields = const [],
+  });
+}
+
 class NotebookEditPage extends StatefulWidget {
-  const NotebookEditPage({super.key});
+  /// 传入已有 Notebook 时为编辑模式，null 为新建模式
+  final Notebook? existingNotebook;
+
+  const NotebookEditPage({super.key, this.existingNotebook});
+
+  bool get isEditMode => existingNotebook != null;
 
   @override
   State<NotebookEditPage> createState() => _NotebookEditPageState();
@@ -17,10 +36,18 @@ class _NotebookEditPageState extends State<NotebookEditPage>
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
 
-  // State for the dynamic structure
   final List<DataFieldDefinition> _fields = [];
 
+  /// 编辑模式下，已被删除的原有字段名
+  final List<String> _removedFieldNames = [];
+
+  /// 图标和颜色选择
+  late int _selectedIconIndex;
+  late int _selectedColorIndex;
+
   late AnimationController _enterController;
+
+  bool get _isEditMode => widget.isEditMode;
 
   @override
   void initState() {
@@ -30,6 +57,42 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       duration: const Duration(milliseconds: 600),
     );
     _enterController.forward();
+
+    // 编辑模式：预填充数据
+    if (_isEditMode) {
+      final nb = widget.existingNotebook!;
+      _nameController.text = nb.name;
+      _descController.text = nb.description;
+      _fields.addAll(
+        nb.schema.map((f) => DataFieldDefinition.fromSchemaField(f)),
+      );
+
+      // 恢复图标选择
+      _selectedIconIndex = 0;
+      if (nb.iconName != null) {
+        for (var i = 0; i < NotebookItem.availableIcons.length; i++) {
+          if (NotebookItem.availableIcons[i].icon.codePoint.toString() ==
+              nb.iconName) {
+            _selectedIconIndex = i;
+            break;
+          }
+        }
+      }
+
+      // 恢复颜色选择
+      _selectedColorIndex = 0;
+      if (nb.colorValue != null) {
+        for (var i = 0; i < NotebookItem.availableColors.length; i++) {
+          if (NotebookItem.availableColors[i].value == nb.colorValue) {
+            _selectedColorIndex = i;
+            break;
+          }
+        }
+      }
+    } else {
+      _selectedIconIndex = 0;
+      _selectedColorIndex = 0;
+    }
   }
 
   @override
@@ -49,6 +112,13 @@ class _NotebookEditPageState extends State<NotebookEditPage>
 
   void _removeField(int index) {
     HapticFeedback.lightImpact();
+    final field = _fields[index];
+
+    // 编辑模式下记录被删除的原有字段名
+    if (field.isExisting && field.originalName != null) {
+      _removedFieldNames.add(field.originalName!);
+    }
+
     setState(() {
       _fields.removeAt(index);
     });
@@ -63,25 +133,102 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         return;
       }
 
-      final notebook = Notebook(
-        name: _nameController.text,
-        description: _descController.text,
-        schema: _fields.map((f) => f.toSchemaField()).toList(),
+      // 检查字段名是否有空的
+      for (final f in _fields) {
+        if (f.name.trim().isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('字段名称不能为空')),
+          );
+          return;
+        }
+      }
+
+      if (_isEditMode) {
+        await _updateNotebook();
+      } else {
+        await _createNotebook();
+      }
+    }
+  }
+
+  Future<void> _createNotebook() async {
+    final selectedIcon = NotebookItem.availableIcons[_selectedIconIndex];
+    final selectedColor = NotebookItem.availableColors[_selectedColorIndex];
+
+    final notebook = Notebook(
+      name: _nameController.text.trim(),
+      description: _descController.text.trim(),
+      schema: _fields.map((f) => f.toSchemaField()).toList(),
+      iconName: selectedIcon.icon.codePoint.toString(),
+      colorValue: selectedColor.value,
+    );
+
+    try {
+      await DatabaseService().createNotebook(notebook);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('小本已保存')),
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('保存失败: $e')),
+      );
+    }
+  }
+
+  Future<void> _updateNotebook() async {
+    final nb = widget.existingNotebook!;
+    final newName = _nameController.text.trim();
+    final newDesc = _descController.text.trim();
+    final newSchema = _fields.map((f) => f.toSchemaField()).toList();
+
+    // 计算重命名映射
+    final renamedFields = <String, String>{};
+    for (final field in _fields) {
+      if (field.isExisting &&
+          field.originalName != null &&
+          field.originalName != field.name.trim()) {
+        renamedFields[field.originalName!] = field.name.trim();
+      }
+    }
+
+    final selectedIcon = NotebookItem.availableIcons[_selectedIconIndex];
+    final selectedColor = NotebookItem.availableColors[_selectedColorIndex];
+    final newIconName = selectedIcon.icon.codePoint.toString();
+    final newColorVal = selectedColor.value;
+
+    try {
+      final updated = await DatabaseService().updateNotebookFull(
+        notebookId: nb.id!,
+        oldName: nb.name,
+        newName: newName != nb.name ? newName : null,
+        newDescription: newDesc != nb.description ? newDesc : null,
+        newSchema: newSchema,
+        newIconName: newIconName != nb.iconName ? newIconName : null,
+        newColorValue: newColorVal != nb.colorValue ? newColorVal : null,
+        renamedFields: renamedFields,
+        removedFields: _removedFieldNames,
       );
 
-      try {
-        await DatabaseService().createNotebook(notebook);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('小本已保存')),
-        );
-        Navigator.of(context).pop();
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('小本已更新')),
+      );
+
+      // 返回编辑结果给详情页
+      Navigator.of(context).pop(NotebookEditResult(
+        notebook: updated!,
+        renamedFields: renamedFields,
+        removedFields: _removedFieldNames,
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更新失败: $e')),
+      );
     }
   }
 
@@ -98,6 +245,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildAppearanceSection(),
+              const SizedBox(height: 28),
               _buildBasicInfoSection(),
               const SizedBox(height: 28),
               _buildStructureSection(),
@@ -129,14 +278,15 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           ),
         ),
       ),
-      title: const Text('新建小本'),
+      title: Text(_isEditMode ? '编辑小本' : '新建小本'),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: GestureDetector(
             onTap: _saveNotebook,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
@@ -152,9 +302,9 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                   ),
                 ],
               ),
-              child: const Text(
-                '完成',
-                style: TextStyle(
+              child: Text(
+                _isEditMode ? '保存' : '完成',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -166,6 +316,203 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       ],
     );
   }
+
+  // ── 外观选择区域 ───────────────────────────
+
+  Widget _buildAppearanceSection() {
+    final selectedIcon = NotebookItem.availableIcons[_selectedIconIndex];
+    final selectedColor = NotebookItem.availableColors[_selectedColorIndex];
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 0.15),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(
+        parent: _enterController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOutCubic),
+      )),
+      child: FadeTransition(
+        opacity: CurvedAnimation(
+          parent: _enterController,
+          curve: const Interval(0.0, 0.4),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('外观', Icons.palette_outlined),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: MiaojiColors.surface,
+                borderRadius: BorderRadius.circular(MiaojiRadius.xl),
+                boxShadow: MiaojiShadows.md,
+                border: Border.all(
+                  color: MiaojiColors.borderLight,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  // 预览
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: selectedColor.bgColor,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: selectedColor.color.withValues(alpha: 0.2),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              selectedColor.color.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      selectedIcon.icon,
+                      color: selectedColor.color,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 颜色选择
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '颜色',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: MiaojiColors.textTertiary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(
+                      NotebookItem.availableColors.length,
+                      (i) {
+                        final opt = NotebookItem.availableColors[i];
+                        final isSelected = i == _selectedColorIndex;
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedColorIndex = i);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: opt.color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? MiaojiColors.textPrimary
+                                    : Colors.transparent,
+                                width: 2.5,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: opt.color
+                                            .withValues(alpha: 0.4),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 图标选择
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '图标',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: MiaojiColors.textTertiary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 8,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemCount: NotebookItem.availableIcons.length,
+                    itemBuilder: (context, i) {
+                      final opt = NotebookItem.availableIcons[i];
+                      final isSelected = i == _selectedIconIndex;
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedIconIndex = i);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? selectedColor.color
+                                    .withValues(alpha: 0.12)
+                                : MiaojiColors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSelected
+                                  ? selectedColor.color
+                                      .withValues(alpha: 0.4)
+                                  : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            opt.icon,
+                            size: 20,
+                            color: isSelected
+                                ? selectedColor.color
+                                : MiaojiColors.textTertiary,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 基本信息区域 ───────────────────────────
 
   Widget _buildBasicInfoSection() {
     return SlideTransition(
@@ -233,7 +580,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                         color: MiaojiColors.textPrimary,
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return '请输入名称';
                         }
                         return null;
@@ -318,7 +665,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add_rounded, size: 16, color: MiaojiColors.primary),
+                        Icon(Icons.add_rounded,
+                            size: 16, color: MiaojiColors.primary),
                         SizedBox(width: 4),
                         Text(
                           '添加字段',
@@ -342,7 +690,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _fields.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   return _buildFieldCard(index, Key(_fields[index].id));
                 },
@@ -440,12 +789,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
   Widget _buildFieldCard(int index, Key key) {
     final field = _fields[index];
 
-    // 为不同类型字段设置不同的装饰色
     final typeColors = {
       DataFieldType.text: MiaojiColors.primary,
       DataFieldType.number: MiaojiColors.info,
       DataFieldType.date: MiaojiColors.warning,
-      DataFieldType.checkbox: MiaojiColors.success,
     };
     final accentColor = typeColors[field.type] ?? MiaojiColors.primary;
 
@@ -543,60 +890,12 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // 类型选择
+                    // 类型选择（已有字段不可修改类型）
                     SizedBox(
                       width: 80,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: accentColor.withValues(alpha: 0.15),
-                            width: 1,
-                          ),
-                        ),
-                        child: DropdownButtonFormField<DataFieldType>(
-                          value: field.type,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                          ),
-                          icon: Icon(
-                            Icons.unfold_more_rounded,
-                            size: 14,
-                            color: accentColor,
-                          ),
-                          dropdownColor: MiaojiColors.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          items: DataFieldType.values.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                type.displayName,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: accentColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => field.type = value);
-                            }
-                          },
-                        ),
-                      ),
+                      child: field.isExisting
+                          ? _buildLockedTypeChip(field, accentColor)
+                          : _buildTypeDropdown(field, accentColor),
                     ),
                     // 删除按钮
                     IconButton(
@@ -642,6 +941,97 @@ class _NotebookEditPageState extends State<NotebookEditPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 已有字段的类型标签（不可修改，显示锁定图标）
+  Widget _buildLockedTypeChip(
+      DataFieldDefinition field, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            field.type.displayName,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: accentColor,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.lock_outline_rounded,
+            size: 11,
+            color: accentColor.withValues(alpha: 0.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 新字段的类型下拉选择
+  Widget _buildTypeDropdown(
+      DataFieldDefinition field, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: DropdownButtonFormField<DataFieldType>(
+        initialValue: field.type,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 8),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+        ),
+        icon: Icon(
+          Icons.unfold_more_rounded,
+          size: 14,
+          color: accentColor,
+        ),
+        dropdownColor: MiaojiColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        items: DataFieldType.values.map((type) {
+          return DropdownMenuItem(
+            value: type,
+            child: Text(
+              type.displayName,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: accentColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            setState(() => field.type = value);
+          }
+        },
       ),
     );
   }

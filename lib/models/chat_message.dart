@@ -10,6 +10,10 @@ class ChatMessage {
   // UI 辅助字段（不序列化）
   bool isStreaming;
 
+  /// UI 显示的文本（如果为 null 则用 content）
+  /// 用于隐藏发给 AI 的额外信息（如时间前缀）
+  String? displayContent;
+
   /// Tool call 执行结果（UI 展示用，不序列化）
   List<ToolResult>? toolResults;
 
@@ -19,6 +23,7 @@ class ChatMessage {
     this.toolCallId,
     this.toolCalls,
     this.isStreaming = false,
+    this.displayContent,
     this.toolResults,
   });
 

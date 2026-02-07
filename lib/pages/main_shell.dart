@@ -24,7 +24,7 @@ class _MainShellState extends State<MainShell> {
     super.initState();
     _pages = [
       HomePage(key: _homeKey),
-      const SizedBox.shrink(),
+      const SizedBox.expand(), // 助手 tab 占位（点击时弹出 BottomSheet）
       const ProfilePage(),
     ];
   }
@@ -88,7 +88,7 @@ class _BottomNavBar extends StatelessWidget {
           left: 8,
           right: 8,
           top: 16,
-          bottom: MediaQuery.of(context).padding.bottom > 0
+          bottom: MediaQuery.of(context).padding.bottom > 12
               ? MediaQuery.of(context).padding.bottom - 12
               : 8,
         ),
@@ -98,14 +98,14 @@ class _BottomNavBar extends StatelessWidget {
             _NavItem(
               icon: Icons.menu_book_outlined,
               activeIcon: Icons.menu_book_rounded,
-              label: '小本',
+              label: '主页',
               isSelected: currentIndex == 0,
               onTap: () => onTap(0),
             ),
             _NavItem(
               icon: Icons.edit_note_outlined,
               activeIcon: Icons.edit_note_rounded,
-              label: '助手',
+              label: '妙记',
               isSelected: false,
               isSpecial: true,
               onTap: () => onTap(1),

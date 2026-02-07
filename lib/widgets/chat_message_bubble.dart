@@ -30,6 +30,8 @@ class ChatMessageBubble extends StatelessWidget {
             _buildAiAvatar(),
             const SizedBox(width: 10),
           ],
+          // 用户消息左侧留白，与 AI 头像 + 间距对齐（32 + 10 = 42）
+          if (isUser) const SizedBox(width: 42),
           Flexible(
             child: Column(
               crossAxisAlignment:
@@ -121,7 +123,7 @@ class ChatMessageBubble extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 MarkdownBody(
-                  data: message.content,
+                  data: message.displayContent ?? message.content,
                   selectable: true,
                   shrinkWrap: true,
                   softLineBreak: true,
@@ -442,8 +444,6 @@ class _NotebookCreatedCard extends StatelessWidget {
       'string' => (Icons.text_fields_rounded, const Color(0xFF5B7FA5)),
       'number' => (Icons.tag_rounded, const Color(0xFFD4A24C)),
       'date' => (Icons.calendar_today_rounded, const Color(0xFF8B6BAD)),
-      'boolean' =>
-        (Icons.check_circle_outline_rounded, const Color(0xFF5B8C5A)),
       _ => (Icons.data_object_rounded, const Color(0xFF8B7355)),
     };
 
@@ -702,9 +702,51 @@ class _RecordActionCard extends StatelessWidget {
               style: const TextStyle(
                   fontSize: 11, color: MiaojiColors.textHint),
             ),
+          // 提醒标签
+          if (record.reminderAt != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: MiaojiColors.info.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: MiaojiColors.info.withValues(alpha: 0.15),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.notifications_outlined,
+                      size: 12, color: MiaojiColors.info),
+                  const SizedBox(width: 4),
+                  Text(
+                    '提醒：${_formatReminderTime(record.reminderAt!)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: MiaojiColors.info,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  static String _formatReminderTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = time.difference(now);
+    if (diff.isNegative) return '已过期';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}分钟后';
+    if (diff.inHours < 24) return '${diff.inHours}小时后';
+    if (diff.inDays < 7) return '${diff.inDays}天后';
+    return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 }
 

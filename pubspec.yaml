@@ -39,6 +39,11 @@ dependencies:
   path: ^1.9.0
   flutter_markdown: ^0.7.6
   url_launcher: ^6.3.1
+  flutter_local_notifications: ^20.0.0
+  timezone: ^0.10.1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
