@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../models/chat_message.dart';
+import 'api_config.dart';
 import 'database_service.dart';
+import 'ticket_service.dart';
 
 /// AI 周报缓存键
 const _kSummaryText = 'summary_text';
@@ -15,7 +17,7 @@ class SummaryService {
   factory SummaryService() => _instance;
   SummaryService._internal();
 
-  static const String _baseUrl = 'http://localhost:8080';
+  static const String _baseUrl = apiBaseUrl;
   final DatabaseService _db = DatabaseService();
 
   /// 获取周报内容（优先读缓存，超过 24h 才请求）
@@ -157,6 +159,10 @@ class SummaryService {
       final request = await client.postUrl(uri);
       request.headers
           .set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
+      final ticketId = await TicketService().getTicketId();
+      if (ticketId != null) {
+        request.headers.set('X-Ticket-ID', ticketId);
+      }
       final bodyBytes = utf8.encode(body);
       request.headers
           .set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());

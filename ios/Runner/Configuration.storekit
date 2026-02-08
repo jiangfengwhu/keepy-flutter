@@ -1,0 +1,79 @@
+{
+  "identifier" : "F3A2B1C4-D5E6-7890-ABCD-EF1234567890",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "25",
+      "familyShareable" : false,
+      "internalID" : "1001",
+      "localizations" : [
+        {
+          "description" : "500 次 AI 对话额度",
+          "displayName" : "500 次卡",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "500 AI conversation credits",
+          "displayName" : "500 Credits",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "miaojidou_500",
+      "referenceName" : "500 次卡",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "45",
+      "familyShareable" : false,
+      "internalID" : "1002",
+      "localizations" : [
+        {
+          "description" : "1000 次 AI 对话额度",
+          "displayName" : "1000 次卡",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "1000 AI conversation credits",
+          "displayName" : "1000 Credits",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "miaojidou_1000",
+      "referenceName" : "1000 次卡",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "215",
+      "familyShareable" : false,
+      "internalID" : "1003",
+      "localizations" : [
+        {
+          "description" : "5000 次 AI 对话额度",
+          "displayName" : "5000 次卡",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "5000 AI conversation credits",
+          "displayName" : "5000 Credits",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "miaojidou_5000",
+      "referenceName" : "5000 次卡",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : ""
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

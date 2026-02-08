@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/notification_service.dart';
+import 'services/ticket_service.dart';
 import 'theme/miaoji_theme.dart';
 import 'pages/main_shell.dart';
 
@@ -9,6 +10,9 @@ void main() async {
 
   // 初始化本地通知服务
   await NotificationService().init();
+
+  // 初始化 Ticket（后台执行，不阻塞启动）
+  TicketService().getTicketId();
 
   runApp(const MyApp());
 }

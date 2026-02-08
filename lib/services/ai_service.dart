@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../models/chat_message.dart';
+import 'api_config.dart';
+import 'ticket_service.dart';
 
 /// 流式响应事件
 sealed class StreamEvent {}
@@ -38,7 +40,7 @@ class StreamErrorEvent extends StreamEvent {
 /// AI 服务 - 负责与后端通信
 class AiService {
   // TODO: 改为可配置
-  static const String _baseUrl = 'http://localhost:8080';
+  static const String _baseUrl = apiBaseUrl;
 
   final HttpClient _client = HttpClient();
 
@@ -58,6 +60,10 @@ class AiService {
       final uri = Uri.parse('$_baseUrl/note/process');
       final request = await _client.postUrl(uri);
       request.headers.set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
+      final ticketId = await TicketService().getTicketId();
+      if (ticketId != null) {
+        request.headers.set('X-Ticket-ID', ticketId);
+      }
       final bodyBytes = utf8.encode(body);
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
       request.add(bodyBytes);
