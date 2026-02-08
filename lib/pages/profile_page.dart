@@ -122,6 +122,7 @@ class _ProfilePageState extends State<ProfilePage>
       } else if (purchase.status == PurchaseStatus.error) {
         _iap.completePurchase(purchase);
         if (mounted) {
+          Navigator.of(context).pop(); // 关闭充值 BottomSheet
           _purchasing.value = false;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -156,6 +157,9 @@ class _ProfilePageState extends State<ProfilePage>
 
     // 无论验证成功与否都要 completePurchase，否则交易会卡住
     _iap.completePurchase(purchase);
+
+    // 关闭充值 BottomSheet，避免遮挡 SnackBar
+    if (mounted) Navigator.of(context).pop();
 
     if (result != null) {
       _loadTicketAndBalance(); // 刷新余额
@@ -219,55 +223,27 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  void _copyTicket() {
-    if (_ticketId == null) return;
-    Clipboard.setData(ClipboardData(text: _ticketId!));
-    HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ticket 已复制到剪贴板')),
-    );
-  }
-
-  void _showImportDialog() {
-    final controller = TextEditingController();
-    showDialog(
+  void _showRestoreSheet() {
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('导入 Ticket'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '粘贴你的 Ticket ID',
-          ),
-          maxLines: 2,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final id = controller.text.trim();
-              if (id.isEmpty) return;
-              Navigator.pop(ctx);
-              final ok = await _ticketService.importTicket(id);
-              if (!mounted) return;
-              if (ok) {
-                _loadTicketAndBalance();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('导入成功！')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('无效的 Ticket')),
-                );
-              }
-            },
-            child: const Text('导入'),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _RestoreSheet(
+        ticketId: _ticketId,
+        onImport: (id) async {
+          final ok = await _ticketService.importTicket(id);
+          if (!mounted) return;
+          if (ok) {
+            _loadTicketAndBalance();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('导入成功！')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('无效的 Ticket')),
+            );
+          }
+        },
       ),
     );
   }
@@ -303,14 +279,6 @@ class _ProfilePageState extends State<ProfilePage>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
               child: _buildBalanceCard(),
-            ),
-          ),
-
-          // Ticket 管理
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: _buildTicketSection(),
             ),
           ),
 
@@ -452,118 +420,14 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   // ══════════════════════════════════════════
-  //  Ticket 管理
-  // ══════════════════════════════════════════
-
-  Widget _buildTicketSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: MiaojiColors.card,
-        borderRadius: BorderRadius.circular(MiaojiRadius.xl),
-        boxShadow: MiaojiShadows.paper,
-        border: Border.all(color: MiaojiColors.borderLight, width: 1),
-      ),
-      child: Column(
-        children: [
-          // 导出 Ticket
-          _buildTicketAction(
-            icon: Icons.file_upload_outlined,
-            color: MiaojiColors.primary,
-            label: '导出 Ticket',
-            subtitle: _ticketId != null
-                ? '${_ticketId!.substring(0, _ticketId!.length.clamp(0, 12))}…'
-                : '加载中…',
-            onTap: _copyTicket,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Divider(
-                height: 1,
-                color: MiaojiColors.divider.withValues(alpha: 0.5)),
-          ),
-          // 导入 Ticket
-          _buildTicketAction(
-            icon: Icons.file_download_outlined,
-            color: MiaojiColors.info,
-            label: '导入 Ticket',
-            subtitle: '用于恢复已购买的次数',
-            onTap: _showImportDialog,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTicketAction({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: MiaojiColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: MiaojiColors.textHint,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: MiaojiColors.textHint,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ══════════════════════════════════════════
   //  设置列表
   // ══════════════════════════════════════════
 
   Widget _buildSettingsSection() {
     final items = [
+      _SettingItem(
+          Icons.restore_rounded, '内购恢复', MiaojiColors.info,
+          onTap: _showRestoreSheet),
       _SettingItem(
           Icons.notifications_outlined, '通知设置', MiaojiColors.warning),
       _SettingItem(
@@ -583,7 +447,7 @@ class _ProfilePageState extends State<ProfilePage>
           return Column(
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: item.onTap,
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -644,7 +508,8 @@ class _SettingItem {
   final IconData icon;
   final String label;
   final Color color;
-  const _SettingItem(this.icon, this.label, this.color);
+  final VoidCallback? onTap;
+  const _SettingItem(this.icon, this.label, this.color, {this.onTap});
 }
 
 class _PlanInfo {
@@ -659,6 +524,218 @@ class _PlanInfo {
     required this.price,
     required this.unitPrice,
   });
+}
+
+// ═══════════════════════════════════════════
+//  内购恢复 BottomSheet
+// ═══════════════════════════════════════════
+
+class _RestoreSheet extends StatefulWidget {
+  final String? ticketId;
+  final Future<void> Function(String id) onImport;
+
+  const _RestoreSheet({required this.ticketId, required this.onImport});
+
+  @override
+  State<_RestoreSheet> createState() => _RestoreSheetState();
+}
+
+class _RestoreSheetState extends State<_RestoreSheet> {
+  final _controller = TextEditingController();
+  bool _importing = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _copyTicket() {
+    if (widget.ticketId == null) return;
+    Clipboard.setData(ClipboardData(text: widget.ticketId!));
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Ticket 已复制到剪贴板')),
+    );
+  }
+
+  Future<void> _doImport() async {
+    final id = _controller.text.trim();
+    if (id.isEmpty) return;
+    setState(() => _importing = true);
+    Navigator.of(context).pop();
+    await widget.onImport(id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: MiaojiColors.background,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPad > 0 ? 0 : 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 拖拽条
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 20),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: MiaojiColors.textHint.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // 标题
+              const Row(
+                children: [
+                  Icon(Icons.restore_rounded,
+                      size: 18, color: MiaojiColors.info),
+                  SizedBox(width: 8),
+                  Text(
+                    '内购恢复',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: MiaojiColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                '更换设备时，可导出当前 Ticket 并在新设备导入来恢复购买的次数。',
+                style: TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+              ),
+              const SizedBox(height: 20),
+
+              // ── 导出 ──
+              const Text('导出 Ticket',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: MiaojiColors.textSecondary)),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: _copyTicket,
+                child: Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: MiaojiColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: MiaojiColors.borderLight, width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.ticketId ?? '加载中…',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: MiaojiColors.textPrimary,
+                            fontFamily: 'monospace',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.copy_rounded,
+                          size: 16, color: MiaojiColors.textHint),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // ── 导入 ──
+              const Text('导入 Ticket',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: MiaojiColors.textSecondary)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      style: const TextStyle(
+                          fontSize: 13, fontFamily: 'monospace'),
+                      decoration: InputDecoration(
+                        hintText: '粘贴 Ticket ID',
+                        hintStyle: const TextStyle(
+                            fontSize: 13, color: MiaojiColors.textHint),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        filled: true,
+                        fillColor: MiaojiColors.surfaceVariant,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                              color: MiaojiColors.borderLight, width: 1),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                              color: MiaojiColors.borderLight, width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                              color: MiaojiColors.primary, width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _importing ? null : _doImport,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: MiaojiColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _importing
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 1.5, color: Colors.white),
+                            )
+                          : const Text(
+                              '导入',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ═══════════════════════════════════════════

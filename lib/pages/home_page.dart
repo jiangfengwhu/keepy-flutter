@@ -261,6 +261,7 @@ class HomePageState extends State<HomePage>
             )
           else if (_notebooks.isEmpty)
             SliverFillRemaining(
+              hasScrollBody: false,
               child: _buildEmptyNotebooks(),
             )
           else ...[

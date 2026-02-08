@@ -71,7 +71,6 @@ class SummaryService {
   Future<String> _buildUserMessage() async {
     final now = DateTime.now();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
-    final sevenDaysAgoStr = sevenDaysAgo.toIso8601String();
 
     // 近 7 天创建的小本
     final allNotebooks = await _db.getAllNotebooks();

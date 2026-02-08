@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/chat_message.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import '../services/tool_executor.dart';
-import '../theme/miaoji_theme.dart';
 import 'chat_input_bar.dart';
 import 'chat_message_bubble.dart';
 
@@ -29,11 +31,13 @@ class _AiChatSheetContent extends StatefulWidget {
 
 class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  /// 由 DraggableScrollableSheet 提供的 ScrollController
+  ScrollController? _sheetScrollController;
   final AiService _aiService = AiService();
   final ToolExecutor _toolExecutor = ToolExecutor();
   final DatabaseService _dbService = DatabaseService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   bool _isSending = false;
   bool _isInitialized = false;
@@ -118,7 +122,6 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   void dispose() {
     _streamSub?.cancel();
     _controller.dispose();
-    _scrollController.dispose();
     _focusNode.dispose();
     _aiService.dispose();
     super.dispose();
@@ -126,14 +129,163 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
 
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 50), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+      final ctrl = _sheetScrollController;
+      if (ctrl != null && ctrl.hasClients) {
+        ctrl.animateTo(
+          ctrl.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
         );
       }
     });
+  }
+
+  // ── 图片选择 ──────────────────────────────────
+
+  /// 显示图片来源选择弹窗
+  void _showImageSourcePicker() {
+    if (_isSending) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: EdgeInsets.fromLTRB(
+          20, 20, 20, MediaQuery.of(ctx).padding.bottom + 20,
+        ),
+        decoration: const BoxDecoration(
+          color: Color(0xFF3D3124),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 拖拽把手
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4A24C).withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildSourceOption(
+                  icon: Icons.camera_alt_rounded,
+                  label: '拍照',
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+                _buildSourceOption(
+                  icon: Icons.photo_library_rounded,
+                  label: '图库',
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSourceOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, color: const Color(0xFFD4A24C), size: 26),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 从指定来源选择图片
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+
+      if (pickedFile == null || !mounted) return;
+
+      // 读取文件并转为 base64
+      final bytes = await File(pickedFile.path).readAsBytes();
+      final rawBase64 = base64Encode(bytes);
+
+      // 推断 MIME 类型
+      final ext = pickedFile.path.split('.').last.toLowerCase();
+      final mimeType = switch (ext) {
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        'bmp' => 'image/bmp',
+        _ => 'image/jpeg',
+      };
+
+      // 带前缀的 base64 数据
+      final base64Data = 'data:$mimeType;base64,$rawBase64';
+
+      // 创建图片消息并添加到历史
+      final imageMsg = ChatMessage.userImage(
+        base64Data: base64Data,
+        mimeType: mimeType,
+      );
+
+      setState(() {
+        _chatHistory.add(imageMsg);
+      });
+      _scrollToBottom();
+
+      // 判断是否触发对话：历史中有非图片的用户/助手消息则触发
+      final hasTextConversation = _chatHistory.any((m) =>
+          (m.isUser || m.isAssistant) && !m.isImageOnly);
+      if (hasTextConversation && !_isSending) {
+        setState(() => _isSending = true);
+        await _streamAiResponse();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      debugPrint('图片选择失败: $e');
+    }
   }
 
   // ── 发送消息入口 ──────────────────────────────
@@ -302,52 +454,65 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final displayMessages = _displayMessages;
 
-    return Container(
-      height: screenHeight * 0.85,
-      decoration: const BoxDecoration(
-        color: MiaojiColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: displayMessages.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    itemCount: displayMessages.length,
-                    itemBuilder: (_, i) =>
-                        ChatMessageBubble(message: displayMessages[i]),
-                  ),
-          ),
-          ChatInputBar(
-            controller: _controller,
-            focusNode: _focusNode,
-            onSend: _sendMessage,
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        maxChildSize: 0.85,
+        minChildSize: 0.3,
+        builder: (context, scrollController) {
+          _sheetScrollController = scrollController;
+          return Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF3D3124), Color(0xFF4E3F2E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: displayMessages.isEmpty
+                      ? CustomScrollView(
+                          controller: scrollController,
+                          slivers: [
+                            SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: _buildEmptyState(),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                          itemCount: displayMessages.length,
+                          itemBuilder: (_, i) =>
+                              ChatMessageBubble(message: displayMessages[i]),
+                        ),
+                ),
+                ChatInputBar(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  onSend: _sendMessage,
+                  onPickImage: _showImageSourcePicker,
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 16, 12),
-      decoration: BoxDecoration(
-        color: MiaojiColors.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(
-          bottom: BorderSide(
-            color: MiaojiColors.divider.withValues(alpha: 0.5),
-            width: 1,
-          ),
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 12, 16, 14),
       child: Column(
         children: [
           Center(
@@ -355,7 +520,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: MiaojiColors.textHint.withValues(alpha: 0.4),
+                color: const Color(0xFFD4A24C).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -368,19 +533,12 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: const Color(0xFFD4A24C).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(11),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF5A4532).withValues(alpha: 0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: const Color(0xFFD4A24C).withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
                 child: const Icon(
                   Icons.edit_note_rounded,
@@ -398,7 +556,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: MiaojiColors.textPrimary,
+                        color: Color(0xFFF5EFE0),
                       ),
                     ),
                     Text(
@@ -406,8 +564,8 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                       style: TextStyle(
                         fontSize: 12,
                         color: _isSending
-                            ? MiaojiColors.primary
-                            : MiaojiColors.textTertiary,
+                            ? const Color(0xFFD4A24C)
+                            : const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -419,17 +577,17 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: MiaojiColors.surfaceVariant,
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: MiaojiColors.borderLight,
+                      color: Colors.white.withValues(alpha: 0.08),
                       width: 1,
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close_rounded,
                     size: 18,
-                    color: MiaojiColors.textSecondary,
+                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -445,32 +603,30 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 空白信纸图标
           Container(
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: MiaojiColors.surfaceVariant,
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: MiaojiColors.borderLight,
+                color: Colors.white.withValues(alpha: 0.06),
                 width: 1.5,
               ),
-              boxShadow: MiaojiShadows.paper,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.edit_note_rounded,
               size: 32,
-              color: MiaojiColors.textHint,
+              color: const Color(0xFFD4A24C).withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             '开始和 AI 对话吧',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: MiaojiColors.textSecondary,
+              color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 8),
@@ -478,7 +634,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
             '试试说「我要创建一个读书记录小本」',
             style: TextStyle(
               fontSize: 13,
-              color: MiaojiColors.textTertiary.withValues(alpha: 0.7),
+              color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),
             ),
           ),
         ],

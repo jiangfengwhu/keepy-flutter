@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,6 +38,12 @@ class ChatMessageBubble extends StatelessWidget {
               crossAxisAlignment:
                   isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
+                // 图片消息
+                if (message.hasImages)
+                  ...message.imageParts.map(
+                    (part) => _buildImageBubble(part, isUser),
+                  ),
+                // 文本消息
                 if (message.content.isNotEmpty || message.isStreaming)
                   _buildTextBubble(isUser),
                 if (message.toolResults != null &&
@@ -50,25 +57,74 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
-  /// AI 头像 — 墨水瓶风格
+  /// 图片气泡
+  Widget _buildImageBubble(ContentPart imagePart, bool isUser) {
+    final Uint8List? bytes = imagePart.imageBytes;
+    if (bytes == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(isUser ? 18 : 4),
+          topRight: Radius.circular(isUser ? 4 : 18),
+          bottomLeft: const Radius.circular(18),
+          bottomRight: const Radius.circular(18),
+        ),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 220, maxHeight: 280),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.white.withValues(alpha: isUser ? 0.15 : 0.06),
+              width: 1,
+            ),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isUser ? 18 : 4),
+              topRight: Radius.circular(isUser ? 4 : 18),
+              bottomLeft: const Radius.circular(18),
+              bottomRight: const Radius.circular(18),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isUser ? 17 : 3),
+              topRight: Radius.circular(isUser ? 3 : 17),
+              bottomLeft: const Radius.circular(17),
+              bottomRight: const Radius.circular(17),
+            ),
+            child: Image.memory(
+              bytes,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              errorBuilder: (_, _, _) => Container(
+                width: 120,
+                height: 80,
+                color: Colors.white.withValues(alpha: 0.08),
+                child: Icon(
+                  Icons.broken_image_outlined,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.3),
+                  size: 32,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// AI 头像
   Widget _buildAiAvatar() {
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF5A4532), Color(0xFF8B6914)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFFD4A24C).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF5A4532).withValues(alpha: 0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: const Color(0xFFD4A24C).withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: const Icon(Icons.edit_note_rounded, color: Color(0xFFD4A24C), size: 16),
     );
@@ -77,44 +133,26 @@ class ChatMessageBubble extends StatelessWidget {
   /// 文本气泡 — 纸张/信纸风格
   Widget _buildTextBubble(bool isUser) {
     final showCursor = message.isStreaming && message.content.isNotEmpty;
-    final textColor = isUser ? const Color(0xFFF5EFE0) : MiaojiColors.textPrimary;
+    final textColor = isUser
+        ? const Color(0xFFF5EFE0)
+        : const Color(0xFFF5EFE0).withValues(alpha: 0.9);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        // 用户：深色墨纸 / AI：浅色信纸
-        gradient: isUser
-            ? const LinearGradient(
-                colors: [Color(0xFF5A4532), Color(0xFF6B5540)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : const LinearGradient(
-                colors: MiaojiColors.paperGradient,
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+        color: isUser
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(isUser ? 18 : 4),
           topRight: Radius.circular(isUser ? 4 : 18),
           bottomLeft: const Radius.circular(18),
           bottomRight: const Radius.circular(18),
         ),
-        boxShadow: isUser
-            ? [
-                BoxShadow(
-                  color: const Color(0xFF5A4532).withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : MiaojiShadows.paper,
-        border: isUser
-            ? Border.all(
-                color: const Color(0xFF8B7355).withValues(alpha: 0.3),
-                width: 1,
-              )
-            : Border.all(color: MiaojiColors.borderLight, width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: isUser ? 0.15 : 0.06),
+          width: 1,
+        ),
       ),
       child: message.content.isEmpty && message.isStreaming
           ? _buildTypingIndicator()
@@ -155,37 +193,25 @@ class ChatMessageBubble extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: textColor,
                         height: 1.4),
-                    a: TextStyle(
-                      color: isUser
-                          ? const Color(0xFFD4A24C)
-                          : MiaojiColors.primary,
+                    a: const TextStyle(
+                      color: Color(0xFFD4A24C),
                       decoration: TextDecoration.underline,
-                      decorationColor: isUser
-                          ? const Color(0xFFD4A24C).withValues(alpha: 0.5)
-                          : MiaojiColors.primary.withValues(alpha: 0.5),
+                      decorationColor: Color(0x80D4A24C),
                     ),
                     strong:
                         TextStyle(fontWeight: FontWeight.w700, color: textColor),
                     em: TextStyle(fontStyle: FontStyle.italic, color: textColor),
                     code: TextStyle(
                       fontSize: 13,
-                      color: isUser
-                          ? const Color(0xFFD4A24C)
-                          : MiaojiColors.primaryDark,
-                      backgroundColor: isUser
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : MiaojiColors.primary.withValues(alpha: 0.06),
+                      color: const Color(0xFFD4A24C),
+                      backgroundColor: Colors.white.withValues(alpha: 0.08),
                       fontFamily: 'monospace',
                     ),
                     codeblockDecoration: BoxDecoration(
-                      color: isUser
-                          ? Colors.black.withValues(alpha: 0.15)
-                          : MiaojiColors.surfaceVariant,
+                      color: Colors.black.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isUser
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : MiaojiColors.borderLight,
+                        color: Colors.white.withValues(alpha: 0.06),
                         width: 1,
                       ),
                     ),
@@ -193,9 +219,7 @@ class ChatMessageBubble extends StatelessWidget {
                     blockquoteDecoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: isUser
-                              ? const Color(0xFFD4A24C).withValues(alpha: 0.5)
-                              : MiaojiColors.primary.withValues(alpha: 0.3),
+                          color: const Color(0xFFD4A24C).withValues(alpha: 0.5),
                           width: 3,
                         ),
                       ),
@@ -204,9 +228,7 @@ class ChatMessageBubble extends StatelessWidget {
                         const EdgeInsets.only(left: 12, top: 4, bottom: 4),
                     blockquote: TextStyle(
                       fontSize: 14,
-                      color: isUser
-                          ? const Color(0xFFF5EFE0).withValues(alpha: 0.8)
-                          : MiaojiColors.textSecondary,
+                      color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                     listBullet: TextStyle(fontSize: 14, color: textColor),
@@ -214,17 +236,13 @@ class ChatMessageBubble extends StatelessWidget {
                     horizontalRuleDecoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: isUser
-                              ? Colors.white.withValues(alpha: 0.15)
-                              : MiaojiColors.divider,
+                          color: Colors.white.withValues(alpha: 0.12),
                           width: 1,
                         ),
                       ),
                     ),
                     tableBorder: TableBorder.all(
-                      color: isUser
-                          ? Colors.white.withValues(alpha: 0.15)
-                          : MiaojiColors.divider,
+                      color: Colors.white.withValues(alpha: 0.12),
                       width: 1,
                     ),
                     tableHead: TextStyle(
@@ -247,9 +265,7 @@ class ChatMessageBubble extends StatelessWidget {
                     child: Text(
                       '●',
                       style: TextStyle(
-                        color: isUser
-                            ? const Color(0xFFD4A24C).withValues(alpha: 0.6)
-                            : MiaojiColors.primary.withValues(alpha: 0.6),
+                        color: const Color(0xFFD4A24C).withValues(alpha: 0.6),
                         fontSize: 10,
                       ),
                     ),
@@ -360,20 +376,20 @@ class _NotebookCreatedCard extends StatelessWidget {
   final Notebook notebook;
   const _NotebookCreatedCard({required this.notebook});
 
-  static const _iconSets = [
-    (Icons.auto_stories_rounded, Color(0xFF8B6BAD), Color(0xFFF0E6F6)),
-    (Icons.fitness_center_rounded, Color(0xFFC1553B), Color(0xFFF8E4DF)),
-    (Icons.restaurant_rounded, Color(0xFFD4A24C), Color(0xFFFDF3DE)),
-    (Icons.medication_rounded, Color(0xFF5B8C5A), Color(0xFFE2F0E2)),
-    (Icons.payments_rounded, Color(0xFF5B7FA5), Color(0xFFDEEAF5)),
-    (Icons.school_rounded, Color(0xFFBF4D28), Color(0xFFF8E4D8)),
-    (Icons.flight_rounded, Color(0xFF5B8C9A), Color(0xFFDEEEF2)),
+  static const _iconColors = [
+    (Icons.auto_stories_rounded, Color(0xFFB896D6)),
+    (Icons.fitness_center_rounded, Color(0xFFE07B63)),
+    (Icons.restaurant_rounded, Color(0xFFE8BD6A)),
+    (Icons.medication_rounded, Color(0xFF7DB87C)),
+    (Icons.payments_rounded, Color(0xFF7FA5C8)),
+    (Icons.school_rounded, Color(0xFFE07044)),
+    (Icons.flight_rounded, Color(0xFF7FB8C8)),
   ];
 
   @override
   Widget build(BuildContext context) {
     final hash = notebook.name.hashCode.abs();
-    final (icon, iconColor, iconBg) = _iconSets[hash % _iconSets.length];
+    final (icon, iconColor) = _iconColors[hash % _iconColors.length];
 
     return _ToolCardWrapper(
       statusColor: MiaojiColors.success,
@@ -388,10 +404,10 @@ class _NotebookCreatedCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: iconBg,
+                  color: iconColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: iconColor.withValues(alpha: 0.2),
+                    color: iconColor.withValues(alpha: 0.25),
                     width: 1,
                   ),
                 ),
@@ -407,15 +423,15 @@ class _NotebookCreatedCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: MiaojiColors.textPrimary,
+                        color: Color(0xFFF5EFE0),
                       ),
                     ),
                     if (notebook.description.isNotEmpty)
                       Text(
                         notebook.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: MiaojiColors.textTertiary,
+                          color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -441,19 +457,19 @@ class _NotebookCreatedCard extends StatelessWidget {
 
   Widget _buildFieldTag(SchemaField field) {
     final (iconData, color) = switch (field.type) {
-      'string' => (Icons.text_fields_rounded, const Color(0xFF5B7FA5)),
-      'number' => (Icons.tag_rounded, const Color(0xFFD4A24C)),
-      'date' => (Icons.calendar_today_rounded, const Color(0xFF8B6BAD)),
-      _ => (Icons.data_object_rounded, const Color(0xFF8B7355)),
+      'string' => (Icons.text_fields_rounded, const Color(0xFF7FA5C8)),
+      'number' => (Icons.tag_rounded, const Color(0xFFE8BD6A)),
+      'date' => (Icons.calendar_today_rounded, const Color(0xFFB896D6)),
+      _ => (Icons.data_object_rounded, const Color(0xFFB8A48A)),
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: MiaojiColors.surfaceVariant,
+        color: Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-            color: MiaojiColors.borderLight, width: 0.5),
+            color: Colors.white.withValues(alpha: 0.08), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -462,10 +478,10 @@ class _NotebookCreatedCard extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             field.field,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: MiaojiColors.textSecondary,
+              color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -497,15 +513,15 @@ class _NotebookUpdatedCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDEEAF5),
+                  color: MiaojiColors.info.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: MiaojiColors.info.withValues(alpha: 0.2),
+                    color: MiaojiColors.info.withValues(alpha: 0.25),
                     width: 1,
                   ),
                 ),
-                child: const Icon(Icons.book_rounded,
-                    size: 18, color: Color(0xFF5B7FA5)),
+                child: Icon(Icons.book_rounded,
+                    size: 18, color: const Color(0xFF7FA5C8)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -517,15 +533,15 @@ class _NotebookUpdatedCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: MiaojiColors.textPrimary,
+                        color: Color(0xFFF5EFE0),
                       ),
                     ),
                     if (notebook.description.isNotEmpty)
                       Text(
                         notebook.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: MiaojiColors.textTertiary,
+                          color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -539,9 +555,9 @@ class _NotebookUpdatedCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               '更新后包含 ${notebook.schema.length} 个字段：${notebook.schema.map((f) => f.field).join('、')}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: MiaojiColors.textSecondary,
+                color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -575,10 +591,10 @@ class _SchemaDeletedCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: MiaojiColors.error.withValues(alpha: 0.1),
+              color: MiaojiColors.error.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: MiaojiColors.error.withValues(alpha: 0.2),
+                color: MiaojiColors.error.withValues(alpha: 0.25),
                 width: 1,
               ),
             ),
@@ -595,14 +611,14 @@ class _SchemaDeletedCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: MiaojiColors.textPrimary,
+                    color: Color(0xFFF5EFE0),
                   ),
                 ),
-                const Text(
+                Text(
                   '小本及其所有记录已被移除',
                   style: TextStyle(
                     fontSize: 12,
-                    color: MiaojiColors.textTertiary,
+                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -657,9 +673,9 @@ class _RecordActionCard extends StatelessWidget {
               const Spacer(),
               Text(
                 '#${record.id ?? ''}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: MiaojiColors.textHint,
+                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),
                   fontFamily: 'monospace',
                 ),
               ),
@@ -675,9 +691,9 @@ class _RecordActionCard extends StatelessWidget {
                       width: 80,
                       child: Text(
                         e.key,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: MiaojiColors.textTertiary,
+                          color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -687,7 +703,7 @@ class _RecordActionCard extends StatelessWidget {
                         '${e.value}',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: MiaojiColors.textPrimary,
+                          color: Color(0xFFF5EFE0),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -699,8 +715,8 @@ class _RecordActionCard extends StatelessWidget {
           if (record.data.length > 5)
             Text(
               '还有 ${record.data.length - 5} 个字段...',
-              style: const TextStyle(
-                  fontSize: 11, color: MiaojiColors.textHint),
+              style: TextStyle(
+                  fontSize: 11, color: const Color(0xFFF5EFE0).withValues(alpha: 0.35)),
             ),
           // 提醒标签
           if (record.reminderAt != null) ...[
@@ -709,10 +725,10 @@ class _RecordActionCard extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: MiaojiColors.info.withValues(alpha: 0.08),
+                color: MiaojiColors.info.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: MiaojiColors.info.withValues(alpha: 0.15),
+                  color: MiaojiColors.info.withValues(alpha: 0.2),
                   width: 0.5,
                 ),
               ),
@@ -772,10 +788,10 @@ class _DeletedCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: MiaojiColors.error.withValues(alpha: 0.1),
+              color: MiaojiColors.error.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: MiaojiColors.error.withValues(alpha: 0.2),
+                color: MiaojiColors.error.withValues(alpha: 0.25),
                 width: 1,
               ),
             ),
@@ -797,14 +813,14 @@ class _DeletedCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: MiaojiColors.textPrimary,
+                    color: Color(0xFFF5EFE0),
                   ),
                 ),
                 Text(
                   'ID: $recordId',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: MiaojiColors.textHint,
+                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),
                     fontFamily: 'monospace',
                   ),
                 ),
@@ -839,14 +855,14 @@ class _QueryResultsCard extends StatelessWidget {
       statusIcon: Icons.search_rounded,
       statusText: '查询到 ${records.length} 条记录',
       child: records.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   '没有找到匹配的记录',
                   style: TextStyle(
                     fontSize: 13,
-                    color: MiaojiColors.textTertiary,
+                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -858,11 +874,10 @@ class _QueryResultsCard extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 6),
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: MiaojiColors.surfaceVariant
-                        .withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: MiaojiColors.borderLight,
+                      color: Colors.white.withValues(alpha: 0.08),
                       width: 0.5,
                     ),
                   ),
@@ -876,15 +891,15 @@ class _QueryResultsCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: MiaojiColors.primary,
+                              color: const Color(0xFFE8BD6A),
                             ),
                           ),
                           const Spacer(),
                           Text(
                             '#${record.id}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              color: MiaojiColors.textHint,
+                              color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),
                               fontFamily: 'monospace',
                             ),
                           ),
@@ -893,9 +908,9 @@ class _QueryResultsCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       ...entries.map((e) => Text(
                             '${e.key}: ${e.value}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: MiaojiColors.textSecondary,
+                              color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -955,15 +970,10 @@ class _ToolCardWrapper extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: MiaojiColors.paperGradient,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: MiaojiShadows.paper,
           border: Border.all(
-            color: MiaojiColors.borderLight,
+            color: Colors.white.withValues(alpha: 0.06),
             width: 1,
           ),
         ),
@@ -976,10 +986,10 @@ class _ToolCardWrapper extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.06),
+                color: statusColor.withValues(alpha: 0.1),
                 border: Border(
                   bottom: BorderSide(
-                    color: MiaojiColors.divider.withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha: 0.06),
                     width: 1,
                   ),
                 ),
@@ -992,10 +1002,10 @@ class _ToolCardWrapper extends StatelessWidget {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.15),
+                      color: statusColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
-                        color: statusColor.withValues(alpha: 0.3),
+                        color: statusColor.withValues(alpha: 0.35),
                         width: 1,
                       ),
                     ),
