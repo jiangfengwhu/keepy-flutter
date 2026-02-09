@@ -5,7 +5,7 @@ import '../theme/miaoji_theme.dart';
 import '../widgets/notebook_tile.dart';
 import 'notebook_detail_page.dart';
 
-/// 全部妙计本页面
+/// 全部妙记本页面
 class AllNotebooksPage extends StatelessWidget {
   final List<NotebookItem> notebooks;
 

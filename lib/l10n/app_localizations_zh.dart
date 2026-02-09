@@ -346,10 +346,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '如您对本协议有任何疑问或建议，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：support@miaoji.app\n\n感谢您选择妙记，祝您使用愉快！';
 
   @override
-  String get homeTitle => '妙记兜';
+  String get homeTitle => '妙记';
 
   @override
-  String get notebookSection => '妙计本';
+  String get notebookSection => '妙记本';
 
   @override
   String notebookCount(num count) {
@@ -358,7 +358,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String viewAllNotebooks(num count) {
-    return '查看全部 $count 个妙计本';
+    return '查看全部 $count 个妙记本';
   }
 
   @override
@@ -428,7 +428,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureAnalyticsDesc => '自动生成趋势图、饼图等可视化分析';
 
   @override
-  String get featureGuideTitle => '欢迎使用妙记兜';
+  String get featureGuideTitle => '欢迎使用妙记';
 
   @override
   String get featureGuideSubtitle => '点击底部「助理」标签，让 AI 帮你创建第一个小本吧';
@@ -440,10 +440,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get emptyNotebooksHint => '试试和 AI 助手说「帮我创建一个读书记录小本」';
 
   @override
-  String get allNotebooksTitle => '全部妙计本';
+  String get allNotebooksTitle => '全部妙记本';
 
   @override
-  String get emptyAllNotebooks => '还没有妙计本';
+  String get emptyAllNotebooks => '还没有妙记本';
 
   @override
   String get searchHint => '搜索记录内容…';

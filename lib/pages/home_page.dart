@@ -206,7 +206,7 @@ class HomePageState extends State<HomePage>
             ),
           ),
 
-          // ── "妙计本" 标题 ──
+          // ── "妙记本" 标题 ──
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 24, 0),

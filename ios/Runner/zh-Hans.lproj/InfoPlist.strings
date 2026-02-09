@@ -1,4 +1,5 @@
 "CFBundleDisplayName" = "妙记";
+"CFBundleName" = "妙记";
 "NSSpeechRecognitionUsageDescription" = "妙记使用语音识别将您的语音实时转为文字，以便在笔记、待办等场景中通过语音快速输入，提升记录效率。";
 "NSMicrophoneUsageDescription" = "妙记使用麦克风进行语音转文字输入。您的语音会实时转为文字，用于在笔记、待办等场景中实现便捷的语音输入。";
 "NSCameraUsageDescription" = "妙记使用相机拍摄照片，可加入笔记或发送进行 AI 理解与记录，便于您即时记录所见内容。";

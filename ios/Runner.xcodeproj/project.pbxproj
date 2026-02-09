@@ -21,6 +21,7 @@
 		F1A2B3C4D5E6F7A800000022 /* alarm_beacon.caf in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A800000021 /* alarm_beacon.caf */; };
 		F1A2B3C4D5E6F7A800000032 /* alarm_chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A800000031 /* alarm_chime.caf */; };
 		F1A2B3C4D5E6F7A800000042 /* alarm_pulse.caf in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A800000041 /* alarm_pulse.caf */; };
+		E5F60718293A400000000004 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E5F60718293A400000000003 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,8 @@
 		C25F5D486C13B59D9FC36EAB /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		E940739F64623234651A8C0F /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		FEAC7DD4B6D43DCA9FF08FAB /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
+		E5F60718293A400000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E5F60718293A400000000002 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +161,7 @@
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
+				E5F60718293A400000000003 /* InfoPlist.strings */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
@@ -250,8 +254,9 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
+				"zh-Hans",
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
@@ -285,6 +290,7 @@
 				F1A2B3C4D5E6F7A800000022 /* alarm_beacon.caf in Resources */,
 				F1A2B3C4D5E6F7A800000032 /* alarm_chime.caf in Resources */,
 				F1A2B3C4D5E6F7A800000042 /* alarm_pulse.caf in Resources */,
+				E5F60718293A400000000004 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +434,15 @@
 				97C147001CF9000F007C117D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		E5F60718293A400000000003 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E5F60718293A400000000001 /* en */,
+				E5F60718293A400000000002 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

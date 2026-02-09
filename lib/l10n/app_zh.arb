@@ -109,8 +109,8 @@
   "userAgreementSection8Content2": "8.2 因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向本应用开发者所在地有管辖权的人民法院提起诉讼。",
   "userAgreementSection9Title": "九、联系我们",
   "userAgreementSection9Content": "如您对本协议有任何疑问或建议，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：support@miaoji.app\n\n感谢您选择妙记，祝您使用愉快！",
-  "homeTitle": "妙记兜",
-  "notebookSection": "妙计本",
+  "homeTitle": "妙记",
+  "notebookSection": "妙记本",
   "notebookCount": "{count} 个",
   "@notebookCount": {
     "placeholders": {
@@ -119,7 +119,7 @@
       }
     }
   },
-  "viewAllNotebooks": "查看全部 {count} 个妙计本",
+  "viewAllNotebooks": "查看全部 {count} 个妙记本",
   "@viewAllNotebooks": {
     "placeholders": {
       "count": {
@@ -187,12 +187,12 @@
   "featureReminderDesc": "为记录设置提醒，不再遗忘重要事项",
   "featureAnalyticsTitle": "数据统计",
   "featureAnalyticsDesc": "自动生成趋势图、饼图等可视化分析",
-  "featureGuideTitle": "欢迎使用妙记兜",
+  "featureGuideTitle": "欢迎使用妙记",
   "featureGuideSubtitle": "点击底部「助理」标签，让 AI 帮你创建第一个小本吧",
   "emptyNotebooksTitle": "还没有小本",
   "emptyNotebooksHint": "试试和 AI 助手说「帮我创建一个读书记录小本」",
-  "allNotebooksTitle": "全部妙计本",
-  "emptyAllNotebooks": "还没有妙计本",
+  "allNotebooksTitle": "全部妙记本",
+  "emptyAllNotebooks": "还没有妙记本",
   "searchHint": "搜索记录内容…",
   "searchEmptyHint": "输入关键词搜索所有记录",
   "searchNoResultsTitle": "没有找到相关记录",
