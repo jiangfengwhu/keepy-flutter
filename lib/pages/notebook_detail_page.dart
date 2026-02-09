@@ -7,6 +7,7 @@ import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
+import '../services/notification_service.dart';
 import '../theme/miaoji_theme.dart';
 import 'notebook_edit_page.dart';
 import 'record_detail_page.dart';
@@ -25,11 +26,20 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
     with SingleTickerProviderStateMixin {
   final DatabaseService _db = DatabaseService();
   late AnimationController _enterController;
+  final ScrollController _scrollController = ScrollController();
 
   Notebook? _notebook;
   List<DataRecord> _records = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
   late NotebookItem _item;
+
+  /// 每页加载条数
+  static const int _pageSize = 20;
+
+  /// 入场动画最多作用于前 N 条记录
+  static const int _maxAnimatedItems = 10;
 
   @override
   void initState() {
@@ -39,15 +49,30 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    _scrollController.addListener(_onScroll);
     _loadData();
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _enterController.dispose();
     super.dispose();
   }
 
+  /// 滚动监听：接近底部时自动加载更多
+  void _onScroll() {
+    if (_isLoadingMore || !_hasMore) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    // 距离底部 200px 时触发加载
+    if (currentScroll >= maxScroll - 200) {
+      _loadMore();
+    }
+  }
+
+  /// 初始加载（重置列表）
   Future<void> _loadData() async {
     try {
       Notebook? notebook;
@@ -56,19 +81,47 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
       }
       notebook ??= await _db.getNotebookByName(_item.title);
 
-      final records = await _db.getRecords(notebookName: notebook?.name ?? _item.title);
+      final records = await _db.getRecords(
+        notebookName: notebook?.name ?? _item.title,
+        limit: _pageSize,
+      );
 
       if (!mounted) return;
       setState(() {
         _notebook = notebook;
         _records = records;
         _isLoading = false;
+        _hasMore = records.length >= _pageSize;
       });
       _enterController.forward();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       _enterController.forward();
+    }
+  }
+
+  /// 加载更多记录（追加到列表末尾）
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+
+    try {
+      final moreRecords = await _db.getRecords(
+        notebookName: _notebook?.name ?? _item.title,
+        limit: _pageSize,
+        offset: _records.length,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _records.addAll(moreRecords);
+        _hasMore = moreRecords.length >= _pageSize;
+        _isLoadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
     }
   }
 
@@ -132,7 +185,10 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
 
     await _db.deleteRecord(record.id!);
     HapticFeedback.lightImpact();
-    _loadData();
+    // 局部移除，不重新加载整个列表
+    setState(() {
+      _records.removeWhere((r) => r.id == record.id);
+    });
   }
 
   @override
@@ -144,6 +200,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
               child: CircularProgressIndicator(
                   strokeWidth: 2, color: MiaojiColors.primary))
           : CustomScrollView(
+              controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // 吸顶 AppBar
@@ -199,21 +256,46 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          final delay = 0.2 + index * 0.06;
-                          final end = (delay + 0.35).clamp(0.0, 1.0);
+                          final card = _buildRecordCard(_records[index], index);
+                          final Widget child;
+                          // 只对前 _maxAnimatedItems 条记录添加入场动画
+                          if (index < _maxAnimatedItems) {
+                            final delay = 0.2 + index * 0.06;
+                            final end = (delay + 0.35).clamp(0.0, 1.0);
+                            child = _buildAnimated(
+                              interval: Interval(delay, end,
+                                  curve: Curves.easeOutCubic),
+                              child: card,
+                            );
+                          } else {
+                            child = card;
+                          }
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: index < _records.length - 1 ? 12 : 0,
                             ),
-                            child: _buildAnimated(
-                              interval: Interval(delay, end,
-                                  curve: Curves.easeOutCubic),
-                              child:
-                                  _buildRecordCard(_records[index], index),
-                            ),
+                            child: child,
                           );
                         },
                         childCount: _records.length,
+                      ),
+                    ),
+                  ),
+
+                // 底部加载更多指示器
+                if (_isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: MiaojiColors.textHint,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -581,9 +663,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
           size: 22,
         ),
       ),
-      child: GestureDetector(
-        onTap: () => _openReadMode(record),
-        child: Container(
+      child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: MiaojiColors.card,
@@ -630,10 +710,16 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                         color: _item.iconColor,
                       ),
                     ),
-                    // 提醒状态标签
+                    // 提醒状态标签（仅待提醒状态可点击修改）
                     if (record.reminderAt != null) ...[
                       const SizedBox(width: 8),
-                      _buildReminderBadge(record),
+                      if (record.hasPendingReminder)
+                        GestureDetector(
+                          onTap: () => _showReminderOptions(record),
+                          child: _buildReminderBadge(record),
+                        )
+                      else
+                        _buildReminderBadge(record),
                     ],
                     const Spacer(),
                     Icon(
@@ -649,6 +735,24 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                         fontSize: 11,
                         color: MiaojiColors.textHint
                             .withValues(alpha: 0.7),
+                      ),
+                    ),
+                    // 阅读模式按钮
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () => _openReadMode(record),
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: _item.iconColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Icon(
+                          Icons.auto_stories_rounded,
+                          size: 13,
+                          color: _item.iconColor.withValues(alpha: 0.7),
+                        ),
                       ),
                     ),
                   ],
@@ -730,7 +834,6 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
             ],
           ),
         ),
-      ),
       ),
     );
   }
@@ -818,7 +921,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
     newData[fieldName] = dt.toIso8601String();
     await DatabaseService().updateRecord(record.id!, newData);
     HapticFeedback.lightImpact();
-    _loadData();
+    _updateLocalRecord(record.id!, newData);
   }
 
   Future<void> _editTextOrNumberField(
@@ -849,7 +952,16 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
     }
     await DatabaseService().updateRecord(record.id!, newData);
     HapticFeedback.lightImpact();
-    _loadData();
+    _updateLocalRecord(record.id!, newData);
+  }
+
+  /// 局部更新本地记录数据，避免整个列表重新加载
+  void _updateLocalRecord(int recordId, Map<String, dynamic> newData) {
+    final idx = _records.indexWhere((r) => r.id == recordId);
+    if (idx == -1) return;
+    setState(() {
+      _records[idx] = _records[idx].copyWith(data: newData);
+    });
   }
 
   /// 提醒状态标签
@@ -908,6 +1020,228 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
         ],
       ),
     );
+  }
+
+  /// 提醒操作菜单（仅待提醒状态可用）
+  void _showReminderOptions(DataRecord record) {
+    if (record.id == null || !record.hasPendingReminder) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        decoration: BoxDecoration(
+          color: MiaojiColors.card,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 当前提醒信息
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Row(
+                  children: [
+                    Icon(Icons.notifications_outlined,
+                        size: 18, color: _item.iconColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      '提醒时间',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: MiaojiColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _formatFullReminderTime(record.reminderAt!),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: MiaojiColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                  height: 1,
+                  color: MiaojiColors.divider.withValues(alpha: 0.5)),
+              // 修改提醒
+              _buildOptionTile(
+                icon: Icons.edit_notifications_rounded,
+                color: MiaojiColors.info,
+                label: '修改提醒时间',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _editReminderTime(record);
+                },
+              ),
+              // 取消提醒
+              _buildOptionTile(
+                icon: Icons.notifications_off_rounded,
+                color: MiaojiColors.error,
+                label: '取消提醒',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _cancelReminder(record);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 16, color: color),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                color: MiaojiColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 编辑提醒时间（日期 + 时间选择器）
+  Future<void> _editReminderTime(DataRecord record) async {
+    if (record.id == null) return;
+
+    final now = DateTime.now();
+    final initial = record.reminderAt != null && record.reminderAt!.isAfter(now)
+        ? record.reminderAt!
+        : now.add(const Duration(hours: 1));
+
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: now,
+      lastDate: DateTime(2100),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: _item.iconColor,
+            onPrimary: Colors.white,
+            surface: MiaojiColors.surface,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: _item.iconColor,
+            onPrimary: Colors.white,
+            surface: MiaojiColors.surface,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (!mounted) return;
+
+    final dt = DateTime(
+      date.year, date.month, date.day,
+      time?.hour ?? initial.hour, time?.minute ?? initial.minute,
+    );
+
+    // 更新数据库
+    await _db.updateRecordReminder(record.id!, dt);
+
+    // 重新调度通知
+    final ns = NotificationService();
+    await ns.cancelReminder(record.id!);
+
+    final summary = _buildRecordSummary(record);
+    await ns.scheduleReminder(
+      recordId: record.id!,
+      reminderAt: dt,
+      notebookName: record.notebookName,
+      title: summary,
+    );
+
+    HapticFeedback.lightImpact();
+    _refreshLocalRecord(record.id!);
+  }
+
+  /// 取消提醒
+  Future<void> _cancelReminder(DataRecord record) async {
+    if (record.id == null) return;
+
+    await _db.updateRecordReminder(record.id!, null);
+    await NotificationService().cancelReminder(record.id!);
+
+    HapticFeedback.lightImpact();
+    _refreshLocalRecord(record.id!);
+  }
+
+  /// 从数据库重新读取单条记录并局部刷新
+  Future<void> _refreshLocalRecord(int recordId) async {
+    final updated = await _db.getRecord(recordId);
+    if (updated == null || !mounted) return;
+    final idx = _records.indexWhere((r) => r.id == recordId);
+    if (idx == -1) return;
+    setState(() {
+      _records[idx] = updated;
+    });
+  }
+
+  /// 从记录数据中提取摘要文本（用于通知标题）
+  String _buildRecordSummary(DataRecord record) {
+    final data = record.data;
+    for (final key in [
+      'title', 'name', '标题', '名称', '事项', '内容', 'task', 'content',
+    ]) {
+      if (data.containsKey(key) && data[key] != null) {
+        return data[key].toString();
+      }
+    }
+    if (data.isNotEmpty) {
+      final first = data.values.first;
+      if (first != null) return first.toString();
+    }
+    return '你有一条待办提醒';
+  }
+
+  String _formatFullReminderTime(DateTime time) {
+    return '${time.month}/${time.day} '
+        '${time.hour.toString().padLeft(2, '0')}:'
+        '${time.minute.toString().padLeft(2, '0')}';
   }
 
   String _formatReminderTime(DateTime time) {
@@ -2255,28 +2589,62 @@ class _TrendLinePainter extends CustomPainter {
     // 将各点转为 canvas 坐标
     final pts = List.generate(points.length, toCanvas);
 
-    // 使用 Catmull-Rom → 三次贝塞尔 实现平滑曲线
+    // 使用单调三次 Hermite 插值（Fritsch-Carlson）实现平滑曲线
     final linePath = Path();
     final fillPath = Path();
     linePath.moveTo(pts[0].dx, pts[0].dy);
     fillPath.moveTo(pts[0].dx, h);
     fillPath.lineTo(pts[0].dx, pts[0].dy);
 
-    const tension = 0.3; // 越小越平滑
+    final n = pts.length;
 
-    for (var i = 0; i < pts.length - 1; i++) {
-      final p0 = i > 0 ? pts[i - 1] : pts[i];
-      final p1 = pts[i];
-      final p2 = pts[i + 1];
-      final p3 = i + 2 < pts.length ? pts[i + 2] : pts[i + 1];
+    // 计算各段斜率（secant）
+    final dxs = List<double>.generate(n - 1, (i) => pts[i + 1].dx - pts[i].dx);
+    final dys = List<double>.generate(n - 1, (i) => pts[i + 1].dy - pts[i].dy);
+    final slopes = List<double>.generate(
+        n - 1, (i) => dxs[i] == 0 ? 0.0 : dys[i] / dxs[i]);
 
-      final cp1x = p1.dx + (p2.dx - p0.dx) * tension;
-      final cp1y = p1.dy + (p2.dy - p0.dy) * tension;
-      final cp2x = p2.dx - (p3.dx - p1.dx) * tension;
-      final cp2y = p2.dy - (p3.dy - p1.dy) * tension;
+    // 计算每个点的切线（Fritsch-Carlson 方法）
+    final tangents = List<double>.filled(n, 0.0);
+    tangents[0] = slopes[0];
+    tangents[n - 1] = slopes[n - 2];
+    for (var i = 1; i < n - 1; i++) {
+      if (slopes[i - 1].sign != slopes[i].sign ||
+          slopes[i - 1] == 0 ||
+          slopes[i] == 0) {
+        tangents[i] = 0.0;
+      } else {
+        tangents[i] = (slopes[i - 1] + slopes[i]) / 2;
+      }
+    }
 
-      linePath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.dx, p2.dy);
-      fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, p2.dx, p2.dy);
+    // 确保单调性：限制切线使曲线不越界
+    for (var i = 0; i < n - 1; i++) {
+      if (slopes[i] == 0) {
+        tangents[i] = 0.0;
+        tangents[i + 1] = 0.0;
+      } else {
+        final alpha = tangents[i] / slopes[i];
+        final beta = tangents[i + 1] / slopes[i];
+        final sqSum = alpha * alpha + beta * beta;
+        if (sqSum > 9) {
+          final t = 3.0 / math.sqrt(sqSum);
+          tangents[i] = t * alpha * slopes[i];
+          tangents[i + 1] = t * beta * slopes[i];
+        }
+      }
+    }
+
+    // 用切线构建三次贝塞尔曲线
+    for (var i = 0; i < n - 1; i++) {
+      final segDx = dxs[i] / 3.0;
+      final cp1x = pts[i].dx + segDx;
+      final cp1y = pts[i].dy + tangents[i] * segDx;
+      final cp2x = pts[i + 1].dx - segDx;
+      final cp2y = pts[i + 1].dy - tangents[i + 1] * segDx;
+
+      linePath.cubicTo(cp1x, cp1y, cp2x, cp2y, pts[i + 1].dx, pts[i + 1].dy);
+      fillPath.cubicTo(cp1x, cp1y, cp2x, cp2y, pts[i + 1].dx, pts[i + 1].dy);
     }
 
     final last = pts.last;

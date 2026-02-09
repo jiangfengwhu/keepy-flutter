@@ -295,11 +295,12 @@ class DatabaseService {
     return db.insert('records', record.toDbRow());
   }
 
-  /// 获取记录（可按 notebook_name 过滤）
+  /// 获取记录（可按 notebook_name 过滤，支持分页）
   Future<List<DataRecord>> getRecords({
     String? notebookName,
     String? query,
     int? limit,
+    int? offset,
   }) async {
     final db = await database;
     String? where;
@@ -322,6 +323,7 @@ class DatabaseService {
       whereArgs: whereArgs,
       orderBy: 'created_at DESC',
       limit: limit ?? 20,
+      offset: offset,
     );
     return rows.map((row) => DataRecord.fromDbRow(row)).toList();
   }
