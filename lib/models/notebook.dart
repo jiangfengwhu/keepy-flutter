@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:ui';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 
 // ── 编辑页面使用的旧模型（兼容） ──────────────
 
@@ -7,14 +9,14 @@ enum DataFieldType {
   number,
   date;
 
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
       case DataFieldType.text:
-        return '文本';
+        return l10n.fieldTypeText;
       case DataFieldType.number:
-        return '数字';
+        return l10n.fieldTypeNumber;
       case DataFieldType.date:
-        return '日期';
+        return l10n.fieldTypeDate;
     }
   }
 
@@ -107,8 +109,9 @@ class Notebook {
   /// 从 AI tool call 的 args JSON 创建
   factory Notebook.fromToolCallArgs(String argsJson) {
     final json = jsonDecode(argsJson) as Map<String, dynamic>;
+    final l10n = lookupAppLocalizations(PlatformDispatcher.instance.locale);
     return Notebook(
-      name: json['name'] as String? ?? '未命名小本',
+      name: json['name'] as String? ?? l10n.unnamedNotebook,
       description: json['description'] as String? ?? '',
       schema: (json['schema'] as List?)
               ?.map((f) => SchemaField.fromJson(f as Map<String, dynamic>))
@@ -180,15 +183,14 @@ class SchemaField {
         'description': description,
       };
 
-  /// 类型的中文显示
-  String get typeDisplay {
+  String typeDisplay(AppLocalizations l10n) {
     switch (type) {
       case 'string':
-        return '文本';
+        return l10n.fieldTypeText;
       case 'number':
-        return '数字';
+        return l10n.fieldTypeNumber;
       case 'date':
-        return '日期';
+        return l10n.fieldTypeDate;
       default:
         return type;
     }

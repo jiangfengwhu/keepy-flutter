@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/chat_message.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
@@ -177,7 +178,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
               children: [
                 _buildSourceOption(
                   icon: Icons.camera_alt_rounded,
-                  label: '拍照',
+                  label: context.l10n.aiImageSourceCamera,
                   onTap: () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.camera);
@@ -185,7 +186,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                 ),
                 _buildSourceOption(
                   icon: Icons.photo_library_rounded,
-                  label: '图库',
+                  label: context.l10n.aiImageSourceGallery,
                   onTap: () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.gallery);
@@ -370,7 +371,8 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
           case StreamErrorEvent(:final message):
             setState(() {
               if (assistantMsg.content.isEmpty) {
-                assistantMsg.content = '抱歉，出错了：$message';
+                assistantMsg.content =
+                    context.l10n.aiErrorMessage(message);
               }
               assistantMsg.isStreaming = false;
               _isSending = false;
@@ -382,7 +384,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
       onError: (error) {
         if (!mounted) return;
         setState(() {
-          assistantMsg.content = '请求失败：$error';
+          assistantMsg.content = context.l10n.aiRequestFailed(error);
           assistantMsg.isStreaming = false;
           _isSending = false;
         });
@@ -551,16 +553,18 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'AI 助手',
-                      style: TextStyle(
+                    Text(
+                      context.l10n.aiAssistantTitle,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFF5EFE0),
                       ),
                     ),
                     Text(
-                      _isSending ? '正在书写...' : '随时准备帮助你',
+                      _isSending
+                          ? context.l10n.aiAssistantWriting
+                          : context.l10n.aiAssistantReady,
                       style: TextStyle(
                         fontSize: 12,
                         color: _isSending
@@ -622,7 +626,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
           ),
           const SizedBox(height: 20),
           Text(
-            '开始和 AI 对话吧',
+            context.l10n.aiEmptyTitle,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -631,7 +635,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
           ),
           const SizedBox(height: 8),
           Text(
-            '试试说「我要创建一个读书记录小本」',
+            context.l10n.aiEmptyHint,
             style: TextStyle(
               fontSize: 13,
               color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),

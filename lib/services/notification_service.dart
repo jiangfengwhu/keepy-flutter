@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -24,45 +26,71 @@ class AlarmSoundOption {
   });
 }
 
-/// 所有可用铃声选项
-const List<AlarmSoundOption> alarmSoundOptions = [
-  AlarmSoundOption(
-    id: 'default',
-    name: '系统默认',
-    iosFile: null,
-    description: '使用系统默认通知声音',
-  ),
-  AlarmSoundOption(
-    id: 'classic',
-    name: '经典闹钟',
-    iosFile: 'alarm_sound.caf',
-    description: '嘟-嘟…嘟-嘟… 经典双音闹钟',
-  ),
-  AlarmSoundOption(
-    id: 'radar',
-    name: '雷达',
-    iosFile: 'alarm_radar.caf',
-    description: '嘟嘟嘟…嘟嘟嘟… 快速脉冲',
-  ),
-  AlarmSoundOption(
-    id: 'beacon',
-    name: '灯塔',
-    iosFile: 'alarm_beacon.caf',
-    description: '低-高…低-高… 交替升调',
-  ),
-  AlarmSoundOption(
-    id: 'chime',
-    name: '钟琴',
-    iosFile: 'alarm_chime.caf',
-    description: '叮…叮…叮… 悠扬清脆',
-  ),
-  AlarmSoundOption(
-    id: 'pulse',
-    name: '脉冲',
-    iosFile: 'alarm_pulse.caf',
-    description: '嘟嘟-嗡…嘟嘟-嗡… 紧迫节奏',
-  ),
+class _AlarmSoundMeta {
+  final String id;
+  final String? iosFile;
+  const _AlarmSoundMeta({required this.id, this.iosFile});
+}
+
+const List<_AlarmSoundMeta> _alarmSoundMetas = [
+  _AlarmSoundMeta(id: 'default', iosFile: null),
+  _AlarmSoundMeta(id: 'classic', iosFile: 'alarm_sound.caf'),
+  _AlarmSoundMeta(id: 'radar', iosFile: 'alarm_radar.caf'),
+  _AlarmSoundMeta(id: 'beacon', iosFile: 'alarm_beacon.caf'),
+  _AlarmSoundMeta(id: 'chime', iosFile: 'alarm_chime.caf'),
+  _AlarmSoundMeta(id: 'pulse', iosFile: 'alarm_pulse.caf'),
 ];
+
+List<AlarmSoundOption> alarmSoundOptions(AppLocalizations l10n) {
+  return _alarmSoundMetas
+      .map(
+        (meta) => AlarmSoundOption(
+          id: meta.id,
+          name: _alarmSoundName(meta.id, l10n),
+          iosFile: meta.iosFile,
+          description: _alarmSoundDescription(meta.id, l10n),
+        ),
+      )
+      .toList();
+}
+
+String _alarmSoundName(String id, AppLocalizations l10n) {
+  switch (id) {
+    case 'default':
+      return l10n.alarmSoundDefaultName;
+    case 'classic':
+      return l10n.alarmSoundClassicName;
+    case 'radar':
+      return l10n.alarmSoundRadarName;
+    case 'beacon':
+      return l10n.alarmSoundBeaconName;
+    case 'chime':
+      return l10n.alarmSoundChimeName;
+    case 'pulse':
+      return l10n.alarmSoundPulseName;
+    default:
+      return l10n.alarmSoundClassicName;
+  }
+}
+
+String _alarmSoundDescription(String id, AppLocalizations l10n) {
+  switch (id) {
+    case 'default':
+      return l10n.alarmSoundDefaultDesc;
+    case 'classic':
+      return l10n.alarmSoundClassicDesc;
+    case 'radar':
+      return l10n.alarmSoundRadarDesc;
+    case 'beacon':
+      return l10n.alarmSoundBeaconDesc;
+    case 'chime':
+      return l10n.alarmSoundChimeDesc;
+    case 'pulse':
+      return l10n.alarmSoundPulseDesc;
+    default:
+      return l10n.alarmSoundClassicDesc;
+  }
+}
 
 const String _kAlarmSoundKey = 'alarm_sound_id';
 
@@ -129,10 +157,7 @@ class NotificationService {
 
   /// 获取当前选中的铃声选项
   AlarmSoundOption get selectedSound {
-    return alarmSoundOptions.firstWhere(
-      (o) => o.id == _selectedSoundId,
-      orElse: () => alarmSoundOptions[1], // fallback to 'classic'
-    );
+    return _optionForId(_selectedSoundId, PlatformDispatcher.instance.locale);
   }
 
   /// 获取当前选中的铃声 ID
@@ -159,16 +184,17 @@ class NotificationService {
     // 先取消正在播放的预览，立即停止当前声音
     await _plugin.cancel(id: 99999);
 
-    final option = alarmSoundOptions.firstWhere(
+    final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+    final option = alarmSoundOptions(l10n).firstWhere(
       (o) => o.id == soundId,
-      orElse: () => alarmSoundOptions[0],
+      orElse: () => alarmSoundOptions(l10n)[0],
     );
 
     final details = _buildNotificationDetails(option);
 
     await _plugin.show(
       id: 99999, // 固定 ID，避免累积
-      title: '🔔 铃声预览',
+      title: l10n.notificationSoundPreviewTitle,
       body: option.name,
       notificationDetails: details,
     );
@@ -223,11 +249,12 @@ class NotificationService {
 
   /// 根据铃声选项构建 NotificationDetails
   NotificationDetails _buildNotificationDetails(AlarmSoundOption option) {
+    final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
     // ── Android: 闹钟式通知 ──
     final androidDetails = AndroidNotificationDetails(
       'miaoji_alarm_reminders',
-      '小本闹钟提醒',
-      channelDescription: '小本记录的闹钟式定时提醒，会持续响铃直到处理',
+      l10n.notificationChannelName,
+      channelDescription: l10n.notificationChannelDescription,
       importance: Importance.max,
       priority: Priority.max,
       playSound: true,
@@ -285,9 +312,10 @@ class NotificationService {
     final notificationDetails = _buildNotificationDetails(selectedSound);
 
     try {
+      final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
       await _plugin.zonedSchedule(
         id: recordId,
-        title: '📝 $notebookName',
+        title: l10n.notificationReminderTitle(notebookName),
         body: title + (body != null ? '\n$body' : ''),
         scheduledDate: scheduledDate,
         notificationDetails: notificationDetails,
@@ -355,6 +383,20 @@ class NotificationService {
       final first = data.values.first;
       if (first != null) return first.toString();
     }
-    return '你有一条待办提醒';
+    final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+    return l10n.notificationFallbackBody;
+  }
+
+  AppLocalizations _l10nForLocale(Locale locale) {
+    return lookupAppLocalizations(locale);
+  }
+
+  AlarmSoundOption _optionForId(String id, Locale locale) {
+    final l10n = _l10nForLocale(locale);
+    final options = alarmSoundOptions(l10n);
+    return options.firstWhere(
+      (o) => o.id == id,
+      orElse: () => options[1],
+    );
   }
 }

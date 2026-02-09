@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/data_record.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
@@ -62,9 +63,10 @@ class HomePageState extends State<HomePage>
       final reminders = await _dbService.getUpcomingReminders();
       final counts = await _dbService.getRecordCountsAll();
       if (!mounted) return;
+      final l10n = context.l10n;
       setState(() {
         _notebooks = notebooks.map((nb) {
-          final item = NotebookItem.fromNotebook(nb);
+          final item = NotebookItem.fromNotebook(nb, l10n: l10n);
           return item.withRecordCount(counts[nb.name] ?? 0);
         }).toList();
         _upcomingReminders = reminders;
@@ -150,7 +152,7 @@ class HomePageState extends State<HomePage>
               child: Row(
                 children: [
                   Text(
-                    '妙记兜',
+                    context.l10n.homeTitle,
                     style:
                         Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.w800,
@@ -216,7 +218,7 @@ class HomePageState extends State<HomePage>
                   children: [
                     Expanded(
                       child: _buildMiniSectionTitle(
-                          Icons.menu_book_rounded, '妙计本'),
+                          Icons.menu_book_rounded, context.l10n.notebookSection),
                     ),
                     GestureDetector(
                       onTap: _notebooks.length > 6
@@ -226,7 +228,7 @@ class HomePageState extends State<HomePage>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${_notebooks.length} 个',
+                            context.l10n.notebookCount(_notebooks.length),
                             style: TextStyle(
                               color: _notebooks.length > 6
                                   ? MiaojiColors.primary
@@ -315,7 +317,7 @@ class HomePageState extends State<HomePage>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '查看全部 ${_notebooks.length} 个妙计本',
+                            context.l10n.viewAllNotebooks(_notebooks.length),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -353,7 +355,10 @@ class HomePageState extends State<HomePage>
       children: [
         // 1) AI 周报建议（mock）— 放最上面
         if (hasNotebooks) ...[
-          _buildMiniSectionTitle(Icons.auto_awesome, 'AI 周报'),
+          _buildMiniSectionTitle(
+            Icons.auto_awesome,
+            context.l10n.aiWeeklyTitle,
+          ),
           const SizedBox(height: 10),
           _buildAiSuggestionCard(),
         ],
@@ -362,7 +367,9 @@ class HomePageState extends State<HomePage>
         if (hasReminders) ...[
           SizedBox(height: hasNotebooks ? 20 : 0),
           _buildMiniSectionTitle(
-              Icons.notifications_active_rounded, '近期提醒'),
+            Icons.notifications_active_rounded,
+            context.l10n.upcomingRemindersTitle,
+          ),
           const SizedBox(height: 10),
           _buildReminderCard(),
         ],
@@ -431,9 +438,9 @@ class HomePageState extends State<HomePage>
                     size: 17, color: Color(0xFFD97706)),
               ),
               const SizedBox(width: 10),
-              const Text(
-                '近期提醒',
-                style: TextStyle(
+              Text(
+                context.l10n.upcomingRemindersTitle,
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: MiaojiColors.textPrimary,
@@ -448,7 +455,7 @@ class HomePageState extends State<HomePage>
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${_upcomingReminders.length} 项',
+                  context.l10n.reminderCount(_upcomingReminders.length),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -465,7 +472,7 @@ class HomePageState extends State<HomePage>
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '还有 ${_upcomingReminders.length - 3} 项提醒…',
+                context.l10n.moreReminders(_upcomingReminders.length - 3),
                 style: const TextStyle(
                   fontSize: 12,
                   color: MiaojiColors.textHint,
@@ -483,13 +490,13 @@ class HomePageState extends State<HomePage>
     final diff = reminderAt.difference(now);
     String timeText;
     if (diff.inDays > 0) {
-      timeText = '${diff.inDays} 天后';
+      timeText = context.l10n.reminderInDays(diff.inDays);
     } else if (diff.inHours > 0) {
-      timeText = '${diff.inHours} 小时后';
+      timeText = context.l10n.reminderInHours(diff.inHours);
     } else if (diff.inMinutes > 0) {
-      timeText = '${diff.inMinutes} 分钟后';
+      timeText = context.l10n.reminderInMinutes(diff.inMinutes);
     } else {
-      timeText = '即将到来';
+      timeText = context.l10n.reminderSoon;
     }
 
     // 从 data 中取第一个文本值作为摘要
@@ -582,14 +589,14 @@ class HomePageState extends State<HomePage>
                     width: 1,
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.auto_awesome,
                         size: 12, color: Color(0xFFD4A24C)),
                     SizedBox(width: 4),
                     Text(
-                      'AI 周报',
+                      context.l10n.aiWeeklyTitle,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -601,7 +608,7 @@ class HomePageState extends State<HomePage>
               ),
               const Spacer(),
               Text(
-                '基于近 7 天数据',
+                context.l10n.aiWeeklyBasedOnDays(7),
                 style: TextStyle(
                   fontSize: 10,
                   color: const Color(0xFFF5EFE0).withValues(alpha: 0.4),
@@ -625,7 +632,7 @@ class HomePageState extends State<HomePage>
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  '正在生成周报…',
+                  context.l10n.aiWeeklyGenerating,
                   style: TextStyle(
                     fontSize: 13,
                     color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
@@ -673,7 +680,7 @@ class HomePageState extends State<HomePage>
           else
             // 无内容或请求失败
             Text(
-              '暂无周报数据，记录更多数据后自动生成',
+              context.l10n.aiWeeklyEmpty,
               style: TextStyle(
                 fontSize: 13,
                 color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
@@ -695,7 +702,7 @@ class HomePageState extends State<HomePage>
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '生成中…',
+                    context.l10n.aiWeeklyStreaming,
                     style: TextStyle(
                       fontSize: 10,
                       color: const Color(0xFFF5EFE0).withValues(alpha: 0.4),
@@ -716,20 +723,20 @@ class HomePageState extends State<HomePage>
       _FeatureItem(
         icon: Icons.auto_awesome,
         iconColor: const Color(0xFFD4A24C),
-        title: 'AI 智能创建',
-        desc: '告诉 AI 你想记录什么，自动生成小本',
+        title: context.l10n.featureAiCreateTitle,
+        desc: context.l10n.featureAiCreateDesc,
       ),
       _FeatureItem(
         icon: Icons.notifications_active_rounded,
         iconColor: const Color(0xFFEF4444),
-        title: '智能提醒',
-        desc: '为记录设置提醒，不再遗忘重要事项',
+        title: context.l10n.featureReminderTitle,
+        desc: context.l10n.featureReminderDesc,
       ),
       _FeatureItem(
         icon: Icons.bar_chart_rounded,
         iconColor: const Color(0xFF3B82F6),
-        title: '数据统计',
-        desc: '自动生成趋势图、饼图等可视化分析',
+        title: context.l10n.featureAnalyticsTitle,
+        desc: context.l10n.featureAnalyticsDesc,
       ),
     ];
 
@@ -744,14 +751,14 @@ class HomePageState extends State<HomePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.waving_hand_rounded,
                   size: 20, color: Color(0xFFD4A24C)),
               SizedBox(width: 8),
               Text(
-                '欢迎使用妙记兜',
-                style: TextStyle(
+                context.l10n.featureGuideTitle,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: MiaojiColors.textPrimary,
@@ -760,9 +767,9 @@ class HomePageState extends State<HomePage>
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            '点击底部「助理」标签，让 AI 帮你创建第一个小本吧',
-            style: TextStyle(
+          Text(
+            context.l10n.featureGuideSubtitle,
+            style: const TextStyle(
               fontSize: 13,
               color: MiaojiColors.textTertiary,
               height: 1.4,
@@ -844,9 +851,9 @@ class HomePageState extends State<HomePage>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            '还没有小本',
-            style: TextStyle(
+          Text(
+            context.l10n.emptyNotebooksTitle,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: MiaojiColors.textSecondary,
@@ -854,7 +861,7 @@ class HomePageState extends State<HomePage>
           ),
           const SizedBox(height: 8),
           Text(
-            '试试和 AI 助手说「帮我创建一个读书记录小本」',
+            context.l10n.emptyNotebooksHint,
             style: TextStyle(
               fontSize: 13,
               color: MiaojiColors.textTertiary.withValues(alpha: 0.7),

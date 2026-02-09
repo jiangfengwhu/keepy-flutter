@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import 'api_config.dart';
 import 'database_service.dart';
@@ -69,6 +71,7 @@ class SummaryService {
 
   /// 收集近 7 天的小本创建与数据添加记录
   Future<String> _buildUserMessage() async {
+    final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
     final now = DateTime.now();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
@@ -89,13 +92,18 @@ class SummaryService {
     }
 
     final buf = StringBuffer();
-    buf.writeln('以下是我近 7 天的记录数据，请帮我生成本周总结和建议：');
+    buf.writeln(l10n.summaryPromptHeader);
     buf.writeln();
 
     if (recentNotebooks.isNotEmpty) {
-      buf.writeln('## 新建小本（${recentNotebooks.length} 个）');
+      buf.writeln(l10n.summaryNewNotebooks(recentNotebooks.length));
       for (final nb in recentNotebooks) {
-        buf.writeln('- ${nb.name}（${nb.schema.map((f) => f.field).join('、')}）');
+        buf.writeln(
+          l10n.summaryNotebookItem(
+            nb.name,
+            nb.schema.map((f) => f.field).join(l10n.listSeparator),
+          ),
+        );
       }
       buf.writeln();
     }
@@ -107,9 +115,9 @@ class SummaryService {
         grouped.putIfAbsent(r.notebookName, () => []).add(r.data);
       }
 
-      buf.writeln('## 新增记录（共 ${filteredRecords.length} 条）');
+      buf.writeln(l10n.summaryNewRecords(filteredRecords.length));
       for (final entry in grouped.entries) {
-        buf.writeln('### ${entry.key}（${entry.value.length} 条）');
+        buf.writeln(l10n.summaryNotebookGroup(entry.key, entry.value.length));
         // 最多列出 10 条的摘要
         for (var i = 0; i < entry.value.length && i < 10; i++) {
           final data = entry.value[i];
@@ -117,20 +125,25 @@ class SummaryService {
               .where((e) => e.value != null && e.value.toString().isNotEmpty)
               .take(3)
               .map((e) => '${e.key}: ${e.value}')
-              .join('，');
-          buf.writeln('- $summary');
+              .join(l10n.summaryItemSeparator);
+          buf.writeln(l10n.summaryRecordItem(summary));
         }
         if (entry.value.length > 10) {
-          buf.writeln('- …还有 ${entry.value.length - 10} 条');
+          buf.writeln(l10n.summaryMoreRecords(entry.value.length - 10));
         }
         buf.writeln();
       }
     }
 
     // 附加全部已有小本信息
-    buf.writeln('## 我的所有小本（${allNotebooks.length} 个）');
+    buf.writeln(l10n.summaryAllNotebooks(allNotebooks.length));
     for (final nb in allNotebooks) {
-      buf.writeln('- ${nb.name}：${nb.description.isEmpty ? "无描述" : nb.description}');
+      buf.writeln(
+        l10n.summaryAllNotebookItem(
+          nb.name,
+          nb.description.isEmpty ? l10n.summaryNoDescription : nb.description,
+        ),
+      );
     }
 
     return buf.toString();
@@ -211,5 +224,9 @@ class SummaryService {
     } finally {
       client.close();
     }
+  }
+
+  AppLocalizations _l10nForLocale(Locale locale) {
+    return lookupAppLocalizations(locale);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 import 'notebook.dart';
 
 /// 首页笔记本列表项数据模型
@@ -66,7 +67,10 @@ class NotebookItem {
   ];
 
   /// 从数据库 Notebook 模型转换
-  factory NotebookItem.fromNotebook(Notebook notebook) {
+  factory NotebookItem.fromNotebook(
+    Notebook notebook, {
+    AppLocalizations? l10n,
+  }) {
     // 优先使用存储的图标/颜色
     final IconData icon;
     final Color color;
@@ -91,7 +95,8 @@ class NotebookItem {
     final fieldCount = notebook.schema.length;
     final subtitle = notebook.description.isNotEmpty
         ? notebook.description
-        : '$fieldCount 个字段';
+        : (l10n?.notebookFieldCount(fieldCount) ??
+            '$fieldCount fields');
 
     return NotebookItem(
       dbId: notebook.id,

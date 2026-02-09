@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'dart:ui';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
@@ -137,7 +139,12 @@ class ToolExecutor {
       final first = data.values.first;
       if (first != null) return first.toString();
     }
-    return '你有一条提醒';
+    final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+    return l10n.notificationFallbackBody;
+  }
+
+  AppLocalizations _l10nForLocale(Locale locale) {
+    return lookupAppLocalizations(locale);
   }
 
   // ── Tool 实现 ────────────────────────────────

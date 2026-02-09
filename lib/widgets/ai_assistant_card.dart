@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 
 /// 首页 AI 助手入口卡片 — 手写信封风格
@@ -57,7 +58,7 @@ class AiAssistantCard extends StatelessWidget {
                         width: 1,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -67,7 +68,7 @@ class AiAssistantCard extends StatelessWidget {
                         ),
                         SizedBox(width: 5),
                         Text(
-                          'AI 助手',
+                          context.l10n.aiAssistantTitle,
                           style: TextStyle(
                             color: Color(0xFFD4A24C),
                             fontSize: 12,
@@ -78,9 +79,9 @@ class AiAssistantCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text(
-                    '创建新的记录本',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.aiAssistantCardTitle,
+                    style: const TextStyle(
                       color: Color(0xFFF5EFE0),
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -89,7 +90,7 @@ class AiAssistantCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '描述你想记录的内容，让 AI 帮你自动构建数据结构',
+                    context.l10n.aiAssistantCardDesc,
                     style: TextStyle(
                       color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
                       fontSize: 13,

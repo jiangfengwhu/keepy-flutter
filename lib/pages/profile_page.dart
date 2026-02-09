@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app_settings/app_settings.dart';
 import 'package:easy_refresh/easy_refresh.dart';
+import '../l10n/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -172,7 +173,11 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           _purchasing.value = false;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('购买失败: ${purchase.error?.message ?? "未知错误"}'),
+              content: Text(
+                context.l10n.purchaseFailed(
+                  purchase.error?.message ?? context.l10n.unknownError,
+                ),
+              ),
             ),
           );
         }
@@ -217,14 +222,18 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         _purchasing.value = false;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('充值成功！已到账 ${result.amount} 次')));
+        ).showSnackBar(
+          SnackBar(content: Text(context.l10n.rechargeSuccess(result.amount))),
+        );
       }
     } else {
       if (mounted) {
         _purchasing.value = false;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('充值验证失败，请联系客服')));
+        ).showSnackBar(
+          SnackBar(content: Text(context.l10n.rechargeVerifyFailed)),
+        );
       }
     }
   }
@@ -233,7 +242,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (_ticketId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Ticket 初始化中，请稍后再试')));
+      ).showSnackBar(
+        SnackBar(content: Text(context.l10n.ticketInitializing)),
+      );
       return;
     }
     _purchasing.value = true;
@@ -252,7 +263,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('购买失败: $e')));
+        ).showSnackBar(
+          SnackBar(content: Text(context.l10n.purchaseFailed(e.toString()))),
+        );
       }
     }
   }
@@ -286,11 +299,15 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             _loadTicketAndBalance();
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('导入成功！')));
+            ).showSnackBar(
+              SnackBar(content: Text(context.l10n.ticketImportSuccess)),
+            );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('无效的 Ticket')));
+            ).showSnackBar(
+              SnackBar(content: Text(context.l10n.ticketInvalid)),
+            );
           }
         },
       ),
@@ -303,14 +320,14 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       backgroundColor: MiaojiColors.background,
       body: EasyRefresh.builder(
         onRefresh: _onRefresh,
-        header: const ClassicHeader(
+        header: ClassicHeader(
           position: IndicatorPosition.locator,
-          dragText: '下拉刷新',
-          armedText: '松手刷新',
-          readyText: '松手刷新',
-          processingText: '刷新中',
-          processedText: '刷新完成',
-          failedText: '刷新失败',
+          dragText: context.l10n.refreshDrag,
+          armedText: context.l10n.refreshArmed,
+          readyText: context.l10n.refreshReady,
+          processingText: context.l10n.refreshProcessing,
+          processedText: context.l10n.refreshProcessed,
+          failedText: context.l10n.refreshFailed,
           showMessage: false,
           iconDimension: 18,
           spacing: 8,
@@ -336,7 +353,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 scrolledUnderElevation: 0.5,
                 automaticallyImplyLeading: false,
                 title: Text(
-                  '我的',
+                  context.l10n.profileTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
@@ -417,13 +434,13 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '通知未开启',
-                    style: TextStyle(
+                    context.l10n.notificationDisabledTitle,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: MiaojiColors.textPrimary,
@@ -431,8 +448,8 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    '开启通知以接收重要提醒，不错过每一条待办',
-                    style: TextStyle(
+                    context.l10n.notificationDisabledDesc,
+                    style: const TextStyle(
                       fontSize: 12,
                       color: MiaojiColors.textTertiary,
                     ),
@@ -447,9 +464,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 color: MiaojiColors.warning,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                '去开启',
-                style: TextStyle(
+              child: Text(
+                context.l10n.notificationDisabledAction,
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -515,7 +532,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '剩余次数',
+                    context.l10n.balanceTitle,
                     style: TextStyle(
                       fontSize: 12,
                       color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
@@ -539,7 +556,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       : Row(
                           children: [
                             Text(
-                              '${_balance ?? 0} 次',
+                              context.l10n.balanceCount(_balance ?? 0),
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -585,7 +602,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
@@ -595,8 +612,8 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        '充值',
-                        style: TextStyle(
+                        context.l10n.purchaseRecharge,
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF3D3124),
@@ -621,19 +638,19 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     final items = [
       _SettingItem(
         Icons.restore_rounded,
-        '内购恢复',
+        context.l10n.restorePurchasesTitle,
         MiaojiColors.info,
         onTap: _showRestoreSheet,
       ),
       _SettingItem(
         Icons.notifications_active_rounded,
-        '通知铃声',
+        context.l10n.notificationSoundSetting,
         MiaojiColors.warning,
         onTap: () => showAlarmSoundPicker(context),
       ),
       _SettingItem(
         Icons.info_outline_rounded,
-        '关于',
+        context.l10n.aboutTitle,
         const Color(0xFF8B6BAD),
         onTap: () => Navigator.push(
           context,
@@ -765,7 +782,9 @@ class _RestoreSheetState extends State<_RestoreSheet> {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Ticket 已复制到剪贴板')));
+    ).showSnackBar(
+      SnackBar(content: Text(context.l10n.ticketCopied)),
+    );
   }
 
   Future<void> _doImport() async {
@@ -805,7 +824,7 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                 ),
               ),
               // 标题
-              const Row(
+              Row(
                 children: [
                   Icon(
                     Icons.restore_rounded,
@@ -814,8 +833,8 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    '内购恢复',
-                    style: TextStyle(
+                    context.l10n.restorePurchasesTitle,
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                       color: MiaojiColors.textPrimary,
@@ -824,16 +843,17 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
-                '更换设备时，可导出当前 Ticket 并在新设备导入来恢复购买的次数。',
-                style: TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+              Text(
+                context.l10n.restorePurchasesDesc,
+                style:
+                    const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
               ),
               const SizedBox(height: 20),
 
               // ── 导出 ──
-              const Text(
-                '导出 Ticket',
-                style: TextStyle(
+              Text(
+                context.l10n.ticketExportTitle,
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: MiaojiColors.textSecondary,
@@ -860,7 +880,7 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          widget.ticketId ?? '加载中…',
+                          widget.ticketId ?? context.l10n.loadingShort,
                           style: const TextStyle(
                             fontSize: 13,
                             color: MiaojiColors.textPrimary,
@@ -883,9 +903,9 @@ class _RestoreSheetState extends State<_RestoreSheet> {
               const SizedBox(height: 20),
 
               // ── 导入 ──
-              const Text(
-                '导入 Ticket',
-                style: TextStyle(
+              Text(
+                context.l10n.ticketImportTitle,
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: MiaojiColors.textSecondary,
@@ -902,7 +922,7 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                         fontFamily: 'monospace',
                       ),
                       decoration: InputDecoration(
-                        hintText: '粘贴 Ticket ID',
+                        hintText: context.l10n.ticketPasteHint,
                         hintStyle: const TextStyle(
                           fontSize: 13,
                           color: MiaojiColors.textHint,
@@ -958,9 +978,9 @@ class _RestoreSheetState extends State<_RestoreSheet> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text(
-                              '导入',
-                              style: TextStyle(
+                          : Text(
+                              context.l10n.ticketImportAction,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -1027,7 +1047,7 @@ class _PurchaseSheet extends StatelessWidget {
                     ),
                   ),
                   // 标题
-                  const Row(
+                  Row(
                     children: [
                       Icon(
                         Icons.shopping_bag_rounded,
@@ -1036,8 +1056,8 @@ class _PurchaseSheet extends StatelessWidget {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        '充值次卡',
-                        style: TextStyle(
+                        context.l10n.purchaseSheetTitle,
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: MiaojiColors.textPrimary,
@@ -1063,9 +1083,9 @@ class _PurchaseSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
-                            '处理中…',
-                            style: TextStyle(
+                          Text(
+                            context.l10n.purchaseProcessing,
+                            style: const TextStyle(
                               fontSize: 13,
                               color: MiaojiColors.textTertiary,
                             ),
@@ -1169,7 +1189,7 @@ class _PlanCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '次',
+                      context.l10n.purchaseTimesUnit,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -1189,9 +1209,9 @@ class _PlanCard extends StatelessWidget {
                           color: MiaojiColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          '推荐',
-                          style: TextStyle(
+                        child: Text(
+                          context.l10n.purchaseRecommended,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             color: MiaojiColors.primary,
@@ -1203,7 +1223,7 @@ class _PlanCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '约 $unitPrice 元/次',
+                  context.l10n.purchaseUnitPrice(unitPrice),
                   style: const TextStyle(
                     fontSize: 11,
                     color: MiaojiColors.textHint,

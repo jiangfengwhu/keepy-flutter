@@ -1,0 +1,606 @@
+{
+  "@@locale": "zh",
+  "appName": "妙记",
+  "navHome": "主页",
+  "navAssistant": "妙记",
+  "navProfile": "我的",
+  "onboardingTitle1": "欢迎使用妙记",
+  "onboardingSubtitle1": "你的智能笔记伙伴",
+  "onboardingDesc1": "妙记帮你轻松管理生活中的每一条重要信息，\n让记录变得简单、有序、有温度。",
+  "onboardingTitle2": "AI 智能助手",
+  "onboardingSubtitle2": "懂你所想，记你所需",
+  "onboardingDesc2": "内置 AI 助手，支持语音输入、智能总结、\n内容分析，让你的笔记更加智能高效。",
+  "onboardingTitle3": "贴心提醒",
+  "onboardingSubtitle3": "重要的事，不再遗忘",
+  "onboardingDesc3": "灵活的提醒功能，为每条笔记设定通知，\n确保你不会错过任何重要时刻。",
+  "onboardingSkip": "跳过",
+  "onboardingNext": "下一步",
+  "onboardingAgreementPrefix": "点击\"同意并开始\"即表示您已阅读并同意",
+  "onboardingAgreementUserAgreement": "《用户服务协议》",
+  "onboardingAgreementAnd": "和",
+  "onboardingAgreementPrivacyPolicy": "《隐私政策》",
+  "onboardingAgreeAndStart": "同意并开始",
+  "aboutTitle": "关于",
+  "aboutVersionInfo": "版本 {version} ({build})",
+  "@aboutVersionInfo": {
+    "placeholders": {
+      "version": {},
+      "build": {}
+    }
+  },
+  "aboutVersionLoading": "加载中…",
+  "appTagline": "你的智能笔记伙伴",
+  "userAgreementTitle": "用户服务协议",
+  "privacyPolicyTitle": "隐私政策",
+  "aboutCopyright": "妙记 © {year}",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "aboutIcp": "ICP备案号：京ICP备XXXXXXXX号-X",
+  "aboutSupportEmail": "联系邮箱：support@miaoji.app",
+  "privacyPolicyHeader": "妙记隐私政策",
+  "privacyPolicyUpdatedAt": "更新日期：2026年2月9日",
+  "privacyPolicyEffectiveAt": "生效日期：2026年2月9日",
+  "privacyPolicyIntro1": "妙记（以下简称\"我们\"）深知个人信息对您的重要性，并会尽全力保护您的个人信息安全可靠。我们致力于维持您对我们的信任，恪守以下原则保护您的个人信息：权责一致原则、目的明确原则、选择同意原则、最少够用原则、确保安全原则、主体参与原则、公开透明原则等。",
+  "privacyPolicyIntro2": "本隐私政策旨在向您说明我们如何收集、使用、存储、共享和保护您的个人信息，以及您如何管理您的个人信息。请您在使用本应用前仔细阅读本隐私政策。",
+  "privacySection1Title": "一、我们收集的信息",
+  "privacySection1_1Title": "1.1 您主动提供的信息",
+  "privacySection1_1Content": "(a) 笔记内容：您在应用中创建的笔记本、记录的文字内容、分类标签等信息。这些数据主要存储在您的本地设备中。\n\n(b) 语音数据：当您使用语音输入功能时，我们会临时采集您的语音信息用于语音识别转文字。语音数据仅在识别过程中使用，不会被永久存储。\n\n(c) 图片数据：当您使用图片相关功能时，我们会访问您的相机或相册以获取图片。图片数据存储在本地设备中。",
+  "privacySection1_2Title": "1.2 我们自动收集的信息",
+  "privacySection1_2Content": "(a) 设备信息：包括设备型号、操作系统版本、设备标识符等，用于保障应用的正常运行和优化用户体验。\n\n(b) 应用使用信息：包括功能使用频率、错误日志等匿名数据，用于改善应用性能和服务质量。\n\n(c) 购买记录：当您进行应用内购买时，我们会记录购买状态以提供相应的付费功能服务。支付过程由 Apple App Store 或 Google Play 处理，我们不会收集您的支付账户信息。",
+  "privacySection1_3Title": "1.3 AI 功能相关信息",
+  "privacySection1_3Content": "当您使用 AI 智能助手功能时，您主动发送给 AI 的笔记内容或对话信息可能会被传输至安全的云端服务器进行处理。我们仅在提供 AI 服务所必需的范围内使用这些数据，不会将其用于其他目的。",
+  "privacySection2Title": "二、信息的使用",
+  "privacySection2Content": "我们收集的信息将用于以下目的：\n\n(a) 提供核心服务：笔记创建与管理、语音输入转文字、提醒通知等基础功能。\n\n(b) AI 智能服务：基于您的笔记内容提供智能总结、分析和问答服务。\n\n(c) 服务优化：分析匿名使用数据以改善应用性能、修复问题和优化功能体验。\n\n(d) 安全保障：检测和防范安全风险，保护您的数据安全。\n\n(e) 通知服务：在您设置的时间发送提醒通知。",
+  "privacySection3Title": "三、信息的存储",
+  "privacySection3_1Title": "3.1 存储位置",
+  "privacySection3_1Content": "您的笔记数据主要存储在您的本地设备中（使用 SQLite 数据库）。当您使用 AI 功能时，相关数据可能会临时传输至云端服务器处理，处理完成后不会在服务端永久保存。",
+  "privacySection3_2Title": "3.2 存储期限",
+  "privacySection3_2Content": "我们仅在为实现目的所必需的时间内保留您的个人信息。当您删除笔记或卸载应用后，您的本地数据将被相应删除。云端临时处理的数据将在处理完成后及时清除。",
+  "privacySection3_3Title": "3.3 数据安全",
+  "privacySection3_3Content": "我们采取以下措施保护您的信息安全：\n\n(a) 使用安全的本地存储方案（如 Flutter Secure Storage）保护敏感数据。\n\n(b) 与云端服务器的数据传输采用 HTTPS 加密协议。\n\n(c) 严格限制数据访问权限，仅在必要时访问您的数据。",
+  "privacySection4Title": "四、信息的共享",
+  "privacySection4Content": "我们承诺不会将您的个人信息出售给任何第三方。在以下情况下，我们可能会共享您的信息：\n\n(a) 经您明确同意后共享。\n\n(b) 为提供 AI 服务，将必要数据传输至 AI 服务提供商进行处理。我们要求 AI 服务提供商严格遵守数据保护协议。\n\n(c) 根据法律法规、法律程序或政府机关的强制性要求。\n\n(d) 为保护我们的用户、公众或我们的合法权益所合理必需。",
+  "privacySection5Title": "五、您的权利",
+  "privacySection5Content": "您对自己的个人信息享有以下权利：\n\n(a) 访问权：您可以随时查看和访问您在应用中的所有数据。\n\n(b) 更正权：您可以随时编辑和修改您的笔记内容。\n\n(c) 删除权：您可以随时删除您的笔记、笔记本或其他数据。卸载应用将删除所有本地数据。\n\n(d) 权限管理：您可以在设备设置中随时开启或关闭我们请求的权限（如麦克风、相机、相册、通知等）。关闭权限可能影响相关功能的使用。",
+  "privacySection6Title": "六、设备权限说明",
+  "privacySection6Content": "本应用可能请求以下设备权限：\n\n(a) 麦克风权限：用于语音输入功能，将您的语音转换为文字。\n\n(b) 相机/相册权限：用于拍照或选取图片功能。\n\n(c) 通知权限：用于发送您设置的提醒通知。\n\n以上权限均为可选权限，仅在您使用对应功能时才会请求，且您可以随时在系统设置中关闭。",
+  "privacySection7Title": "七、未成年人保护",
+  "privacySection7Content": "我们高度重视未成年人的个人信息保护。如果您是未满 14 周岁的未成年人，请在法定监护人的陪同和指导下阅读本隐私政策，并在取得监护人同意后使用本应用。",
+  "privacySection8Title": "八、隐私政策的更新",
+  "privacySection8Content": "我们可能会不时更新本隐私政策。更新后的政策将在应用内以适当方式通知您。若更新涉及重大变更（如收集信息范围扩大），我们将以弹窗或其他显著方式再次征求您的同意。",
+  "privacySection9Title": "九、联系我们",
+  "privacySection9Content": "如您对本隐私政策有任何疑问、意见或建议，或者您需要行使个人信息相关权利，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：privacy@miaoji.app\n\n我们将在收到您的请求后 15 个工作日内予以回复。",
+  "userAgreementHeader": "妙记用户服务协议",
+  "userAgreementUpdatedAt": "更新日期：2026年2月9日",
+  "userAgreementEffectiveAt": "生效日期：2026年2月9日",
+  "userAgreementIntro": "欢迎您使用\"妙记\"应用程序（以下简称\"本应用\"）。请您在使用本应用之前，仔细阅读并充分理解本协议的全部内容。如果您不同意本协议的任何条款，请勿使用本应用。您一旦开始使用本应用，即表示您已充分理解并同意本协议。",
+  "userAgreementSection1Title": "一、服务说明",
+  "userAgreementSection1Content1": "1.1 本应用是一款智能笔记管理工具，为用户提供笔记本创建与管理、文字记录、语音输入、AI 智能助手、提醒通知等功能服务（以下简称\"本服务\"）。",
+  "userAgreementSection1Content2": "1.2 本应用提供的服务内容可能会随版本更新而发生变化。我们保留随时修改、中断或终止部分或全部服务的权利，并将尽合理努力提前通知用户。",
+  "userAgreementSection1Content3": "1.3 您理解并同意，本应用可能包含免费功能和付费功能。付费功能将通过应用内购买（In-App Purchase）方式提供，具体内容和价格以应用内展示为准。",
+  "userAgreementSection2Title": "二、账号与使用规范",
+  "userAgreementSection2Content1": "2.1 您在使用本应用时应遵守中华人民共和国相关法律法规，不得利用本应用从事任何违法违规活动。",
+  "userAgreementSection2Content2": "2.2 您应妥善保管设备及应用数据。因您个人原因导致的数据丢失、泄露等后果，由您自行承担。",
+  "userAgreementSection2Content3": "2.3 您不得利用本应用进行以下行为：\n  (a) 发布、传播违法、有害、威胁、侮辱、诽谤、色情或其他不当内容；\n  (b) 侵犯他人知识产权、隐私权或其他合法权益；\n  (c) 对本应用进行反向工程、反编译、反汇编或以其他方式试图获取源代码；\n  (d) 干扰或破坏本应用的正常运行，包括但不限于传播病毒、恶意代码等；\n  (e) 其他违反法律法规或本协议的行为。",
+  "userAgreementSection3Title": "三、知识产权",
+  "userAgreementSection3Content1": "3.1 本应用的所有内容，包括但不限于界面设计、程序代码、文字、图片、图标、音频等，均受中华人民共和国著作权法及国际著作权条约的保护，其知识产权归本应用开发者所有。",
+  "userAgreementSection3Content2": "3.2 您在本应用中创建的笔记内容、录入的数据等用户生成内容，其知识产权归您所有。但您授权本应用在提供服务所必需的范围内使用这些内容（例如 AI 助手分析您的笔记以提供智能建议）。",
+  "userAgreementSection3Content3": "3.3 未经本应用开发者书面许可，您不得以任何形式复制、传播、展示、镜像或以其他方式使用本应用的任何内容。",
+  "userAgreementSection4Title": "四、AI 服务条款",
+  "userAgreementSection4Content1": "4.1 本应用提供 AI 智能助手功能，可协助您进行笔记总结、内容分析、智能问答等操作。AI 生成的内容仅供参考，不构成任何专业建议。",
+  "userAgreementSection4Content2": "4.2 您理解并同意，AI 功能的回答可能存在不准确、不完整或不及时的情况，您应自行判断和验证 AI 提供的信息。因使用 AI 生成内容而导致的任何损失，本应用不承担责任。",
+  "userAgreementSection4Content3": "4.3 为提供 AI 服务，本应用可能需要将您的部分笔记内容发送至安全的云端服务器进行处理。我们将采取严格的数据安全措施保护您的信息，详情请参阅《隐私政策》。",
+  "userAgreementSection5Title": "五、付费服务",
+  "userAgreementSection5Content1": "5.1 本应用部分功能为付费功能，通过 Apple App Store 或 Google Play 的应用内购买机制提供。付费前请仔细确认购买内容和价格。",
+  "userAgreementSection5Content2": "5.2 付费成功后，相关功能将立即开通。除法律另有规定外，已完成的购买不支持退款。如需退款，请联系对应应用商店的客服。",
+  "userAgreementSection5Content3": "5.3 订阅类服务将按周期自动续费，您可在应用商店的订阅管理中随时取消自动续费。取消后，当前订阅周期内的服务不受影响。",
+  "userAgreementSection6Title": "六、免责声明",
+  "userAgreementSection6Content1": "6.1 本应用按\"现状\"提供服务，不对服务的及时性、安全性、准确性作出任何明示或暗示的保证。",
+  "userAgreementSection6Content2": "6.2 因不可抗力、系统维护、网络故障、设备故障等原因导致服务中断或数据丢失的，本应用不承担责任，但将尽合理努力减少对您的影响。",
+  "userAgreementSection6Content3": "6.3 您的笔记数据存储在本地设备中。我们建议您定期备份重要数据。因设备损坏、系统重置等导致的数据丢失，本应用不承担责任。",
+  "userAgreementSection7Title": "七、协议变更",
+  "userAgreementSection7Content1": "7.1 我们有权根据需要修改本协议的内容。协议变更后，我们将在应用内以适当方式通知您。",
+  "userAgreementSection7Content2": "7.2 如您不同意修改后的协议，您有权停止使用本服务。如您在协议修改后继续使用本服务，则视为您已接受修改后的协议。",
+  "userAgreementSection8Title": "八、法律适用与争议解决",
+  "userAgreementSection8Content1": "8.1 本协议的解释、效力和执行均适用中华人民共和国法律（不包括冲突法规则）。",
+  "userAgreementSection8Content2": "8.2 因本协议引起的或与本协议有关的任何争议，双方应首先通过友好协商解决。协商不成的，任何一方均可向本应用开发者所在地有管辖权的人民法院提起诉讼。",
+  "userAgreementSection9Title": "九、联系我们",
+  "userAgreementSection9Content": "如您对本协议有任何疑问或建议，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：support@miaoji.app\n\n感谢您选择妙记，祝您使用愉快！",
+  "homeTitle": "妙记兜",
+  "notebookSection": "妙计本",
+  "notebookCount": "{count} 个",
+  "@notebookCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "viewAllNotebooks": "查看全部 {count} 个妙计本",
+  "@viewAllNotebooks": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "aiWeeklyTitle": "AI 周报",
+  "aiWeeklyBasedOnDays": "基于近 {days} 天数据",
+  "@aiWeeklyBasedOnDays": {
+    "placeholders": {
+      "days": {
+        "type": "num"
+      }
+    }
+  },
+  "aiWeeklyGenerating": "正在生成周报…",
+  "aiWeeklyEmpty": "暂无周报数据，记录更多数据后自动生成",
+  "aiWeeklyStreaming": "生成中…",
+  "upcomingRemindersTitle": "近期提醒",
+  "reminderCount": "{count} 项",
+  "@reminderCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "moreReminders": "还有 {count} 项提醒…",
+  "@moreReminders": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reminderInDays": "{count} 天后",
+  "@reminderInDays": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reminderInHours": "{count} 小时后",
+  "@reminderInHours": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reminderInMinutes": "{count} 分钟后",
+  "@reminderInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "reminderSoon": "即将到来",
+  "featureAiCreateTitle": "AI 智能创建",
+  "featureAiCreateDesc": "告诉 AI 你想记录什么，自动生成小本",
+  "featureReminderTitle": "智能提醒",
+  "featureReminderDesc": "为记录设置提醒，不再遗忘重要事项",
+  "featureAnalyticsTitle": "数据统计",
+  "featureAnalyticsDesc": "自动生成趋势图、饼图等可视化分析",
+  "featureGuideTitle": "欢迎使用妙记兜",
+  "featureGuideSubtitle": "点击底部「助理」标签，让 AI 帮你创建第一个小本吧",
+  "emptyNotebooksTitle": "还没有小本",
+  "emptyNotebooksHint": "试试和 AI 助手说「帮我创建一个读书记录小本」",
+  "allNotebooksTitle": "全部妙计本",
+  "emptyAllNotebooks": "还没有妙计本",
+  "searchHint": "搜索记录内容…",
+  "searchEmptyHint": "输入关键词搜索所有记录",
+  "searchNoResultsTitle": "没有找到相关记录",
+  "searchNoResultsHint": "换个关键词试试",
+  "searchRecordCount": "{count} 条",
+  "@searchRecordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "searchMoreFields": "还有 {count} 个字段…",
+  "@searchMoreFields": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "recordCount": "{count} 条",
+  "@recordCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "alarmSoundTitle": "提醒铃声",
+  "alarmSoundDefaultName": "系统默认",
+  "alarmSoundDefaultDesc": "使用系统默认通知声音",
+  "alarmSoundClassicName": "经典闹钟",
+  "alarmSoundClassicDesc": "嘟-嘟…嘟-嘟… 经典双音闹钟",
+  "alarmSoundRadarName": "雷达",
+  "alarmSoundRadarDesc": "嘟嘟嘟…嘟嘟嘟… 快速脉冲",
+  "alarmSoundBeaconName": "灯塔",
+  "alarmSoundBeaconDesc": "低-高…低-高… 交替升调",
+  "alarmSoundChimeName": "钟琴",
+  "alarmSoundChimeDesc": "叮…叮…叮… 悠扬清脆",
+  "alarmSoundPulseName": "脉冲",
+  "alarmSoundPulseDesc": "嘟嘟-嗡…嘟嘟-嗡… 紧迫节奏",
+  "notificationSoundPreviewTitle": "🔔 铃声预览",
+  "notificationChannelName": "小本闹钟提醒",
+  "notificationChannelDescription": "小本记录的闹钟式定时提醒，会持续响铃直到处理",
+  "notificationReminderTitle": "📝 {notebookName}",
+  "@notificationReminderTitle": {
+    "placeholders": {
+      "notebookName": {}
+    }
+  },
+  "notificationFallbackBody": "你有一条待办提醒",
+  "aiImageSourceCamera": "拍照",
+  "aiImageSourceGallery": "图库",
+  "aiErrorMessage": "抱歉，出错了：{message}",
+  "@aiErrorMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiRequestFailed": "请求失败：{error}",
+  "@aiRequestFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "aiAssistantTitle": "AI 助手",
+  "aiAssistantWriting": "正在书写...",
+  "aiAssistantReady": "随时准备帮助你",
+  "aiEmptyTitle": "开始和 AI 对话吧",
+  "aiEmptyHint": "试试说「我要创建一个读书记录小本」",
+  "chatInputListeningHint": "正在聆听...",
+  "chatInputPlaceholder": "写点什么...",
+  "recordAddedSuccess": "记录添加成功",
+  "recordUpdatedSuccess": "记录更新成功",
+  "notebookCreatedSuccess": "小本创建成功",
+  "notebookUpdatedSuccess": "小本更新成功",
+  "notebookUpdatedFields": "更新后包含 {count} 个字段：{fields}",
+  "@notebookUpdatedFields": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "fields": {}
+    }
+  },
+  "notebookDeletedSuccess": "小本已删除",
+  "notebookDeletedName": "已删除「{name}」",
+  "@notebookDeletedName": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "notebookDeletedDesc": "小本及其所有记录已被移除",
+  "recordMoreFields": "还有 {count} 个字段...",
+  "@recordMoreFields": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "recordReminderLabel": "提醒：{time}",
+  "@recordReminderLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "reminderExpired": "已过期",
+  "recordDeletedSuccess": "记录已删除",
+  "recordDeletedFromNotebook": "已删除「{name}」记录",
+  "@recordDeletedFromNotebook": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "recordDeleted": "已删除记录",
+  "recordIdLabel": "ID: {id}",
+  "@recordIdLabel": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "queryResultsCount": "查询到 {count} 条记录",
+  "@queryResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "queryNoResults": "没有找到匹配的记录",
+  "toolResultSuccess": "{tool} 执行成功",
+  "@toolResultSuccess": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
+  "toolResultFailure": "{tool} 执行失败",
+  "@toolResultFailure": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
+  "listSeparator": "、",
+  "aiAssistantCardTitle": "创建新的记录本",
+  "aiAssistantCardDesc": "描述你想记录的内容，让 AI 帮你自动构建数据结构",
+  "aiServerError": "服务器错误（{status}）：{details}",
+  "@aiServerError": {
+    "placeholders": {
+      "status": {},
+      "details": {}
+    }
+  },
+  "aiConnectionError": "无法连接到服务器：{message}",
+  "@aiConnectionError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiHttpError": "HTTP 错误：{message}",
+  "@aiHttpError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiRequestFailedError": "请求失败：{error}",
+  "@aiRequestFailedError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "summaryPromptHeader": "以下是我近 7 天的记录数据，请帮我生成本周总结和建议：",
+  "summaryNewNotebooks": "## 新建小本（{count} 个）",
+  "@summaryNewNotebooks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryNotebookItem": "- {name}（{fields}）",
+  "@summaryNotebookItem": {
+    "placeholders": {
+      "name": {},
+      "fields": {}
+    }
+  },
+  "summaryNewRecords": "## 新增记录（共 {count} 条）",
+  "@summaryNewRecords": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryNotebookGroup": "### {name}（{count} 条）",
+  "@summaryNotebookGroup": {
+    "placeholders": {
+      "name": {},
+      "count": {}
+    }
+  },
+  "summaryRecordItem": "- {summary}",
+  "@summaryRecordItem": {
+    "placeholders": {
+      "summary": {}
+    }
+  },
+  "summaryMoreRecords": "- …还有 {count} 条",
+  "@summaryMoreRecords": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryAllNotebooks": "## 我的所有小本（{count} 个）",
+  "@summaryAllNotebooks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryAllNotebookItem": "- {name}：{description}",
+  "@summaryAllNotebookItem": {
+    "placeholders": {
+      "name": {},
+      "description": {}
+    }
+  },
+  "summaryNoDescription": "无描述",
+  "summaryItemSeparator": "，",
+  "notebookFieldCount": "{count} 个字段",
+  "@notebookFieldCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "refreshDrag": "下拉刷新",
+  "refreshArmed": "松手刷新",
+  "refreshReady": "松手刷新",
+  "refreshProcessing": "刷新中",
+  "refreshProcessed": "刷新完成",
+  "refreshFailed": "刷新失败",
+  "profileTitle": "我的",
+  "notificationDisabledTitle": "通知未开启",
+  "notificationDisabledDesc": "开启通知以接收重要提醒，不错过每一条待办",
+  "notificationDisabledAction": "去开启",
+  "balanceTitle": "剩余次数",
+  "balanceCount": "{count} 次",
+  "@balanceCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "purchaseRecharge": "充值",
+  "restorePurchasesTitle": "内购恢复",
+  "notificationSoundSetting": "通知铃声",
+  "purchaseFailed": "购买失败：{message}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "unknownError": "未知错误",
+  "rechargeSuccess": "充值成功！已到账 {amount} 次",
+  "@rechargeSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "num"
+      }
+    }
+  },
+  "rechargeVerifyFailed": "充值验证失败，请联系客服",
+  "ticketInitializing": "Ticket 初始化中，请稍后再试",
+  "ticketImportSuccess": "导入成功！",
+  "ticketInvalid": "无效的 Ticket",
+  "ticketCopied": "Ticket 已复制到剪贴板",
+  "restorePurchasesDesc": "更换设备时，可导出当前 Ticket 并在新设备导入来恢复购买的次数。",
+  "ticketExportTitle": "导出 Ticket",
+  "loadingShort": "加载中…",
+  "ticketImportTitle": "导入 Ticket",
+  "ticketPasteHint": "粘贴 Ticket ID",
+  "ticketImportAction": "导入",
+  "purchaseSheetTitle": "充值次卡",
+  "purchaseProcessing": "处理中…",
+  "purchaseTimesUnit": "次",
+  "purchaseRecommended": "推荐",
+  "purchaseUnitPrice": "约 {price} 元/次",
+  "@purchaseUnitPrice": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "schemaAddAtLeastOneField": "请至少添加一个数据字段",
+  "fieldNameRequired": "字段名称不能为空",
+  "notebookSaved": "小本已保存",
+  "saveFailed": "保存失败：{error}",
+  "@saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "notebookUpdated": "小本已更新",
+  "updateFailed": "更新失败：{error}",
+  "@updateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "editNotebookTitle": "编辑小本",
+  "createNotebookTitle": "新建小本",
+  "saveAction": "保存",
+  "doneAction": "完成",
+  "appearanceSectionTitle": "外观",
+  "colorLabel": "颜色",
+  "iconLabel": "图标",
+  "basicInfoSectionTitle": "基本信息",
+  "notebookNameLabel": "小本名称",
+  "notebookNameHint": "例如：日常账单",
+  "notebookNameRequired": "请输入名称",
+  "notebookDescLabel": "描述",
+  "notebookDescHint": "写点什么来描述这个小本...",
+  "schemaSectionTitle": "数据结构",
+  "addFieldAction": "添加字段",
+  "schemaEmptyTitle": "还没有定义数据结构",
+  "schemaEmptyHint": "点击上方\"添加字段\"开始设计",
+  "fieldNameLabel": "字段名称",
+  "fieldDescHint": "可选：字段描述",
+  "recordEmptyContent": "暂无内容",
+  "backAction": "返回",
+  "confirmDeleteTitle": "确认删除",
+  "confirmDeleteRecordContent": "删除后无法恢复，确定要删除这条记录吗？",
+  "cancelAction": "取消",
+  "deleteAction": "删除",
+  "recordListTitle": "记录列表",
+  "noRecordsTitle": "暂无记录",
+  "noRecordsHint": "试试和 AI 助手说「帮我记一笔 {notebook}」",
+  "@noRecordsHint": {
+    "placeholders": {
+      "notebook": {}
+    }
+  },
+  "reminderSentLabel": "已提醒",
+  "reminderExpiredLabel": "已过期",
+  "reminderTimeLabel": "提醒时间",
+  "reminderEditAction": "修改提醒时间",
+  "reminderCancelAction": "取消提醒",
+  "yes": "是",
+  "no": "否",
+  "timeJustNow": "刚刚",
+  "timeMinutesAgo": "{count} 分钟前",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "timeHoursAgo": "{count} 小时前",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "timeDaysAgo": "{count} 天前",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "fieldNumberHint": "输入数字...",
+  "fieldMarkdownHint": "支持 Markdown 语法...",
+  "statsTitle": "数据统计",
+  "filteredRecordsCount": "{filtered} / {total} 条",
+  "@filteredRecordsCount": {
+    "placeholders": {
+      "filtered": {},
+      "total": {}
+    }
+  },
+  "clearAction": "清除",
+  "allOption": "全部",
+  "validValueCount": "{count} 个有效值",
+  "@validValueCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "metricSum": "总和",
+  "metricAverage": "平均值",
+  "metricMax": "最大值",
+  "metricMin": "最小值",
+  "trendLabel": "趋势",
+  "trendInsufficientForGranularity": "该粒度下数据不足",
+  "trendInsufficientData": "数据不足，至少需要 2 条记录才能生成趋势图",
+  "noData": "暂无数据",
+  "distributionLabel": "分布",
+  "noDistributionData": "暂无分布数据",
+  "granularityDay": "日",
+  "granularityWeek": "周",
+  "granularityMonth": "月",
+  "createdTimeLabel": "创建时间",
+  "axisLabel": "横轴",
+  "otherLabel": "其他",
+  "fieldTypeText": "文本",
+  "fieldTypeNumber": "数字",
+  "fieldTypeDate": "日期",
+  "unnamedNotebook": "未命名小本"
+}

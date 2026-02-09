@@ -1,0 +1,566 @@
+{
+  "@@locale": "en",
+  "appName": "Miaoji",
+  "navHome": "Home",
+  "navAssistant": "Miaoji",
+  "navProfile": "Me",
+  "onboardingTitle1": "Welcome to Miaoji",
+  "onboardingSubtitle1": "Your intelligent note companion",
+  "onboardingDesc1": "Miaoji helps you easily manage every important detail in life,\nso recording becomes simple, organized, and warm.",
+  "onboardingTitle2": "AI Assistant",
+  "onboardingSubtitle2": "Understands you, records what you need",
+  "onboardingDesc2": "Built-in AI assistant supports voice input, smart summaries,\ncontent analysis, making your notes smarter and more efficient.",
+  "onboardingTitle3": "Thoughtful Reminders",
+  "onboardingSubtitle3": "Never forget what matters",
+  "onboardingDesc3": "Flexible reminders for each note,\nso you never miss an important moment.",
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingAgreementPrefix": "By tapping \"Agree and Start\", you have read and agree to",
+  "onboardingAgreementUserAgreement": "User Service Agreement",
+  "onboardingAgreementAnd": "and",
+  "onboardingAgreementPrivacyPolicy": "Privacy Policy",
+  "onboardingAgreeAndStart": "Agree and Start",
+  "aboutTitle": "About",
+  "aboutVersionInfo": "Version {version} ({build})",
+  "@aboutVersionInfo": {
+    "placeholders": {
+      "version": {},
+      "build": {}
+    }
+  },
+  "aboutVersionLoading": "Loading...",
+  "appTagline": "Your intelligent note companion",
+  "userAgreementTitle": "User Service Agreement",
+  "privacyPolicyTitle": "Privacy Policy",
+  "aboutCopyright": "Miaoji © {year}",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "aboutIcp": "ICP Filing No.: Jing ICP XXXXXXXX-X",
+  "aboutSupportEmail": "Support Email: support@miaoji.app",
+  "privacyPolicyHeader": "Miaoji Privacy Policy",
+  "privacyPolicyUpdatedAt": "Updated: Feb 9, 2026",
+  "privacyPolicyEffectiveAt": "Effective: Feb 9, 2026",
+  "privacyPolicyIntro1": "Miaoji (\"we\") understands the importance of your personal information and will do our best to keep it secure and reliable. We are committed to maintaining your trust and follow these principles: accountability, purpose limitation, consent, data minimization, security, participation, and transparency.",
+  "privacyPolicyIntro2": "This Privacy Policy explains how we collect, use, store, share, and protect your personal information, and how you can manage it. Please read it carefully before using this app.",
+  "privacySection1Title": "1. Information We Collect",
+  "privacySection1_1Title": "1.1 Information You Provide",
+  "privacySection1_1Content": "(a) Note content: notebooks you create, text records, category tags, etc. These data are mainly stored on your device.\n\n(b) Voice data: when you use voice input, we temporarily capture your voice for speech-to-text. Voice data is used only during recognition and is not stored permanently.\n\n(c) Image data: when you use image-related features, we access your camera or photo library to obtain images. Images are stored on your device.",
+  "privacySection1_2Title": "1.2 Information We Collect Automatically",
+  "privacySection1_2Content": "(a) Device info: device model, OS version, device identifiers, etc., to ensure normal operation and improve experience.\n\n(b) App usage info: feature usage frequency, error logs, and other anonymous data, used to improve performance and service quality.\n\n(c) Purchase records: when you make in-app purchases, we record purchase status to provide paid features. Payments are processed by Apple App Store or Google Play; we do not collect your payment account information.",
+  "privacySection1_3Title": "1.3 AI-Related Information",
+  "privacySection1_3Content": "When you use the AI assistant, notes or conversation content you send to AI may be transmitted to secure cloud servers for processing. We use this data only as necessary to provide AI services and do not use it for other purposes.",
+  "privacySection2Title": "2. How We Use Information",
+  "privacySection2Content": "We use the collected information for:\n\n(a) Core services: note creation and management, speech-to-text, reminders, etc.\n\n(b) AI services: summaries, analysis, and Q&A based on your notes.\n\n(c) Service improvement: analyze anonymous usage data to improve performance, fix issues, and optimize experience.\n\n(d) Security: detect and prevent security risks to protect your data.\n\n(e) Notifications: send reminders at the times you set.",
+  "privacySection3Title": "3. Storage of Information",
+  "privacySection3_1Title": "3.1 Storage Location",
+  "privacySection3_1Content": "Your note data is mainly stored on your device (SQLite). When you use AI features, related data may be temporarily transmitted to cloud servers for processing and will not be permanently stored on the server after processing.",
+  "privacySection3_2Title": "3.2 Retention Period",
+  "privacySection3_2Content": "We retain your personal information only as long as necessary. When you delete notes or uninstall the app, local data is deleted. Temporarily processed cloud data is cleared promptly after processing.",
+  "privacySection3_3Title": "3.3 Data Security",
+  "privacySection3_3Content": "We take the following measures to protect your information:\n\n(a) Use secure local storage (e.g., Flutter Secure Storage) for sensitive data.\n\n(b) Use HTTPS encryption for data transmission to cloud servers.\n\n(c) Strictly limit data access and only access your data when necessary.",
+  "privacySection4Title": "4. Information Sharing",
+  "privacySection4Content": "We will not sell your personal information to any third party. We may share your information in the following cases:\n\n(a) With your explicit consent.\n\n(b) To provide AI services, necessary data may be sent to AI service providers for processing. We require them to comply with data protection agreements.\n\n(c) As required by laws, legal processes, or government requests.\n\n(d) As reasonably necessary to protect our users, the public, or our legitimate rights and interests.",
+  "privacySection5Title": "5. Your Rights",
+  "privacySection5Content": "You have the following rights regarding your personal information:\n\n(a) Access: view and access all your data in the app at any time.\n\n(b) Correction: edit and modify your notes at any time.\n\n(c) Deletion: delete your notes, notebooks, or other data at any time. Uninstalling the app will delete all local data.\n\n(d) Permission management: enable or disable permissions we request in device settings (e.g., microphone, camera, photo library, notifications). Disabling permissions may affect related features.",
+  "privacySection6Title": "6. Device Permissions",
+  "privacySection6Content": "This app may request the following device permissions:\n\n(a) Microphone: for voice input and speech-to-text.\n\n(b) Camera/Photo Library: for taking or selecting images.\n\n(c) Notifications: to send the reminders you set.\n\nAll permissions are optional, requested only when you use the relevant feature, and can be turned off anytime in system settings.",
+  "privacySection7Title": "7. Protection of Minors",
+  "privacySection7Content": "We place high importance on protecting minors' personal information. If you are under 14, please read this policy with a guardian and use the app only with their consent.",
+  "privacySection8Title": "8. Updates to This Policy",
+  "privacySection8Content": "We may update this policy from time to time. Updated policies will be announced in the app in an appropriate manner. If there are significant changes (e.g., expanded data collection scope), we will request your consent again via pop-up or other prominent methods.",
+  "privacySection9Title": "9. Contact Us",
+  "privacySection9Content": "If you have any questions, comments, or suggestions about this policy, or need to exercise your rights, contact us:\n\nApp name: Miaoji\nEmail: privacy@miaoji.app\n\nWe will respond within 15 business days.",
+  "userAgreementHeader": "Miaoji User Service Agreement",
+  "userAgreementUpdatedAt": "Updated: Feb 9, 2026",
+  "userAgreementEffectiveAt": "Effective: Feb 9, 2026",
+  "userAgreementIntro": "Welcome to the \"Miaoji\" app (the \"App\"). Please read and fully understand this Agreement before using it. If you do not agree to any terms, do not use the App. Once you start using the App, you indicate that you have understood and agreed to this Agreement.",
+  "userAgreementSection1Title": "1. Service Description",
+  "userAgreementSection1Content1": "1.1 This App is an intelligent note management tool that provides notebook creation and management, text records, voice input, AI assistant, reminders, and other services (the \"Services\").",
+  "userAgreementSection1Content2": "1.2 The Services may change with version updates. We reserve the right to modify, suspend, or terminate some or all Services at any time, and will make reasonable efforts to notify users in advance.",
+  "userAgreementSection1Content3": "1.3 You understand and agree that the App may include free and paid features. Paid features are provided via in-app purchases; specific content and prices are as shown in the app.",
+  "userAgreementSection2Title": "2. Account and Usage Rules",
+  "userAgreementSection2Content1": "2.1 When using the App, you must comply with the laws and regulations of the People's Republic of China and must not use the App for any illegal activities.",
+  "userAgreementSection2Content2": "2.2 You should properly keep your device and app data. Any loss or leakage caused by your own reasons shall be borne by you.",
+  "userAgreementSection2Content3": "2.3 You must not use the App to:\n  (a) publish or spread illegal, harmful, threatening, insulting, defamatory, pornographic, or other improper content;\n  (b) infringe intellectual property, privacy, or other lawful rights of others;\n  (c) reverse engineer, decompile, disassemble, or otherwise attempt to obtain source code;\n  (d) interfere with or disrupt normal operation, including spreading viruses or malicious code;\n  (e) other acts that violate laws or this Agreement.",
+  "userAgreementSection3Title": "3. Intellectual Property",
+  "userAgreementSection3Content1": "3.1 All content of the App, including interface design, code, text, images, icons, audio, etc., is protected by copyright laws and treaties, and the IP belongs to the developer.",
+  "userAgreementSection3Content2": "3.2 You own the IP of user-generated content such as notes and data you create. However, you authorize the App to use such content as necessary to provide services (e.g., AI assistant analyzing notes to provide suggestions).",
+  "userAgreementSection3Content3": "3.3 Without written permission from the developer, you may not copy, distribute, display, mirror, or otherwise use any content of the App.",
+  "userAgreementSection4Title": "4. AI Service Terms",
+  "userAgreementSection4Content1": "4.1 The App provides an AI assistant to help with summaries, content analysis, and Q&A. AI-generated content is for reference only and does not constitute professional advice.",
+  "userAgreementSection4Content2": "4.2 You understand that AI responses may be inaccurate, incomplete, or untimely; you should judge and verify information yourself. The App is not liable for losses arising from AI content.",
+  "userAgreementSection4Content3": "4.3 To provide AI services, the App may send some of your note content to secure cloud servers for processing. We will take strict security measures; see the Privacy Policy for details.",
+  "userAgreementSection5Title": "5. Paid Services",
+  "userAgreementSection5Content1": "5.1 Some features are paid and provided through in-app purchases via Apple App Store or Google Play. Please confirm content and price before purchase.",
+  "userAgreementSection5Content2": "5.2 After successful payment, features are enabled immediately. Except as required by law, completed purchases are non-refundable. For refunds, contact the relevant app store support.",
+  "userAgreementSection5Content3": "5.3 Subscription services auto-renew. You can cancel auto-renewal in the app store's subscription management. After cancellation, the service remains available for the current subscription period.",
+  "userAgreementSection6Title": "6. Disclaimer",
+  "userAgreementSection6Content1": "6.1 The App provides services \"as is\" and makes no express or implied warranties regarding timeliness, security, or accuracy.",
+  "userAgreementSection6Content2": "6.2 The App is not liable for interruptions or data loss caused by force majeure, system maintenance, network failures, device failures, etc., but will make reasonable efforts to minimize impact.",
+  "userAgreementSection6Content3": "6.3 Your note data is stored on your device. We recommend regular backups. The App is not liable for data loss due to device damage or system reset.",
+  "userAgreementSection7Title": "7. Changes to the Agreement",
+  "userAgreementSection7Content1": "7.1 We may modify this Agreement as needed and will notify you appropriately in the app.",
+  "userAgreementSection7Content2": "7.2 If you disagree with the modified Agreement, you may stop using the Services. Continued use after changes indicates acceptance.",
+  "userAgreementSection8Title": "8. Governing Law and Dispute Resolution",
+  "userAgreementSection8Content1": "8.1 Interpretation, validity, and enforcement of this Agreement are governed by the laws of the People's Republic of China (excluding conflict of laws).",
+  "userAgreementSection8Content2": "8.2 Any dispute arising from or related to this Agreement shall first be resolved through friendly negotiation. If negotiation fails, either party may file a lawsuit in a court with jurisdiction where the developer is located.",
+  "userAgreementSection9Title": "9. Contact Us",
+  "userAgreementSection9Content": "If you have any questions or suggestions about this Agreement, please contact us:\n\nApp name: Miaoji\nEmail: support@miaoji.app\n\nThank you for choosing Miaoji. Enjoy!",
+  "homeTitle": "Miaoji Pocket",
+  "notebookSection": "Notebooks",
+  "notebookCount": "{count, plural, =0{0 notebooks} =1{1 notebook} other{{count} notebooks}}",
+  "@notebookCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "viewAllNotebooks": "View all {count, plural, =0{0 notebooks} =1{1 notebook} other{{count} notebooks}}",
+  "@viewAllNotebooks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "aiWeeklyTitle": "AI Weekly",
+  "aiWeeklyBasedOnDays": "{days, plural, =1{Based on last 1 day of data} other{Based on last {days} days of data}}",
+  "@aiWeeklyBasedOnDays": {
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "aiWeeklyGenerating": "Generating weekly report...",
+  "aiWeeklyEmpty": "No weekly data yet. Record more data to generate automatically.",
+  "aiWeeklyStreaming": "Generating...",
+  "upcomingRemindersTitle": "Upcoming Reminders",
+  "reminderCount": "{count, plural, =0{0 reminders} =1{1 reminder} other{{count} reminders}}",
+  "@reminderCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moreReminders": "and {count, plural, =0{0 more reminders} =1{1 more reminder} other{{count} more reminders}}...",
+  "@moreReminders": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "reminderInDays": "{count, plural, =1{in 1 day} other{in {count} days}}",
+  "@reminderInDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "reminderInHours": "{count, plural, =1{in 1 hour} other{in {count} hours}}",
+  "@reminderInHours": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "reminderInMinutes": "{count, plural, =1{in 1 minute} other{in {count} minutes}}",
+  "@reminderInMinutes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "reminderSoon": "Coming soon",
+  "featureAiCreateTitle": "AI Smart Create",
+  "featureAiCreateDesc": "Tell AI what you want to record and it will create a notebook",
+  "featureReminderTitle": "Smart Reminders",
+  "featureReminderDesc": "Set reminders for records and never forget important things",
+  "featureAnalyticsTitle": "Data Insights",
+  "featureAnalyticsDesc": "Automatically generate trends, pie charts, and visual analysis",
+  "featureGuideTitle": "Welcome to Miaoji Pocket",
+  "featureGuideSubtitle": "Tap the \"Assistant\" tab below and let AI create your first notebook",
+  "emptyNotebooksTitle": "No notebooks yet",
+  "emptyNotebooksHint": "Try telling the AI assistant \"Create a reading log notebook\"",
+  "allNotebooksTitle": "All Notebooks",
+  "emptyAllNotebooks": "No notebooks yet",
+  "searchHint": "Search records...",
+  "searchEmptyHint": "Type keywords to search all records",
+  "searchNoResultsTitle": "No matching records",
+  "searchNoResultsHint": "Try a different keyword",
+  "searchRecordCount": "{count, plural, =0{0 records} =1{1 record} other{{count} records}}",
+  "@searchRecordCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "searchMoreFields": "and {count, plural, =0{0 more fields} =1{1 more field} other{{count} more fields}}...",
+  "@searchMoreFields": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "recordCount": "{count, plural, =0{0 records} =1{1 record} other{{count} records}}",
+  "@recordCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "alarmSoundTitle": "Reminder Sound",
+  "alarmSoundDefaultName": "System Default",
+  "alarmSoundDefaultDesc": "Use the system default notification sound",
+  "alarmSoundClassicName": "Classic Alarm",
+  "alarmSoundClassicDesc": "Beep-beep... classic dual-tone alarm",
+  "alarmSoundRadarName": "Radar",
+  "alarmSoundRadarDesc": "Beep-beep-beep... fast pulses",
+  "alarmSoundBeaconName": "Beacon",
+  "alarmSoundBeaconDesc": "Low-high... alternating rising tones",
+  "alarmSoundChimeName": "Chime",
+  "alarmSoundChimeDesc": "Ding... ding... crisp chimes",
+  "alarmSoundPulseName": "Pulse",
+  "alarmSoundPulseDesc": "Beep-buzz... urgent rhythm",
+  "notificationSoundPreviewTitle": "🔔 Sound Preview",
+  "notificationChannelName": "Notebook Alarm Reminder",
+  "notificationChannelDescription": "Alarm-style reminders for notebook records that keep ringing until handled",
+  "notificationReminderTitle": "📝 {notebookName}",
+  "@notificationReminderTitle": {
+    "placeholders": {
+      "notebookName": {}
+    }
+  },
+  "notificationFallbackBody": "You have a pending reminder",
+  "aiImageSourceCamera": "Camera",
+  "aiImageSourceGallery": "Gallery",
+  "aiErrorMessage": "Sorry, an error occurred: {message}",
+  "@aiErrorMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiRequestFailed": "Request failed: {error}",
+  "@aiRequestFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "aiAssistantTitle": "AI Assistant",
+  "aiAssistantWriting": "Writing...",
+  "aiAssistantReady": "Ready to help anytime",
+  "aiEmptyTitle": "Start chatting with AI",
+  "aiEmptyHint": "Try saying \"Create a reading log notebook\"",
+  "chatInputListeningHint": "Listening...",
+  "chatInputPlaceholder": "Write something...",
+  "recordAddedSuccess": "Record added successfully",
+  "recordUpdatedSuccess": "Record updated successfully",
+  "notebookCreatedSuccess": "Notebook created successfully",
+  "notebookUpdatedSuccess": "Notebook updated successfully",
+  "notebookUpdatedFields": "After update: {count, plural, =0{0 fields} =1{1 field} other{{count} fields}}: {fields}",
+  "@notebookUpdatedFields": {
+    "placeholders": {
+      "count": {},
+      "fields": {}
+    }
+  },
+  "notebookDeletedSuccess": "Notebook deleted",
+  "notebookDeletedName": "Deleted \"{name}\"",
+  "@notebookDeletedName": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "notebookDeletedDesc": "The notebook and all its records have been removed",
+  "recordMoreFields": "and {count, plural, =0{0 more fields} =1{1 more field} other{{count} more fields}}...",
+  "@recordMoreFields": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "recordReminderLabel": "Reminder: {time}",
+  "@recordReminderLabel": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "reminderExpired": "Expired",
+  "recordDeletedSuccess": "Record deleted",
+  "recordDeletedFromNotebook": "Deleted record from \"{name}\"",
+  "@recordDeletedFromNotebook": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "recordDeleted": "Record deleted",
+  "recordIdLabel": "ID: {id}",
+  "@recordIdLabel": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "queryResultsCount": "{count, plural, =0{No records found} =1{Found 1 record} other{Found {count} records}}",
+  "@queryResultsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "queryNoResults": "No matching records",
+  "toolResultSuccess": "{tool} executed successfully",
+  "@toolResultSuccess": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
+  "toolResultFailure": "{tool} failed to execute",
+  "@toolResultFailure": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
+  "listSeparator": ", ",
+  "aiAssistantCardTitle": "Create a new notebook",
+  "aiAssistantCardDesc": "Describe what you want to record and let AI build the data structure",
+  "aiServerError": "Server error ({status}): {details}",
+  "@aiServerError": {
+    "placeholders": {
+      "status": {},
+      "details": {}
+    }
+  },
+  "aiConnectionError": "Unable to connect to server: {message}",
+  "@aiConnectionError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiHttpError": "HTTP error: {message}",
+  "@aiHttpError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "aiRequestFailedError": "Request failed: {error}",
+  "@aiRequestFailedError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "summaryPromptHeader": "Below is my record data from the past 7 days. Please generate a weekly summary and suggestions:",
+  "summaryNewNotebooks": "## New notebooks ({count})",
+  "@summaryNewNotebooks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryNotebookItem": "- {name} ({fields})",
+  "@summaryNotebookItem": {
+    "placeholders": {
+      "name": {},
+      "fields": {}
+    }
+  },
+  "summaryNewRecords": "## New records (total {count})",
+  "@summaryNewRecords": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryNotebookGroup": "### {name} ({count})",
+  "@summaryNotebookGroup": {
+    "placeholders": {
+      "name": {},
+      "count": {}
+    }
+  },
+  "summaryRecordItem": "- {summary}",
+  "@summaryRecordItem": {
+    "placeholders": {
+      "summary": {}
+    }
+  },
+  "summaryMoreRecords": "- ...and {count} more",
+  "@summaryMoreRecords": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryAllNotebooks": "## All my notebooks ({count})",
+  "@summaryAllNotebooks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "summaryAllNotebookItem": "- {name}: {description}",
+  "@summaryAllNotebookItem": {
+    "placeholders": {
+      "name": {},
+      "description": {}
+    }
+  },
+  "summaryNoDescription": "No description",
+  "summaryItemSeparator": ", ",
+  "notebookFieldCount": "{count, plural, =0{0 fields} =1{1 field} other{{count} fields}}",
+  "@notebookFieldCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refreshDrag": "Pull to refresh",
+  "refreshArmed": "Release to refresh",
+  "refreshReady": "Release to refresh",
+  "refreshProcessing": "Refreshing...",
+  "refreshProcessed": "Refresh complete",
+  "refreshFailed": "Refresh failed",
+  "profileTitle": "Me",
+  "notificationDisabledTitle": "Notifications off",
+  "notificationDisabledDesc": "Enable notifications to receive important reminders",
+  "notificationDisabledAction": "Enable",
+  "balanceTitle": "Remaining",
+  "balanceCount": "{count}",
+  "@balanceCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "purchaseRecharge": "Recharge",
+  "restorePurchasesTitle": "Restore Purchases",
+  "notificationSoundSetting": "Notification Sound",
+  "purchaseFailed": "Purchase failed: {message}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "unknownError": "Unknown error",
+  "rechargeSuccess": "Recharge successful! {amount, plural, =0{0 times} =1{1 time} other{{amount} times}} added",
+  "@rechargeSuccess": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "rechargeVerifyFailed": "Recharge verification failed. Please contact support.",
+  "ticketInitializing": "Ticket is initializing. Please try again later.",
+  "ticketImportSuccess": "Import successful!",
+  "ticketInvalid": "Invalid ticket",
+  "ticketCopied": "Ticket copied to clipboard",
+  "restorePurchasesDesc": "When switching devices, export your Ticket and import it on the new device to restore purchased times.",
+  "ticketExportTitle": "Export Ticket",
+  "loadingShort": "Loading...",
+  "ticketImportTitle": "Import Ticket",
+  "ticketPasteHint": "Paste Ticket ID",
+  "ticketImportAction": "Import",
+  "purchaseSheetTitle": "Recharge Packs",
+  "purchaseProcessing": "Processing...",
+  "purchaseTimesUnit": "times",
+  "purchaseRecommended": "Recommended",
+  "purchaseUnitPrice": "About {price} per time",
+  "@purchaseUnitPrice": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "schemaAddAtLeastOneField": "Please add at least one data field",
+  "fieldNameRequired": "Field name cannot be empty",
+  "notebookSaved": "Notebook saved",
+  "saveFailed": "Save failed: {error}",
+  "@saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "notebookUpdated": "Notebook updated",
+  "updateFailed": "Update failed: {error}",
+  "@updateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "editNotebookTitle": "Edit Notebook",
+  "createNotebookTitle": "Create Notebook",
+  "saveAction": "Save",
+  "doneAction": "Done",
+  "appearanceSectionTitle": "Appearance",
+  "colorLabel": "Color",
+  "iconLabel": "Icon",
+  "basicInfoSectionTitle": "Basic Info",
+  "notebookNameLabel": "Notebook Name",
+  "notebookNameHint": "e.g., Daily Expenses",
+  "notebookNameRequired": "Please enter a name",
+  "notebookDescLabel": "Description",
+  "notebookDescHint": "Describe this notebook...",
+  "schemaSectionTitle": "Data Schema",
+  "addFieldAction": "Add Field",
+  "schemaEmptyTitle": "No schema defined yet",
+  "schemaEmptyHint": "Tap \"Add Field\" above to start",
+  "fieldNameLabel": "Field Name",
+  "fieldDescHint": "Optional: field description",
+  "recordEmptyContent": "No content",
+  "backAction": "Back",
+  "confirmDeleteTitle": "Confirm Delete",
+  "confirmDeleteRecordContent": "This cannot be undone. Delete this record?",
+  "cancelAction": "Cancel",
+  "deleteAction": "Delete",
+  "recordListTitle": "Records",
+  "noRecordsTitle": "No records yet",
+  "noRecordsHint": "Try telling the AI assistant \"Add a {notebook} record\"",
+  "@noRecordsHint": {
+    "placeholders": {
+      "notebook": {}
+    }
+  },
+  "reminderSentLabel": "Reminded",
+  "reminderExpiredLabel": "Expired",
+  "reminderTimeLabel": "Reminder time",
+  "reminderEditAction": "Edit reminder time",
+  "reminderCancelAction": "Cancel reminder",
+  "yes": "Yes",
+  "no": "No",
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "fieldNumberHint": "Enter a number...",
+  "fieldMarkdownHint": "Markdown supported...",
+  "statsTitle": "Statistics",
+  "filteredRecordsCount": "{filtered} / {total} records",
+  "@filteredRecordsCount": {
+    "placeholders": {
+      "filtered": {},
+      "total": {}
+    }
+  },
+  "clearAction": "Clear",
+  "allOption": "All",
+  "validValueCount": "{count, plural, =0{0 valid values} =1{1 valid value} other{{count} valid values}}",
+  "@validValueCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "metricSum": "Sum",
+  "metricAverage": "Average",
+  "metricMax": "Max",
+  "metricMin": "Min",
+  "trendLabel": "Trend",
+  "trendInsufficientForGranularity": "Not enough data for this granularity",
+  "trendInsufficientData": "Not enough data. At least 2 records are required to generate a trend chart.",
+  "noData": "No data",
+  "distributionLabel": "Distribution",
+  "noDistributionData": "No distribution data",
+  "granularityDay": "Day",
+  "granularityWeek": "Week",
+  "granularityMonth": "Month",
+  "createdTimeLabel": "Created time",
+  "axisLabel": "Axis",
+  "otherLabel": "Other",
+  "fieldTypeText": "Text",
+  "fieldTypeNumber": "Number",
+  "fieldTypeDate": "Date",
+  "unnamedNotebook": "Untitled Notebook"
+}

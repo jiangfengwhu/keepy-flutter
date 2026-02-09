@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/ai_chat_sheet.dart';
 import 'home_page.dart';
@@ -98,14 +99,14 @@ class _BottomNavBar extends StatelessWidget {
             _NavItem(
               icon: Icons.menu_book_outlined,
               activeIcon: Icons.menu_book_rounded,
-              label: '主页',
+              label: context.l10n.navHome,
               isSelected: currentIndex == 0,
               onTap: () => onTap(0),
             ),
             _NavItem(
               icon: Icons.edit_note_outlined,
               activeIcon: Icons.edit_note_rounded,
-              label: '妙记',
+              label: context.l10n.navAssistant,
               isSelected: false,
               isSpecial: true,
               onTap: () => onTap(1),
@@ -113,7 +114,7 @@ class _BottomNavBar extends StatelessWidget {
             _NavItem(
               icon: Icons.person_outline_rounded,
               activeIcon: Icons.person_rounded,
-              label: '我的',
+              label: context.l10n.navProfile,
               isSelected: currentIndex == 2,
               onTap: () => onTap(2),
             ),

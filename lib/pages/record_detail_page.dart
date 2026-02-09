@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/data_record.dart';
 import '../models/notebook.dart';
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 
 /// 记录阅读页 — 纯沉浸式 Markdown 阅读
@@ -90,7 +91,7 @@ class RecordDetailPage extends StatelessWidget {
                       ],
                       if (isEmpty)
                         Text(
-                          '暂无内容',
+                          context.l10n.recordEmptyContent,
                           style: TextStyle(
                             fontSize: 15,
                             color:
@@ -154,7 +155,7 @@ class RecordDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '返回',
+                      context.l10n.backAction,
                       style: TextStyle(
                         fontSize: 13,
                         color: MiaojiColors.textTertiary,

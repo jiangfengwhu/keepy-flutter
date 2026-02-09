@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/notebook_item.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/notebook_tile.dart';
@@ -17,7 +18,7 @@ class AllNotebooksPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: MiaojiColors.background,
         title: Text(
-          '全部妙计本',
+          context.l10n.allNotebooksTitle,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -31,7 +32,7 @@ class AllNotebooksPage extends StatelessWidget {
             padding: const EdgeInsets.only(right: 16),
             child: Center(
               child: Text(
-                '${notebooks.length} 个',
+                context.l10n.notebookCount(notebooks.length),
                 style: const TextStyle(
                   fontSize: 13,
                   color: MiaojiColors.textHint,
@@ -43,10 +44,10 @@ class AllNotebooksPage extends StatelessWidget {
         ],
       ),
       body: notebooks.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                '还没有妙计本',
-                style: TextStyle(
+                context.l10n.emptyAllNotebooks,
+                style: const TextStyle(
                     fontSize: 15, color: MiaojiColors.textTertiary),
               ),
             )

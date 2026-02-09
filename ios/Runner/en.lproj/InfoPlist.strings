@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Miaoji";
+"NSMicrophoneUsageDescription" = "Microphone access is needed for voice input.";
+"NSSpeechRecognitionUsageDescription" = "Speech recognition is needed to convert voice to text.";
+"NSCameraUsageDescription" = "Camera access is needed to take photos for the AI assistant.";
+"NSPhotoLibraryUsageDescription" = "Photo library access is needed to select images for the AI assistant.";

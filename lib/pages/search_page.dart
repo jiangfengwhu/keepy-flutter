@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
@@ -78,7 +79,7 @@ class _SearchPageState extends State<SearchPage> {
   void _openNotebookDetail(DataRecord record) {
     final nb = _notebookCache[record.notebookName];
     if (nb == null) return;
-    final item = NotebookItem.fromNotebook(nb);
+    final item = NotebookItem.fromNotebook(nb, l10n: context.l10n);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => NotebookDetailPage(notebookItem: item),
@@ -145,7 +146,7 @@ class _SearchPageState extends State<SearchPage> {
                         color: MiaojiColors.textPrimary,
                       ),
                       decoration: InputDecoration(
-                        hintText: '搜索记录内容…',
+                        hintText: context.l10n.searchHint,
                         hintStyle: const TextStyle(
                           color: MiaojiColors.textHint,
                           fontSize: 14,
@@ -206,9 +207,9 @@ class _SearchPageState extends State<SearchPage> {
               size: 48,
               color: MiaojiColors.textHint.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          const Text(
-            '输入关键词搜索所有记录',
-            style: TextStyle(
+          Text(
+            context.l10n.searchEmptyHint,
+            style: const TextStyle(
               fontSize: 14,
               color: MiaojiColors.textTertiary,
             ),
@@ -229,16 +230,16 @@ class _SearchPageState extends State<SearchPage> {
               size: 48,
               color: MiaojiColors.textHint.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          const Text(
-            '没有找到相关记录',
-            style: TextStyle(
+          Text(
+            context.l10n.searchNoResultsTitle,
+            style: const TextStyle(
               fontSize: 14,
               color: MiaojiColors.textTertiary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            '换个关键词试试',
+            context.l10n.searchNoResultsHint,
             style: TextStyle(
               fontSize: 12,
               color: MiaojiColors.textHint.withValues(alpha: 0.7),
@@ -266,7 +267,8 @@ class _SearchPageState extends State<SearchPage> {
         final notebookName = grouped.keys.elementAt(groupIndex);
         final records = grouped[notebookName]!;
         final nb = _notebookCache[notebookName];
-        final nbItem = nb != null ? NotebookItem.fromNotebook(nb) : null;
+        final nbItem =
+            nb != null ? NotebookItem.fromNotebook(nb, l10n: context.l10n) : null;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +315,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${records.length} 条',
+                      context.l10n.searchRecordCount(records.length),
                       style: const TextStyle(
                         fontSize: 11,
                         color: MiaojiColors.textHint,
@@ -411,7 +413,7 @@ class _SearchPageState extends State<SearchPage> {
             }),
             if (displayEntries.length > 3)
               Text(
-                '还有 ${displayEntries.length - 3} 个字段…',
+                context.l10n.searchMoreFields(displayEntries.length - 3),
                 style: const TextStyle(
                   fontSize: 11,
                   color: MiaojiColors.textHint,

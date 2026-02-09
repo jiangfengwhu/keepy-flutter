@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 import 'user_agreement_page.dart';
 import 'privacy_policy_page.dart';
@@ -36,7 +37,7 @@ class _AboutPageState extends State<AboutPage> {
     return Scaffold(
       backgroundColor: MiaojiColors.background,
       appBar: AppBar(
-        title: const Text('关于'),
+        title: Text(context.l10n.aboutTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
@@ -67,9 +68,9 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const SizedBox(height: 16),
             // App 名称
-            const Text(
-              '妙记',
-              style: TextStyle(
+            Text(
+              context.l10n.appName,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
                 color: MiaojiColors.textPrimary,
@@ -80,8 +81,11 @@ class _AboutPageState extends State<AboutPage> {
             // 版本号
             Text(
               _version.isNotEmpty
-                  ? 'Version $_version ($_buildNumber)'
-                  : '加载中…',
+                  ? context.l10n.aboutVersionInfo(
+                      _version,
+                      _buildNumber,
+                    )
+                  : context.l10n.aboutVersionLoading,
               style: const TextStyle(
                 fontSize: 14,
                 color: MiaojiColors.textTertiary,
@@ -89,9 +93,9 @@ class _AboutPageState extends State<AboutPage> {
             ),
             const SizedBox(height: 8),
             // 一句话描述
-            const Text(
-              '你的智能笔记伙伴',
-              style: TextStyle(
+            Text(
+              context.l10n.appTagline,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: MiaojiColors.textSecondary,
@@ -118,7 +122,7 @@ class _AboutPageState extends State<AboutPage> {
     final items = [
       _LinkItem(
         icon: Icons.description_outlined,
-        label: '用户服务协议',
+        label: context.l10n.userAgreementTitle,
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const UserAgreementPage()),
@@ -126,7 +130,7 @@ class _AboutPageState extends State<AboutPage> {
       ),
       _LinkItem(
         icon: Icons.shield_outlined,
-        label: '隐私政策',
+        label: context.l10n.privacyPolicyTitle,
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
@@ -212,18 +216,18 @@ class _AboutPageState extends State<AboutPage> {
     return Column(
       children: [
         Text(
-          '妙记 © ${DateTime.now().year}',
+          context.l10n.aboutCopyright(DateTime.now().year),
           style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'ICP备案号：京ICP备XXXXXXXX号-X',
-          style: TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+        Text(
+          context.l10n.aboutIcp,
+          style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
         ),
         const SizedBox(height: 4),
-        const Text(
-          '联系邮箱：support@miaoji.app',
-          style: TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+        Text(
+          context.l10n.aboutSupportEmail,
+          style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
         ),
       ],
     );

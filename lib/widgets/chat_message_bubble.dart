@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/chat_message.dart';
 import '../models/data_record.dart';
 import '../models/notebook.dart';
@@ -48,7 +50,8 @@ class ChatMessageBubble extends StatelessWidget {
                   _buildTextBubble(isUser),
                 if (message.toolResults != null &&
                     message.toolResults!.isNotEmpty)
-                  ...message.toolResults!.map(_buildToolResultCard),
+                  ...message.toolResults!
+                      .map((result) => _buildToolResultCard(context, result)),
               ],
             ),
           ),
@@ -290,7 +293,7 @@ class ChatMessageBubble extends StatelessWidget {
 
   // ── Tool Result Card 分发 ─────────────────────
 
-  Widget _buildToolResultCard(ToolResult result) {
+  Widget _buildToolResultCard(BuildContext context, ToolResult result) {
     final uiData = result.uiData;
     if (uiData == null) {
       return _GenericToolCard(result: result);
@@ -308,7 +311,7 @@ class ChatMessageBubble extends StatelessWidget {
         final type = uiData['type'] as String? ?? '';
         if (record is DataRecord) {
           return _RecordActionCard(
-            title: '记录添加成功',
+            title: context.l10n.recordAddedSuccess,
             icon: Icons.add_circle_outline_rounded,
             color: MiaojiColors.success,
             notebookName: type,
@@ -321,7 +324,7 @@ class ChatMessageBubble extends StatelessWidget {
         final record = uiData['record'];
         if (record is DataRecord) {
           return _RecordActionCard(
-            title: '记录更新成功',
+            title: context.l10n.recordUpdatedSuccess,
             icon: Icons.edit_outlined,
             color: MiaojiColors.info,
             notebookName: record.notebookName,
@@ -394,7 +397,7 @@ class _NotebookCreatedCard extends StatelessWidget {
     return _ToolCardWrapper(
       statusColor: MiaojiColors.success,
       statusIcon: Icons.check_rounded,
-      statusText: '小本创建成功',
+      statusText: context.l10n.notebookCreatedSuccess,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -503,7 +506,7 @@ class _NotebookUpdatedCard extends StatelessWidget {
     return _ToolCardWrapper(
       statusColor: MiaojiColors.info,
       statusIcon: Icons.edit_outlined,
-      statusText: '小本更新成功',
+      statusText: context.l10n.notebookUpdatedSuccess,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -554,7 +557,12 @@ class _NotebookUpdatedCard extends StatelessWidget {
           if (notebook.schema.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
-              '更新后包含 ${notebook.schema.length} 个字段：${notebook.schema.map((f) => f.field).join('、')}',
+              context.l10n.notebookUpdatedFields(
+                notebook.schema.length,
+                notebook.schema.map((f) => f.field).join(
+                      context.l10n.listSeparator,
+                    ),
+              ),
               style: TextStyle(
                 fontSize: 12,
                 color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
@@ -584,7 +592,7 @@ class _SchemaDeletedCard extends StatelessWidget {
     return _ToolCardWrapper(
       statusColor: MiaojiColors.error,
       statusIcon: Icons.delete_outline_rounded,
-      statusText: '小本已删除',
+      statusText: context.l10n.notebookDeletedSuccess,
       child: Row(
         children: [
           Container(
@@ -607,7 +615,7 @@ class _SchemaDeletedCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '已删除「$name」',
+                  context.l10n.notebookDeletedName(name),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -615,7 +623,7 @@ class _SchemaDeletedCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '小本及其所有记录已被移除',
+                  context.l10n.notebookDeletedDesc,
                   style: TextStyle(
                     fontSize: 12,
                     color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
@@ -714,7 +722,7 @@ class _RecordActionCard extends StatelessWidget {
               )),
           if (record.data.length > 5)
             Text(
-              '还有 ${record.data.length - 5} 个字段...',
+              context.l10n.recordMoreFields(record.data.length - 5),
               style: TextStyle(
                   fontSize: 11, color: const Color(0xFFF5EFE0).withValues(alpha: 0.35)),
             ),
@@ -739,7 +747,9 @@ class _RecordActionCard extends StatelessWidget {
                       size: 12, color: MiaojiColors.info),
                   const SizedBox(width: 4),
                   Text(
-                    '提醒：${_formatReminderTime(record.reminderAt!)}',
+                    context.l10n.recordReminderLabel(
+                      _formatReminderTime(context, record.reminderAt!),
+                    ),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -755,14 +765,16 @@ class _RecordActionCard extends StatelessWidget {
     );
   }
 
-  static String _formatReminderTime(DateTime time) {
+  static String _formatReminderTime(BuildContext context, DateTime time) {
     final now = DateTime.now();
     final diff = time.difference(now);
-    if (diff.isNegative) return '已过期';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}分钟后';
-    if (diff.inHours < 24) return '${diff.inHours}小时后';
-    if (diff.inDays < 7) return '${diff.inDays}天后';
-    return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    final l10n = context.l10n;
+    if (diff.isNegative) return l10n.reminderExpired;
+    if (diff.inMinutes < 60) return l10n.reminderInMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.reminderInHours(diff.inHours);
+    if (diff.inDays < 7) return l10n.reminderInDays(diff.inDays);
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).add_Hm().format(time);
   }
 }
 
@@ -781,7 +793,7 @@ class _DeletedCard extends StatelessWidget {
     return _ToolCardWrapper(
       statusColor: MiaojiColors.error,
       statusIcon: Icons.delete_outline_rounded,
-      statusText: '记录已删除',
+      statusText: context.l10n.recordDeletedSuccess,
       child: Row(
         children: [
           Container(
@@ -808,8 +820,10 @@ class _DeletedCard extends StatelessWidget {
               children: [
                 Text(
                   record != null
-                      ? '已删除「${record!.notebookName}」记录'
-                      : '已删除记录',
+                      ? context.l10n.recordDeletedFromNotebook(
+                          record!.notebookName,
+                        )
+                      : context.l10n.recordDeleted,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -817,7 +831,7 @@ class _DeletedCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'ID: $recordId',
+                  context.l10n.recordIdLabel(recordId),
                   style: TextStyle(
                     fontSize: 11,
                     color: const Color(0xFFF5EFE0).withValues(alpha: 0.35),
@@ -853,13 +867,13 @@ class _QueryResultsCard extends StatelessWidget {
     return _ToolCardWrapper(
       statusColor: MiaojiColors.primary,
       statusIcon: Icons.search_rounded,
-      statusText: '查询到 ${records.length} 条记录',
+      statusText: context.l10n.queryResultsCount(records.length),
       child: records.isEmpty
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  '没有找到匹配的记录',
+                  context.l10n.queryNoResults,
                   style: TextStyle(
                     fontSize: 13,
                     color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
@@ -939,8 +953,8 @@ class _GenericToolCard extends StatelessWidget {
       statusIcon:
           result.success ? Icons.check_rounded : Icons.error_outline_rounded,
       statusText: result.success
-          ? '${result.toolName} 执行成功'
-          : '${result.toolName} 执行失败',
+          ? context.l10n.toolResultSuccess(result.toolName)
+          : context.l10n.toolResultFailure(result.toolName),
       child: const SizedBox.shrink(),
     );
   }

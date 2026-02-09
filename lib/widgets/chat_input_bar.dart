@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 
 /// 聊天输入栏组件 — 支持语音输入 + 图片发送
@@ -102,6 +103,9 @@ class _ChatInputBarState extends State<ChatInputBar>
     setState(() => _isListening = true);
     _borderController.repeat(reverse: true);
 
+    final locale = Localizations.localeOf(context);
+    final localeId = locale.languageCode == 'zh' ? 'zh_CN' : 'en_US';
+
     await _speech.listen(
       onResult: (result) {
         if (!mounted) return;
@@ -111,7 +115,7 @@ class _ChatInputBarState extends State<ChatInputBar>
           TextPosition(offset: widget.controller.text.length),
         );
       },
-      localeId: 'zh_CN',
+      localeId: localeId,
       listenOptions: stt.SpeechListenOptions(
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
@@ -185,7 +189,9 @@ class _ChatInputBarState extends State<ChatInputBar>
                 ),
                 cursorColor: const Color(0xFFD4A24C),
                 decoration: InputDecoration(
-                  hintText: _isListening ? '正在聆听...' : '写点什么...',
+                  hintText: _isListening
+                      ? context.l10n.chatInputListeningHint
+                      : context.l10n.chatInputPlaceholder,
                   hintStyle: TextStyle(
                     color: _isListening
                         ? const Color(0xFFE85D4A).withValues(alpha: 0.6)

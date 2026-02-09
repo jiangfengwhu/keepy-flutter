@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/notebook_item.dart';
 import '../theme/miaoji_theme.dart';
 
@@ -117,7 +118,7 @@ class NotebookTile extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${item.recordCount} 条',
+                            context.l10n.recordCount(item.recordCount),
                             style: TextStyle(
                               fontSize: 12,
                               color: item.iconColor.withValues(alpha: 0.7),

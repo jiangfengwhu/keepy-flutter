@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
@@ -153,7 +155,10 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
       // 编辑成功，刷新数据和 item 信息
       setState(() {
         _notebook = result.notebook;
-        _item = NotebookItem.fromNotebook(result.notebook);
+        _item = NotebookItem.fromNotebook(
+          result.notebook,
+          l10n: context.l10n,
+        );
       });
       _loadData();
     }
@@ -163,19 +168,21 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('删除后无法恢复，确定要删除这条记录吗？'),
+        title: Text(context.l10n.confirmDeleteTitle),
+        content: Text(context.l10n.confirmDeleteRecordContent),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text(context.l10n.cancelAction),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除',
-                style: TextStyle(color: MiaojiColors.error)),
+            child: Text(
+              context.l10n.deleteAction,
+              style: const TextStyle(color: MiaojiColors.error),
+            ),
           ),
         ],
       ),
@@ -473,13 +480,13 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                       children: [
                         _buildStatChip(
                           Icons.description_outlined,
-                          '$fieldCount 个字段',
+                          context.l10n.notebookFieldCount(fieldCount),
                           _item.iconColor,
                         ),
                         const SizedBox(width: 10),
                         _buildStatChip(
                           Icons.layers_outlined,
-                          '$recordCount 条记录',
+                          context.l10n.recordCount(recordCount),
                           _item.iconColor,
                         ),
                       ],
@@ -560,9 +567,9 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
-          '记录列表',
-          style: TextStyle(
+        Text(
+          context.l10n.recordListTitle,
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: MiaojiColors.textPrimary,
@@ -615,9 +622,9 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            '暂无记录',
-            style: TextStyle(
+          Text(
+            context.l10n.noRecordsTitle,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: MiaojiColors.textSecondary,
@@ -625,7 +632,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
           ),
           const SizedBox(height: 8),
           Text(
-            '试试和 AI 助手说「帮我记一笔 ${_item.title}」',
+            context.l10n.noRecordsHint(_item.title),
             style: TextStyle(
               fontSize: 13,
               color: MiaojiColors.textTertiary.withValues(alpha: 0.7),
@@ -979,12 +986,12 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
       bgColor = MiaojiColors.success.withValues(alpha: 0.1);
       textColor = MiaojiColors.success;
       icon = Icons.notifications_active_rounded;
-      label = '已提醒';
+      label = context.l10n.reminderSentLabel;
     } else if (isOverdue) {
       bgColor = MiaojiColors.warning.withValues(alpha: 0.1);
       textColor = MiaojiColors.warning;
       icon = Icons.notification_important_rounded;
-      label = '已过期';
+      label = context.l10n.reminderExpiredLabel;
     } else if (isPending) {
       bgColor = MiaojiColors.info.withValues(alpha: 0.1);
       textColor = MiaojiColors.info;
@@ -1048,7 +1055,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                         size: 18, color: _item.iconColor),
                     const SizedBox(width: 8),
                     Text(
-                      '提醒时间',
+                      context.l10n.reminderTimeLabel,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -1073,7 +1080,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
               _buildOptionTile(
                 icon: Icons.edit_notifications_rounded,
                 color: MiaojiColors.info,
-                label: '修改提醒时间',
+                label: context.l10n.reminderEditAction,
                 onTap: () {
                   Navigator.pop(ctx);
                   _editReminderTime(record);
@@ -1083,7 +1090,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
               _buildOptionTile(
                 icon: Icons.notifications_off_rounded,
                 color: MiaojiColors.error,
-                label: '取消提醒',
+                label: context.l10n.reminderCancelAction,
                 onTap: () {
                   Navigator.pop(ctx);
                   _cancelReminder(record);
@@ -1235,28 +1242,36 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
       final first = data.values.first;
       if (first != null) return first.toString();
     }
-    return '你有一条待办提醒';
+    return context.l10n.notificationFallbackBody;
   }
 
   String _formatFullReminderTime(DateTime time) {
-    return '${time.month}/${time.day} '
-        '${time.hour.toString().padLeft(2, '0')}:'
-        '${time.minute.toString().padLeft(2, '0')}';
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).add_Hm().format(time);
   }
 
   String _formatReminderTime(DateTime time) {
     final now = DateTime.now();
     final diff = time.difference(now);
 
-    if (diff.inMinutes < 60) return '${diff.inMinutes}分钟后';
-    if (diff.inHours < 24) return '${diff.inHours}小时后';
-    if (diff.inDays < 7) return '${diff.inDays}天后';
-    return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    if (diff.inMinutes < 60) {
+      return context.l10n.reminderInMinutes(diff.inMinutes);
+    }
+    if (diff.inHours < 24) {
+      return context.l10n.reminderInHours(diff.inHours);
+    }
+    if (diff.inDays < 7) {
+      return context.l10n.reminderInDays(diff.inDays);
+    }
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).add_Hm().format(time);
   }
 
   String _formatValue(dynamic value, [String? fieldType]) {
     if (value == null) return '-';
-    if (value is bool) return value ? '是' : '否';
+    if (value is bool) {
+      return value ? context.l10n.yes : context.l10n.no;
+    }
 
     // 日期类型格式化为 YYYY-MM-DD HH:MM:SS
     if (fieldType == 'date' && value is String && value.isNotEmpty) {
@@ -1278,12 +1293,19 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return '刚刚';
-    if (diff.inHours < 1) return '${diff.inMinutes} 分钟前';
-    if (diff.inDays < 1) return '${diff.inHours} 小时前';
-    if (diff.inDays < 7) return '${diff.inDays} 天前';
+    if (diff.inMinutes < 1) return context.l10n.timeJustNow;
+    if (diff.inHours < 1) {
+      return context.l10n.timeMinutesAgo(diff.inMinutes);
+    }
+    if (diff.inDays < 1) {
+      return context.l10n.timeHoursAgo(diff.inHours);
+    }
+    if (diff.inDays < 7) {
+      return context.l10n.timeDaysAgo(diff.inDays);
+    }
 
-    return '${date.month}/${date.day} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).add_Hm().format(date);
   }
 
   // ── 入场动画 ──────────────────────────────────
@@ -1451,9 +1473,9 @@ class _FieldEditSheetState extends State<_FieldEditSheet> {
                         ),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        '完成',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.doneAction,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -1480,8 +1502,9 @@ class _FieldEditSheetState extends State<_FieldEditSheet> {
                   maxLines: null,
                   minLines: isNumber ? 1 : 3,
                   decoration: InputDecoration(
-                    hintText:
-                        isNumber ? '输入数字...' : '支持 Markdown 语法...',
+                    hintText: isNumber
+                        ? context.l10n.fieldNumberHint
+                        : context.l10n.fieldMarkdownHint,
                     hintStyle: TextStyle(
                       color: MiaojiColors.textHint.withValues(alpha: 0.5),
                       fontSize: 14,
@@ -1629,6 +1652,7 @@ class _PieSlice {
     required String numberField,
     required String groupField,
     required List<DataRecord> records,
+    required String otherLabel,
   }) {
     final groups = <String, double>{};
     for (final r in records) {
@@ -1661,7 +1685,7 @@ class _PieSlice {
       }
     }
     if (otherSum > 0) {
-      capped.add(MapEntry('其他', otherSum));
+      capped.add(MapEntry(otherLabel, otherSum));
     }
 
     return capped.asMap().entries.map((e) {
@@ -1819,9 +1843,9 @@ class _StatsSheetState extends State<_StatsSheet> {
                   Icon(Icons.bar_chart_rounded,
                       size: 20, color: widget.accentColor),
                   const SizedBox(width: 10),
-                  const Text(
-                    '数据统计',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.statsTitle,
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                       color: MiaojiColors.textPrimary,
@@ -1829,7 +1853,10 @@ class _StatsSheetState extends State<_StatsSheet> {
                   ),
                   const Spacer(),
                   Text(
-                    '${filtered.length} / ${widget.records.length} 条',
+                    context.l10n.filteredRecordsCount(
+                      filtered.length,
+                      widget.records.length,
+                    ),
                     style: TextStyle(
                       fontSize: 12,
                       color: MiaojiColors.textHint,
@@ -1883,8 +1910,8 @@ class _StatsSheetState extends State<_StatsSheet> {
               padding: const EdgeInsets.only(left: 6),
               child: ActionChip(
                 label: Text(
-                  '清除',
-                  style: TextStyle(fontSize: 12, color: MiaojiColors.error),
+                  context.l10n.clearAction,
+                  style: const TextStyle(fontSize: 12, color: MiaojiColors.error),
                 ),
                 onPressed: _clearFilters,
                 backgroundColor: MiaojiColors.error.withValues(alpha: 0.08),
@@ -1919,7 +1946,8 @@ class _StatsSheetState extends State<_StatsSheet> {
         itemBuilder: (_) => [
           PopupMenuItem(
             value: _kAllValue,
-            child: Text('全部',
+            child: Text(
+                context.l10n.allOption,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: selected == null ? FontWeight.w700 : null,
@@ -2064,7 +2092,7 @@ class _StatsSheetState extends State<_StatsSheet> {
             ),
             const Spacer(),
             Text(
-              '${stats.count} 个有效值',
+              context.l10n.validValueCount(stats.count),
               style: TextStyle(
                 fontSize: 11,
                 color: MiaojiColors.textHint,
@@ -2078,23 +2106,43 @@ class _StatsSheetState extends State<_StatsSheet> {
           // 4 个指标卡片
           Row(
             children: [
-              Expanded(child: _metricCard(
-                '总和', _formatNum(stats.sum), Icons.functions_rounded)),
+              Expanded(
+                child: _metricCard(
+                  context.l10n.metricSum,
+                  _formatNum(stats.sum),
+                  Icons.functions_rounded,
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _metricCard(
-                '平均值', _formatNum(stats.avg), Icons.trending_flat_rounded)),
+              Expanded(
+                child: _metricCard(
+                  context.l10n.metricAverage,
+                  _formatNum(stats.avg),
+                  Icons.trending_flat_rounded,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _metricCard(
-                '最大值', _formatNum(stats.max), Icons.arrow_upward_rounded,
-                valueColor: const Color(0xFF4CAF50))),
+              Expanded(
+                child: _metricCard(
+                  context.l10n.metricMax,
+                  _formatNum(stats.max),
+                  Icons.arrow_upward_rounded,
+                  valueColor: const Color(0xFF4CAF50),
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: _metricCard(
-                '最小值', _formatNum(stats.min), Icons.arrow_downward_rounded,
-                valueColor: const Color(0xFFE57373))),
+              Expanded(
+                child: _metricCard(
+                  context.l10n.metricMin,
+                  _formatNum(stats.min),
+                  Icons.arrow_downward_rounded,
+                  valueColor: const Color(0xFFE57373),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -2103,9 +2151,14 @@ class _StatsSheetState extends State<_StatsSheet> {
           if (stats.points.length >= 2) ...[
             Row(
               children: [
-                const Text('趋势',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                        color: MiaojiColors.textTertiary)),
+                Text(
+                  context.l10n.trendLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: MiaojiColors.textTertiary,
+                  ),
+                ),
                 const Spacer(),
                 ..._buildGranularityChips(),
               ],
@@ -2139,14 +2192,18 @@ class _StatsSheetState extends State<_StatsSheet> {
                         size: Size.infinite,
                       )
                     : Center(
-                        child: Text('该粒度下数据不足',
-                            style: TextStyle(
-                                fontSize: 12, color: MiaojiColors.textHint)),
+                        child: Text(
+                          context.l10n.trendInsufficientForGranularity,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: MiaojiColors.textHint,
+                          ),
+                        ),
                       ),
               );
             }),
           ] else
-            _emptyBox('数据不足，至少需要 2 条记录才能生成趋势图'),
+            _emptyBox(context.l10n.trendInsufficientData),
 
           // 饼图（如果有文本字段）
           if (_textFields.isNotEmpty) ...[
@@ -2154,7 +2211,7 @@ class _StatsSheetState extends State<_StatsSheet> {
             _buildPieSection(stats.fieldName, filtered),
           ],
         ] else
-          _emptyBox('暂无数据'),
+          _emptyBox(context.l10n.noData),
       ],
     );
   }
@@ -2167,6 +2224,7 @@ class _StatsSheetState extends State<_StatsSheet> {
       numberField: numberField,
       groupField: groupField,
       records: filtered,
+      otherLabel: context.l10n.otherLabel,
     );
 
     return Column(
@@ -2175,9 +2233,14 @@ class _StatsSheetState extends State<_StatsSheet> {
         // 标题 + 分组切换
         Row(
           children: [
-            const Text('分布',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-                    color: MiaojiColors.textTertiary)),
+            Text(
+              context.l10n.distributionLabel,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: MiaojiColors.textTertiary,
+              ),
+            ),
             const Spacer(),
             if (_textFields.length > 1)
               ..._textFields.map((f) {
@@ -2215,7 +2278,7 @@ class _StatsSheetState extends State<_StatsSheet> {
         const SizedBox(height: 10),
 
         if (slices.isEmpty)
-          _emptyBox('暂无分布数据')
+          _emptyBox(context.l10n.noDistributionData)
         else
           Container(
             width: double.infinity,
@@ -2356,14 +2419,16 @@ class _StatsSheetState extends State<_StatsSheet> {
 
   // ── 趋势图粒度切换 ──────────────────────
 
-  static const _granularityOptions = [
-    ('day', '日'),
-    ('week', '周'),
-    ('month', '月'),
-  ];
+  List<(String, String)> _granularityOptions(BuildContext context) {
+    return [
+      ('day', context.l10n.granularityDay),
+      ('week', context.l10n.granularityWeek),
+      ('month', context.l10n.granularityMonth),
+    ];
+  }
 
   List<Widget> _buildGranularityChips() {
-    return _granularityOptions.map((opt) {
+    return _granularityOptions(context).map((opt) {
       final selected = _trendGranularity == opt.$1;
       return Padding(
         padding: const EdgeInsets.only(left: 6),
@@ -2404,7 +2469,7 @@ class _StatsSheetState extends State<_StatsSheet> {
     // 可选项：schema 中的 date 字段 + createdAt
     final options = <(String?, String)>[
       ...(_dateFields.map((f) => (f.field as String?, f.field))),
-      (null, '创建时间'),
+      (null, context.l10n.createdTimeLabel),
     ];
 
     // 只有一个选项时不需要显示切换
@@ -2417,11 +2482,14 @@ class _StatsSheetState extends State<_StatsSheet> {
           Icon(Icons.access_time_rounded,
               size: 12, color: MiaojiColors.textHint),
           const SizedBox(width: 4),
-          Text('横轴',
-              style: TextStyle(
-                  fontSize: 11,
-                  color: MiaojiColors.textHint,
-                  fontWeight: FontWeight.w500)),
+          Text(
+            context.l10n.axisLabel,
+            style: TextStyle(
+              fontSize: 11,
+              color: MiaojiColors.textHint,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: SingleChildScrollView(

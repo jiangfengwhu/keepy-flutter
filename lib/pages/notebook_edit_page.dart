@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/l10n_ext.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
@@ -128,7 +129,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
     if (_formKey.currentState!.validate()) {
       if (_fields.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请至少添加一个数据字段')),
+        SnackBar(content: Text(context.l10n.schemaAddAtLeastOneField)),
         );
         return;
       }
@@ -137,7 +138,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       for (final f in _fields) {
         if (f.name.trim().isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('字段名称不能为空')),
+            SnackBar(content: Text(context.l10n.fieldNameRequired)),
           );
           return;
         }
@@ -167,13 +168,13 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       await DatabaseService().createNotebook(notebook);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('小本已保存')),
+        SnackBar(content: Text(context.l10n.notebookSaved)),
       );
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('保存失败: $e')),
+        SnackBar(content: Text(context.l10n.saveFailed(e.toString()))),
       );
     }
   }
@@ -215,7 +216,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('小本已更新')),
+        SnackBar(content: Text(context.l10n.notebookUpdated)),
       );
 
       // 返回编辑结果给详情页
@@ -227,7 +228,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('更新失败: $e')),
+        SnackBar(content: Text(context.l10n.updateFailed(e.toString()))),
       );
     }
   }
@@ -278,7 +279,11 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           ),
         ),
       ),
-      title: Text(_isEditMode ? '编辑小本' : '新建小本'),
+      title: Text(
+        _isEditMode
+            ? context.l10n.editNotebookTitle
+            : context.l10n.createNotebookTitle,
+      ),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 12),
@@ -303,7 +308,9 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                 ],
               ),
               child: Text(
-                _isEditMode ? '保存' : '完成',
+                _isEditMode
+                    ? context.l10n.saveAction
+                    : context.l10n.doneAction,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -339,7 +346,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('外观', Icons.palette_outlined),
+            _buildSectionTitle(
+              context.l10n.appearanceSectionTitle,
+              Icons.palette_outlined,
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(20),
@@ -386,8 +396,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '颜色',
-                      style: TextStyle(
+                      context.l10n.colorLabel,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: MiaojiColors.textTertiary,
@@ -449,8 +459,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '图标',
-                      style: TextStyle(
+                      context.l10n.iconLabel,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: MiaojiColors.textTertiary,
@@ -531,7 +541,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('基本信息', Icons.info_outline_rounded),
+            _buildSectionTitle(
+              context.l10n.basicInfoSectionTitle,
+              Icons.info_outline_rounded,
+            ),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
@@ -551,8 +564,8 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                     child: TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: '小本名称',
-                        hintText: '例如：日常账单',
+                        labelText: context.l10n.notebookNameLabel,
+                        hintText: context.l10n.notebookNameHint,
                         prefixIcon: Container(
                           margin: const EdgeInsets.only(right: 12),
                           child: const Icon(
@@ -581,7 +594,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return '请输入名称';
+                          return context.l10n.notebookNameRequired;
                         }
                         return null;
                       },
@@ -600,9 +613,9 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                     child: TextFormField(
                       controller: _descController,
                       maxLines: 3,
-                      decoration: const InputDecoration(
-                        labelText: '描述',
-                        hintText: '写点什么来描述这个小本...',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.notebookDescLabel,
+                        hintText: context.l10n.notebookDescHint,
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -646,7 +659,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSectionTitle('数据结构', Icons.account_tree_outlined),
+                _buildSectionTitle(
+                  context.l10n.schemaSectionTitle,
+                  Icons.account_tree_outlined,
+                ),
                 GestureDetector(
                   onTap: _addField,
                   child: Container(
@@ -662,15 +678,15 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                         width: 1,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.add_rounded,
                             size: 16, color: MiaojiColors.primary),
                         SizedBox(width: 4),
                         Text(
-                          '添加字段',
-                          style: TextStyle(
+                          context.l10n.addFieldAction,
+                          style: const TextStyle(
                             color: MiaojiColors.primary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -765,9 +781,9 @@ class _NotebookEditPageState extends State<NotebookEditPage>
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            '还没有定义数据结构',
-            style: TextStyle(
+          Text(
+            context.l10n.schemaEmptyTitle,
+            style: const TextStyle(
               color: MiaojiColors.textSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -775,7 +791,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           ),
           const SizedBox(height: 6),
           Text(
-            '点击上方"添加字段"开始设计',
+            context.l10n.schemaEmptyHint,
             style: TextStyle(
               color: MiaojiColors.textTertiary,
               fontSize: 12,
@@ -858,7 +874,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                       child: TextFormField(
                         initialValue: field.name,
                         decoration: InputDecoration(
-                          labelText: '字段名称',
+                          labelText: context.l10n.fieldNameLabel,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
@@ -911,7 +927,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                 TextFormField(
                   initialValue: field.description,
                   decoration: InputDecoration(
-                    hintText: '可选：字段描述',
+                    hintText: context.l10n.fieldDescHint,
                     prefixIcon: Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: Icon(
@@ -962,7 +978,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            field.type.displayName,
+            field.type.displayName(context.l10n),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -1017,7 +1033,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           return DropdownMenuItem(
             value: type,
             child: Text(
-              type.displayName,
+              type.displayName(context.l10n),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

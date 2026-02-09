@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
 import 'user_agreement_page.dart';
 import 'privacy_policy_page.dart';
@@ -17,26 +18,31 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<_OnboardingData> _pages = const [
-    _OnboardingData(
-      icon: Icons.menu_book_rounded,
-      title: '欢迎使用妙记',
-      subtitle: '你的智能笔记伙伴',
-      description: '妙记帮你轻松管理生活中的每一条重要信息，\n让记录变得简单、有序、有温度。',
-    ),
-    _OnboardingData(
-      icon: Icons.auto_awesome_rounded,
-      title: 'AI 智能助手',
-      subtitle: '懂你所想，记你所需',
-      description: '内置 AI 助手，支持语音输入、智能总结、\n内容分析，让你的笔记更加智能高效。',
-    ),
-    _OnboardingData(
-      icon: Icons.notifications_active_rounded,
-      title: '贴心提醒',
-      subtitle: '重要的事，不再遗忘',
-      description: '灵活的提醒功能，为每条笔记设定通知，\n确保你不会错过任何重要时刻。',
-    ),
-  ];
+  List<_OnboardingData> get _pages => _getPages();
+
+  List<_OnboardingData> _getPages() {
+    final l10n = context.l10n;
+    return [
+      _OnboardingData(
+        icon: Icons.menu_book_rounded,
+        title: l10n.onboardingTitle1,
+        subtitle: l10n.onboardingSubtitle1,
+        description: l10n.onboardingDesc1,
+      ),
+      _OnboardingData(
+        icon: Icons.auto_awesome_rounded,
+        title: l10n.onboardingTitle2,
+        subtitle: l10n.onboardingSubtitle2,
+        description: l10n.onboardingDesc2,
+      ),
+      _OnboardingData(
+        icon: Icons.notifications_active_rounded,
+        title: l10n.onboardingTitle3,
+        subtitle: l10n.onboardingSubtitle3,
+        description: l10n.onboardingDesc3,
+      ),
+    ];
+  }
 
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
@@ -64,6 +70,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final pages = _getPages();
     return Scaffold(
       backgroundColor: MiaojiColors.background,
       body: SafeArea(
@@ -75,20 +82,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, right: 16),
                 child: AnimatedOpacity(
-                  opacity: _currentPage < _pages.length - 1 ? 1.0 : 0.0,
+                  opacity: _currentPage < pages.length - 1 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: TextButton(
-                    onPressed: _currentPage < _pages.length - 1
+                    onPressed: _currentPage < pages.length - 1
                         ? () {
                             _pageController.animateToPage(
-                              _pages.length - 1,
+                              pages.length - 1,
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.easeInOut,
                             );
                           }
                         : null,
                     child: Text(
-                      '跳过',
+                      context.l10n.onboardingSkip,
                       style: TextStyle(
                         color: MiaojiColors.textTertiary,
                         fontSize: 14,
@@ -104,12 +111,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 onPageChanged: (index) {
                   setState(() => _currentPage = index);
                 },
                 itemBuilder: (context, index) {
-                  return _buildPage(_pages[index], index == _pages.length - 1);
+                  return _buildPage(pages[index], index == pages.length - 1);
                 },
               ),
             ),
@@ -122,7 +129,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             // 底部按钮区域
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: _currentPage == _pages.length - 1
+              child: _currentPage == pages.length - 1
                   ? _buildLastPageButtons()
                   : _buildNextButton(),
             ),
@@ -235,8 +242,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             borderRadius: BorderRadius.circular(MiaojiRadius.md),
           ),
         ),
-        child: const Text(
-          '下一步',
+        child: Text(
+          context.l10n.onboardingNext,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -256,7 +263,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             alignment: WrapAlignment.center,
             children: [
               Text(
-                '点击"同意并开始"即表示您已阅读并同意',
+                context.l10n.onboardingAgreementPrefix,
                 style: TextStyle(
                   fontSize: 12,
                   color: MiaojiColors.textTertiary,
@@ -272,7 +279,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   );
                 },
                 child: Text(
-                  '《用户服务协议》',
+                  context.l10n.onboardingAgreementUserAgreement,
                   style: TextStyle(
                     fontSize: 12,
                     color: MiaojiColors.primary,
@@ -281,7 +288,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
               Text(
-                '和',
+                context.l10n.onboardingAgreementAnd,
                 style: TextStyle(
                   fontSize: 12,
                   color: MiaojiColors.textTertiary,
@@ -297,7 +304,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   );
                 },
                 child: Text(
-                  '《隐私政策》',
+                  context.l10n.onboardingAgreementPrivacyPolicy,
                   style: TextStyle(
                     fontSize: 12,
                     color: MiaojiColors.primary,
@@ -323,8 +330,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 borderRadius: BorderRadius.circular(MiaojiRadius.md),
               ),
             ),
-            child: const Text(
-              '同意并开始',
+            child: Text(
+              context.l10n.onboardingAgreeAndStart,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

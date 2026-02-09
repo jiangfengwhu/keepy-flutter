@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:keepy_flutter/l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import 'api_config.dart';
 import 'ticket_service.dart';
@@ -71,7 +73,10 @@ class AiService {
 
       if (response.statusCode != 200) {
         final errorBody = await response.transform(utf8.decoder).join();
-        yield StreamErrorEvent('服务器错误 (${response.statusCode}): $errorBody');
+        final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+        yield StreamErrorEvent(
+          l10n.aiServerError(response.statusCode, errorBody),
+        );
         return;
       }
 
@@ -105,11 +110,14 @@ class AiService {
 
       yield StreamDoneEvent();
     } on SocketException catch (e) {
-      yield StreamErrorEvent('无法连接到服务器: ${e.message}');
+      final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+      yield StreamErrorEvent(l10n.aiConnectionError(e.message));
     } on HttpException catch (e) {
-      yield StreamErrorEvent('HTTP 错误: ${e.message}');
+      final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+      yield StreamErrorEvent(l10n.aiHttpError(e.message));
     } catch (e) {
-      yield StreamErrorEvent('请求失败: $e');
+      final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
+      yield StreamErrorEvent(l10n.aiRequestFailedError(e.toString()));
     }
   }
 
@@ -141,5 +149,9 @@ class AiService {
 
   void dispose() {
     _client.close();
+  }
+
+  AppLocalizations _l10nForLocale(Locale locale) {
+    return lookupAppLocalizations(locale);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/l10n_ext.dart';
 import '../services/notification_service.dart';
 import '../theme/miaoji_theme.dart';
 
@@ -71,9 +72,9 @@ class _AlarmSoundPickerContentState extends State<_AlarmSoundPickerContent> {
               const Icon(Icons.notifications_active_rounded,
                   size: 20, color: MiaojiColors.primary),
               const SizedBox(width: 8),
-              const Text(
-                '提醒铃声',
-                style: TextStyle(
+              Text(
+                context.l10n.alarmSoundTitle,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: MiaojiColors.textPrimary,
@@ -101,7 +102,9 @@ class _AlarmSoundPickerContentState extends State<_AlarmSoundPickerContent> {
             child: ListView(
               shrinkWrap: true,
               padding: EdgeInsets.zero,
-              children: alarmSoundOptions.map((option) => _buildSoundTile(option)).toList(),
+              children: alarmSoundOptions(context.l10n)
+                  .map((option) => _buildSoundTile(option))
+                  .toList(),
             ),
           ),
         ],
