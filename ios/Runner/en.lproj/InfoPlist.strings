@@ -1,5 +1,5 @@
 "CFBundleDisplayName" = "Miaoji";
-"NSMicrophoneUsageDescription" = "Microphone access is needed for voice input.";
-"NSSpeechRecognitionUsageDescription" = "Speech recognition is needed to convert voice to text.";
-"NSCameraUsageDescription" = "Camera access is needed to take photos for the AI assistant.";
-"NSPhotoLibraryUsageDescription" = "Photo library access is needed to select images for the AI assistant.";
+"NSSpeechRecognitionUsageDescription" = "Miaoji uses speech recognition to convert your voice into text in real time, so you can quickly input content by voice in notes and todos for a more efficient recording experience.";
+"NSMicrophoneUsageDescription" = "Miaoji uses the microphone for voice-to-text input. Your voice is converted to text in real time for convenient input in notes, todos, and other scenarios.";
+"NSCameraUsageDescription" = "Miaoji uses the camera to take photos that can be added to notes or sent for AI understanding and recording, so you can capture and record what you see in the moment.";
+"NSPhotoLibraryUsageDescription" = "Miaoji needs photo library access to let you select images for AI understanding and recording. You can add photos and screenshots to notes for AI-assisted organization and visual memory features.";

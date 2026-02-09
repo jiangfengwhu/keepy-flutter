@@ -1,5 +1,5 @@
 "CFBundleDisplayName" = "妙记";
-"NSSpeechRecognitionUsageDescription" = "需要语音识别权限以将语音转为文字";
-"NSMicrophoneUsageDescription" = "需要麦克风权限以进行语音输入";
-"NSCameraUsageDescription" = "需要相机权限以拍照发送给 AI 助手";
-"NSPhotoLibraryUsageDescription" = "需要相册权限以选择图片发送给 AI 助手";
+"NSSpeechRecognitionUsageDescription" = "妙记使用语音识别将您的语音实时转为文字，以便在笔记、待办等场景中通过语音快速输入，提升记录效率。";
+"NSMicrophoneUsageDescription" = "妙记使用麦克风进行语音转文字输入。您的语音会实时转为文字，用于在笔记、待办等场景中实现便捷的语音输入。";
+"NSCameraUsageDescription" = "妙记使用相机拍摄照片，可加入笔记或发送进行 AI 理解与记录，便于您即时记录所见内容。";
+"NSPhotoLibraryUsageDescription" = "妙记需要相册权限以便您选择图片进行 AI 理解与记录。您可以将照片、截图等加入笔记，由 AI 辅助整理并实现图文结合的记忆与记录功能。";
