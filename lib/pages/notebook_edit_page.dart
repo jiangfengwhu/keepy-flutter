@@ -9,6 +9,7 @@ import '../models/notebook.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
 import '../theme/miaoji_theme.dart';
+import '../widgets/app_toast.dart';
 
 /// 编辑结果，包含 schema 变更信息
 class NotebookEditResult {
@@ -135,18 +136,14 @@ class _NotebookEditPageState extends State<NotebookEditPage>
   Future<void> _saveNotebook() async {
     if (_formKey.currentState!.validate()) {
       if (_fields.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.schemaAddAtLeastOneField)),
-        );
+        AppToast.show(context.l10n.schemaAddAtLeastOneField);
         return;
       }
 
       // 检查字段名是否有空的
       for (final f in _fields) {
         if (f.name.trim().isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.fieldNameRequired)),
-          );
+          AppToast.show(context.l10n.fieldNameRequired);
           return;
         }
       }
@@ -179,15 +176,11 @@ class _NotebookEditPageState extends State<NotebookEditPage>
     try {
       await DatabaseService().createNotebook(notebook);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.notebookSaved)),
-      );
+      AppToast.show(context.l10n.notebookSaved);
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.saveFailed(e.toString()))),
-      );
+      AppToast.show(context.l10n.saveFailed(e.toString()));
     }
   }
 
@@ -235,9 +228,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.notebookUpdated)),
-      );
+      AppToast.show(context.l10n.notebookUpdated);
 
       // 返回编辑结果给详情页
       Navigator.of(context).pop(NotebookEditResult(
@@ -247,9 +238,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       ));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.updateFailed(e.toString()))),
-      );
+      AppToast.show(context.l10n.updateFailed(e.toString()));
     }
   }
 
@@ -1156,9 +1145,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       setState(() => _iconImagePath = savedFile.path);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.saveFailed(e.toString()))),
-      );
+      AppToast.show(context.l10n.saveFailed(e.toString()));
     }
   }
 }

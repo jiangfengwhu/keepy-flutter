@@ -10,6 +10,7 @@ import '../services/ticket_service.dart';
 import '../services/assistant_persona_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/alarm_sound_picker.dart';
+import '../widgets/app_toast.dart';
 import 'about_page.dart';
 
 /// 内购产品 ID（需在 App Store Connect 中配置）
@@ -152,9 +153,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (saved != true) return;
     await _loadAssistantPersona();
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.assistantPersonaSaved)));
+    AppToast.show(l10n.assistantPersonaSaved);
   }
 
   Future<void> _initIAP() async {
@@ -200,13 +199,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         if (mounted) {
           Navigator.of(context).pop(); // 关闭充值 BottomSheet
           _purchasing.value = false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.purchaseFailed(
-                  purchase.error?.message ?? context.l10n.unknownError,
-                ),
-              ),
+          AppToast.show(
+            context.l10n.purchaseFailed(
+              purchase.error?.message ?? context.l10n.unknownError,
             ),
           );
         }
@@ -242,32 +237,26 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     // 无论验证成功与否都要 completePurchase，否则交易会卡住
     _iap.completePurchase(purchase);
 
-    // 关闭充值 BottomSheet，避免遮挡 SnackBar
+    // 关闭充值 BottomSheet
     if (mounted) Navigator.of(context).pop();
 
     if (result != null) {
       _loadTicketAndBalance(); // 刷新余额
       if (mounted) {
         _purchasing.value = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.rechargeSuccess(result.amount))),
-        );
+        AppToast.show(context.l10n.rechargeSuccess(result.amount));
       }
     } else {
       if (mounted) {
         _purchasing.value = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.rechargeVerifyFailed)),
-        );
+        AppToast.show(context.l10n.rechargeVerifyFailed);
       }
     }
   }
 
   Future<void> _buyProduct(ProductDetails product) async {
     if (_ticketId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.ticketInitializing)));
+      AppToast.show(context.l10n.ticketInitializing);
       return;
     }
     _purchasing.value = true;
@@ -284,9 +273,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     } catch (e) {
       _purchasing.value = false;
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.purchaseFailed(e.toString()))),
-        );
+        AppToast.show(context.l10n.purchaseFailed(e.toString()));
       }
     }
   }
@@ -318,13 +305,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           if (!mounted) return;
           if (ok) {
             _loadTicketAndBalance();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n.ticketImportSuccess)),
-            );
+            AppToast.show(context.l10n.ticketImportSuccess);
           } else {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(context.l10n.ticketInvalid)));
+            AppToast.show(context.l10n.ticketInvalid);
           }
         },
       ),
@@ -967,9 +950,7 @@ class _RestoreSheetState extends State<_RestoreSheet> {
     if (widget.ticketId == null) return;
     Clipboard.setData(ClipboardData(text: widget.ticketId!));
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.l10n.ticketCopied)));
+    AppToast.show(context.l10n.ticketCopied);
   }
 
   Future<void> _doImport() async {

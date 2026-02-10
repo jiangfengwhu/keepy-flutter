@@ -10,6 +10,7 @@ import '../services/database_service.dart';
 import '../services/notification_service.dart';
 import '../services/summary_service.dart';
 import '../theme/miaoji_theme.dart';
+import '../widgets/app_toast.dart';
 import '../widgets/notebook_grid_tile.dart';
 import 'all_notebooks_page.dart';
 import 'notebook_detail_page.dart';
@@ -147,9 +148,7 @@ class HomePageState extends State<HomePage>
         _checkinSuccessAnimating = true;
       }
     });
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(toastMessage)));
+    AppToast.show(toastMessage);
     if (result.success) {
       _checkinLikeController.forward(from: 0);
       Future.delayed(const Duration(milliseconds: 900), () {
@@ -407,9 +406,12 @@ class HomePageState extends State<HomePage>
           _buildAiSuggestionCard(),
         ],
 
-        // 2) 近期提醒
+        // 2) 没有任何数据时：功能引导（欢迎使用妙记）
+        if (!hasNotebooks && !hasReminders) _buildFeatureGuideCard(),
+
+        // 3) 近期提醒 — 放在欢迎使用妙记下面
         if (showReminderSection) ...[
-          SizedBox(height: hasNotebooks ? 20 : 0),
+          SizedBox(height: hasNotebooks || (!hasNotebooks && !hasReminders) ? 20 : 0),
           _buildMiniSectionTitle(
             Icons.notifications_active_rounded,
             context.l10n.upcomingRemindersTitle,
@@ -417,9 +419,6 @@ class HomePageState extends State<HomePage>
           const SizedBox(height: 10),
           _buildReminderCard(),
         ],
-
-        // 3) 没有任何数据时：功能引导
-        if (!hasNotebooks && !hasReminders) _buildFeatureGuideCard(),
       ],
     );
   }

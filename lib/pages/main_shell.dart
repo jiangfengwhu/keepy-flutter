@@ -84,41 +84,42 @@ class _BottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 8,
-          right: 8,
-          top: 16,
-          bottom: MediaQuery.of(context).padding.bottom > 12
-              ? MediaQuery.of(context).padding.bottom - 12
-              : 8,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavItem(
-              icon: Icons.menu_book_outlined,
-              activeIcon: Icons.menu_book_rounded,
-              label: context.l10n.navHome,
-              isSelected: currentIndex == 0,
-              onTap: () => onTap(0),
-            ),
-            _NavItem(
-              icon: Icons.edit_note_outlined,
-              activeIcon: Icons.edit_note_rounded,
-              label: context.l10n.navAssistant,
-              isSelected: false,
-              isSpecial: true,
-              onTap: () => onTap(1),
-            ),
-            _NavItem(
-              icon: Icons.person_outline_rounded,
-              activeIcon: Icons.person_rounded,
-              label: context.l10n.navProfile,
-              isSelected: currentIndex == 2,
-              onTap: () => onTap(2),
-            ),
-          ],
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            left: 8,
+            right: 8,
+            top: 16,
+            bottom: 8,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(
+                icon: Icons.menu_book_outlined,
+                activeIcon: Icons.menu_book_rounded,
+                label: context.l10n.navHome,
+                isSelected: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavItem(
+                icon: Icons.edit_note_outlined,
+                activeIcon: Icons.edit_note_rounded,
+                label: context.l10n.navAssistant,
+                isSelected: false,
+                isSpecial: true,
+                onTap: () => onTap(1),
+              ),
+              _NavItem(
+                icon: Icons.person_outline_rounded,
+                activeIcon: Icons.person_rounded,
+                label: context.l10n.navProfile,
+                isSelected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+            ],
+          ),
         ),
       ),
     );

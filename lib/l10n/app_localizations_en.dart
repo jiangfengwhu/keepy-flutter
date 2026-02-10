@@ -672,6 +672,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatInputPlaceholder => 'Write something...';
 
   @override
+  String get chatInputSpeechUnavailable =>
+      'Voice input is unavailable. Please check microphone permission.';
+
+  @override
   String get recordAddedSuccess => 'Record added successfully';
 
   @override

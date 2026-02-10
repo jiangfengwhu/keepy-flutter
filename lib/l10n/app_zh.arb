@@ -271,6 +271,7 @@
   "aiEmptyHint": "试试说「我要创建一个读书记录小本」",
   "chatInputListeningHint": "正在聆听...",
   "chatInputPlaceholder": "写点什么...",
+  "chatInputSpeechUnavailable": "语音输入不可用，请检查麦克风权限",
   "recordAddedSuccess": "记录添加成功",
   "recordUpdatedSuccess": "记录更新成功",
   "notebookCreatedSuccess": "小本创建成功",

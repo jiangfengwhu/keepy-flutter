@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
+import 'app_toast.dart';
 
 /// 聊天输入栏组件 — 支持语音输入 + 图片发送
 class ChatInputBar extends StatefulWidget {
@@ -52,29 +53,36 @@ class _ChatInputBarState extends State<ChatInputBar>
   }
 
   Future<void> _initSpeech() async {
-    final available = await _speech.initialize(
-      onError: (error) {
-        debugPrint('SpeechToText error: ${error.errorMsg}');
-        if (mounted) {
-          setState(() => _isListening = false);
-          _borderController.stop();
-          _borderController.reset();
-        }
-      },
-      onStatus: (status) {
-        debugPrint('SpeechToText status: $status');
-        // 当识别自动停止时（如超时），更新状态
-        if (status == 'done' || status == 'notListening') {
-          if (mounted && _isListening) {
+    try {
+      final available = await _speech.initialize(
+        onError: (error) {
+          debugPrint('SpeechToText error: ${error.errorMsg}');
+          if (mounted) {
             setState(() => _isListening = false);
             _borderController.stop();
             _borderController.reset();
           }
-        }
-      },
-    );
-    if (mounted) {
-      setState(() => _speechAvailable = available);
+        },
+        onStatus: (status) {
+          debugPrint('SpeechToText status: $status');
+          // 当识别自动停止时（如超时），更新状态
+          if (status == 'done' || status == 'notListening') {
+            if (mounted && _isListening) {
+              setState(() => _isListening = false);
+              _borderController.stop();
+              _borderController.reset();
+            }
+          }
+        },
+      );
+      if (mounted) {
+        setState(() => _speechAvailable = available);
+      }
+    } catch (e) {
+      debugPrint('SpeechToText init failed: $e');
+      if (mounted) {
+        setState(() => _speechAvailable = false);
+      }
     }
   }
 
@@ -95,8 +103,53 @@ class _ChatInputBarState extends State<ChatInputBar>
 
   // ── 语音控制 ──
 
+  void _showSpeechUnavailable() {
+    if (!mounted) return;
+    AppToast.show(
+      context.l10n.chatInputSpeechUnavailable,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
   Future<void> _startListening() async {
-    if (!_speechAvailable || _isListening) return;
+    if (_isListening) return;
+
+    if (!_speechAvailable) {
+      // 权限未授予或语音识别不可用时，尝试重新初始化
+      try {
+        final available = await _speech.initialize(
+          onError: (error) {
+            debugPrint('SpeechToText error: ${error.errorMsg}');
+            if (mounted) {
+              setState(() => _isListening = false);
+              _borderController.stop();
+              _borderController.reset();
+            }
+          },
+          onStatus: (status) {
+            debugPrint('SpeechToText status: $status');
+            if (status == 'done' || status == 'notListening') {
+              if (mounted && _isListening) {
+                setState(() => _isListening = false);
+                _borderController.stop();
+                _borderController.reset();
+              }
+            }
+          },
+        );
+        if (mounted) {
+          setState(() => _speechAvailable = available);
+        }
+        if (!available) {
+          _showSpeechUnavailable();
+          return;
+        }
+      } catch (e) {
+        debugPrint('SpeechToText init failed: $e');
+        _showSpeechUnavailable();
+        return;
+      }
+    }
 
     HapticFeedback.mediumImpact();
 

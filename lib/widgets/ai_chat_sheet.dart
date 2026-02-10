@@ -33,7 +33,8 @@ class _AiChatSheetContent extends StatefulWidget {
   State<_AiChatSheetContent> createState() => _AiChatSheetContentState();
 }
 
-class _AiChatSheetContentState extends State<_AiChatSheetContent> {
+class _AiChatSheetContentState extends State<_AiChatSheetContent>
+    with WidgetsBindingObserver {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
@@ -47,6 +48,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
 
   bool _isSending = false;
   bool _isInitialized = false;
+  double _previousBottomInset = 0;
   StreamSubscription<StreamEvent>? _streamSub;
 
   /// 完整对话历史（包含 system 消息，用于发送给后端）
@@ -55,6 +57,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initSystemMessage();
   }
 
@@ -118,11 +121,27 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _streamSub?.cancel();
     _controller.dispose();
     _focusNode.dispose();
     _aiService.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    // 延迟一帧，确保 MediaQuery 已更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+      if (bottomInset > _previousBottomInset && bottomInset > 0) {
+        // 键盘弹出，滚动到底部
+        _scrollToBottom();
+      }
+      _previousBottomInset = bottomInset;
+    });
   }
 
   void _scrollToBottom() {
@@ -131,8 +150,8 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
       if (ctrl != null && ctrl.hasClients) {
         ctrl.animateTo(
           ctrl.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
         );
       }
     });

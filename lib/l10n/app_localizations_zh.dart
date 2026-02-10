@@ -584,6 +584,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatInputPlaceholder => '写点什么...';
 
   @override
+  String get chatInputSpeechUnavailable => '语音输入不可用，请检查麦克风权限';
+
+  @override
   String get recordAddedSuccess => '记录添加成功';
 
   @override

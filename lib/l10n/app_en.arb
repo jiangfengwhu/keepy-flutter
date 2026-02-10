@@ -249,6 +249,7 @@
   "aiEmptyHint": "Try saying \"Create a reading log notebook\"",
   "chatInputListeningHint": "Listening...",
   "chatInputPlaceholder": "Write something...",
+  "chatInputSpeechUnavailable": "Voice input is unavailable. Please check microphone permission.",
   "recordAddedSuccess": "Record added successfully",
   "recordUpdatedSuccess": "Record updated successfully",
   "notebookCreatedSuccess": "Notebook created successfully",

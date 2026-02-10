@@ -1106,6 +1106,12 @@ abstract class AppLocalizations {
   /// **'Write something...'**
   String get chatInputPlaceholder;
 
+  /// No description provided for @chatInputSpeechUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is unavailable. Please check microphone permission.'**
+  String get chatInputSpeechUnavailable;
+
   /// No description provided for @recordAddedSuccess.
   ///
   /// In en, this message translates to:
