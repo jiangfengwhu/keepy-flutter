@@ -78,6 +78,9 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
   /// 初始加载（重置列表）
   Future<void> _loadData() async {
     try {
+      // 先将所有已到期的提醒标记为已发送，避免显示为"已过期"
+      await NotificationService().checkAndMarkOverdueReminders();
+
       Notebook? notebook;
       if (_item.dbId != null) {
         notebook = await _db.getNotebook(_item.dbId!);

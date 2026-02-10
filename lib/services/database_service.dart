@@ -390,6 +390,18 @@ class DatabaseService {
     );
   }
 
+  /// 将所有已到期但未标记的提醒批量标记为已发送
+  Future<int> markOverdueRemindersAsSent() async {
+    final db = await database;
+    final now = DateTime.now().toIso8601String();
+    return db.update(
+      'records',
+      {'reminder_sent': 1},
+      where: "reminder_at != '' AND reminder_sent = 0 AND reminder_at <= ?",
+      whereArgs: [now],
+    );
+  }
+
   /// 获取所有待发送提醒的记录（提醒时间不为空、未发送）
   Future<List<DataRecord>> getPendingReminders() async {
     final db = await database;

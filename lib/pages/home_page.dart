@@ -7,6 +7,7 @@ import '../models/data_record.dart';
 import '../models/notebook_item.dart';
 import '../services/checkin_service.dart';
 import '../services/database_service.dart';
+import '../services/notification_service.dart';
 import '../services/summary_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/notebook_grid_tile.dart';
@@ -67,6 +68,8 @@ class HomePageState extends State<HomePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // app 从后台回到前台时，先标记所有已到期提醒为已发送
+      NotificationService().checkAndMarkOverdueReminders();
       _loadData();
       _loadCheckinStatus();
     }

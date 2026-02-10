@@ -243,6 +243,17 @@ class NotificationService {
     debugPrint(
       'Notification tapped: id=${response.id}, payload=${response.payload}',
     );
+    // 从 payload 提取 recordId 并标记提醒已发送
+    final payload = response.payload;
+    if (payload != null && payload.startsWith('record_')) {
+      final recordId = int.tryParse(payload.substring('record_'.length));
+      if (recordId != null) {
+        _db.markReminderSent(recordId);
+        debugPrint(
+          'NotificationService: marked reminder sent for record $recordId (tapped)',
+        );
+      }
+    }
   }
 
   // ── 构建通知详情 ────────────────────────────
@@ -337,9 +348,27 @@ class NotificationService {
     debugPrint('NotificationService: cancelled reminder for record $recordId');
   }
 
+  /// 检查并标记所有已到期的提醒为已发送
+  /// 适用于 app 在前台时通知已触发但数据库未同步更新的场景
+  Future<void> checkAndMarkOverdueReminders() async {
+    try {
+      final count = await _db.markOverdueRemindersAsSent();
+      if (count > 0) {
+        debugPrint(
+          'NotificationService: marked $count overdue reminders as sent',
+        );
+      }
+    } catch (e) {
+      debugPrint('NotificationService: markOverdue error: $e');
+    }
+  }
+
   /// 从数据库恢复所有待发送的提醒（app 启动时调用）
   Future<void> rescheduleAllReminders() async {
     try {
+      // 先将所有已到期的提醒标记为已发送
+      await checkAndMarkOverdueReminders();
+
       final pendingRecords = await _db.getPendingReminders();
       debugPrint(
         'NotificationService: rescheduling ${pendingRecords.length} reminders',
