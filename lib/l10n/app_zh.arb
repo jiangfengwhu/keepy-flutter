@@ -127,7 +127,8 @@
       }
     }
   },
-  "aiWeeklyTitle": "AI 周报",
+  "aiWeeklyTitle": "每日一语",
+  "aiWeeklyCardLabel": "致亲爱的自己",
   "aiWeeklyBasedOnDays": "基于近 {days} 天数据",
   "@aiWeeklyBasedOnDays": {
     "placeholders": {
@@ -136,10 +137,15 @@
       }
     }
   },
-  "aiWeeklyGenerating": "正在生成周报…",
-  "aiWeeklyEmpty": "暂无周报数据，记录更多数据后自动生成",
+  "aiWeeklyGenerating": "正在生成每日一语…",
+  "aiWeeklyEmpty": "暂无数据，记录更多数据后自动生成",
   "aiWeeklyStreaming": "生成中…",
   "upcomingRemindersTitle": "近期提醒",
+  "checkinTitle": "签到",
+  "checkinAction": "去签到",
+  "checkinDone": "今日已签到",
+  "checkinSuccessFallback": "签到成功",
+  "checkinFailedFallback": "签到失败，请稍后重试",
   "reminderCount": "{count} 项",
   "@reminderCount": {
     "placeholders": {
@@ -364,7 +370,7 @@
       "error": {}
     }
   },
-  "summaryPromptHeader": "以下是我近 7 天的记录数据，请帮我生成本周总结和建议：",
+  "summaryPromptHeader": "以下是我近 1 天的记录数据：",
   "summaryNewNotebooks": "## 新建小本（{count} 个）",
   "@summaryNewNotebooks": {
     "placeholders": {
@@ -446,6 +452,11 @@
   "purchaseRecharge": "充值",
   "restorePurchasesTitle": "内购恢复",
   "notificationSoundSetting": "通知铃声",
+  "assistantPersonaSetting": "助手性格",
+  "assistantPersonaDescription": "设置 AI 助手的人设风格",
+  "assistantPersonaTitle": "助手性格设置",
+  "assistantPersonaHint": "例如：你是一个温柔且简洁的记录助手，回答时先鼓励用户，再给出清晰步骤。",
+  "assistantPersonaSaved": "助手性格已保存",
   "purchaseFailed": "购买失败：{message}",
   "@purchaseFailed": {
     "placeholders": {

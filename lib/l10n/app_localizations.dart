@@ -713,8 +713,14 @@ abstract class AppLocalizations {
   /// No description provided for @aiWeeklyTitle.
   ///
   /// In en, this message translates to:
-  /// **'AI Weekly'**
+  /// **'Daily Quote'**
   String get aiWeeklyTitle;
+
+  /// No description provided for @aiWeeklyCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear Myself'**
+  String get aiWeeklyCardLabel;
 
   /// No description provided for @aiWeeklyBasedOnDays.
   ///
@@ -725,13 +731,13 @@ abstract class AppLocalizations {
   /// No description provided for @aiWeeklyGenerating.
   ///
   /// In en, this message translates to:
-  /// **'Generating weekly report...'**
+  /// **'Generating daily quote...'**
   String get aiWeeklyGenerating;
 
   /// No description provided for @aiWeeklyEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No weekly data yet. Record more data to generate automatically.'**
+  /// **'No data yet. Record more data to generate automatically.'**
   String get aiWeeklyEmpty;
 
   /// No description provided for @aiWeeklyStreaming.
@@ -745,6 +751,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upcoming Reminders'**
   String get upcomingRemindersTitle;
+
+  /// No description provided for @checkinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Check-in'**
+  String get checkinTitle;
+
+  /// No description provided for @checkinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Check in'**
+  String get checkinAction;
+
+  /// No description provided for @checkinDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked in today'**
+  String get checkinDone;
+
+  /// No description provided for @checkinSuccessFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in successful'**
+  String get checkinSuccessFallback;
+
+  /// No description provided for @checkinFailedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in failed. Please try again later.'**
+  String get checkinFailedFallback;
 
   /// No description provided for @reminderCount.
   ///
@@ -1229,7 +1265,7 @@ abstract class AppLocalizations {
   /// No description provided for @summaryPromptHeader.
   ///
   /// In en, this message translates to:
-  /// **'Below is my record data from the past 7 days. Please generate a weekly summary and suggestions:'**
+  /// **'Below is my record data from the past 1 day. Please start with \'Dear myself\' and write a warm, healing, and empowering daily quote to encourage me to keep going:'**
   String get summaryPromptHeader;
 
   /// No description provided for @summaryNewNotebooks.
@@ -1387,6 +1423,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notification Sound'**
   String get notificationSoundSetting;
+
+  /// No description provided for @assistantPersonaSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant Persona'**
+  String get assistantPersonaSetting;
+
+  /// No description provided for @assistantPersonaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the AI assistant style'**
+  String get assistantPersonaDescription;
+
+  /// No description provided for @assistantPersonaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant Persona'**
+  String get assistantPersonaTitle;
+
+  /// No description provided for @assistantPersonaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: You are a warm and concise note assistant. Encourage first, then provide clear steps.'**
+  String get assistantPersonaHint;
+
+  /// No description provided for @assistantPersonaSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant persona saved'**
+  String get assistantPersonaSaved;
 
   /// No description provided for @purchaseFailed.
   ///

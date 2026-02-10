@@ -123,17 +123,23 @@
       "count": {}
     }
   },
-  "aiWeeklyTitle": "AI Weekly",
+  "aiWeeklyTitle": "Daily Quote",
+  "aiWeeklyCardLabel": "Dear Myself",
   "aiWeeklyBasedOnDays": "{days, plural, =1{Based on last 1 day of data} other{Based on last {days} days of data}}",
   "@aiWeeklyBasedOnDays": {
     "placeholders": {
       "days": {}
     }
   },
-  "aiWeeklyGenerating": "Generating weekly report...",
-  "aiWeeklyEmpty": "No weekly data yet. Record more data to generate automatically.",
+  "aiWeeklyGenerating": "Generating daily quote...",
+  "aiWeeklyEmpty": "No data yet. Record more data to generate automatically.",
   "aiWeeklyStreaming": "Generating...",
   "upcomingRemindersTitle": "Upcoming Reminders",
+  "checkinTitle": "Daily Check-in",
+  "checkinAction": "Check in",
+  "checkinDone": "Checked in today",
+  "checkinSuccessFallback": "Check-in successful",
+  "checkinFailedFallback": "Check-in failed. Please try again later.",
   "reminderCount": "{count, plural, =0{0 reminders} =1{1 reminder} other{{count} reminders}}",
   "@reminderCount": {
     "placeholders": {
@@ -336,7 +342,7 @@
       "error": {}
     }
   },
-  "summaryPromptHeader": "Below is my record data from the past 7 days. Please generate a weekly summary and suggestions:",
+  "summaryPromptHeader": "Below is my record data from the past 1 day. Please start with 'Dear myself' and write a warm, healing, and empowering daily quote to encourage me to keep going:",
   "summaryNewNotebooks": "## New notebooks ({count})",
   "@summaryNewNotebooks": {
     "placeholders": {
@@ -416,6 +422,11 @@
   "purchaseRecharge": "Recharge",
   "restorePurchasesTitle": "Restore Purchases",
   "notificationSoundSetting": "Notification Sound",
+  "assistantPersonaSetting": "Assistant Persona",
+  "assistantPersonaDescription": "Set the AI assistant style",
+  "assistantPersonaTitle": "Assistant Persona",
+  "assistantPersonaHint": "Example: You are a warm and concise note assistant. Encourage first, then provide clear steps.",
+  "assistantPersonaSaved": "Assistant persona saved",
   "purchaseFailed": "Purchase failed: {message}",
   "@purchaseFailed": {
     "placeholders": {

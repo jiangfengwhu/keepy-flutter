@@ -6,14 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:keepy_flutter/l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import 'api_config.dart';
+import 'assistant_persona_service.dart';
 import 'database_service.dart';
 import 'ticket_service.dart';
 
-/// AI 周报缓存键
+/// 每日一语缓存键
 const _kSummaryText = 'summary_text';
 const _kSummaryTime = 'summary_time';
 
-/// AI 周报服务 — 调用 /note/summary，每天最多一次，本地缓存
+/// 每日一语服务 — 调用 /note/summary，每天最多一次，本地缓存
 class SummaryService {
   static final SummaryService _instance = SummaryService._internal();
   factory SummaryService() => _instance;
@@ -21,8 +22,9 @@ class SummaryService {
 
   static const String _baseUrl = apiBaseUrl;
   final DatabaseService _db = DatabaseService();
+  final AssistantPersonaService _personaService = AssistantPersonaService();
 
-  /// 获取周报内容（优先读缓存，超过 24h 才请求）
+  /// 获取每日一语内容（优先读缓存，超过 24h 才请求）
   ///
   /// [onStreaming] 可选回调，流式内容实时推送（用于 UI 动效）
   /// 返回完整文本；如果请求失败且无缓存，返回 null
@@ -44,10 +46,10 @@ class SummaryService {
       }
     }
 
-    // 2. 收集近 7 天数据，组装用户消息
+    // 2. 收集近 1 天数据，组装用户消息
     final userMessage = await _buildUserMessage();
     if (userMessage.isEmpty) {
-      debugPrint('SummaryService: 近 7 天无数据，跳过请求');
+      debugPrint('SummaryService: 近 1 天无数据，跳过请求');
       return cachedText; // 返回旧缓存或 null
     }
 
@@ -58,7 +60,7 @@ class SummaryService {
         // 4. 写入缓存
         await _db.setKv(_kSummaryText, result);
         await _db.setKv(_kSummaryTime, DateTime.now().toIso8601String());
-        debugPrint('SummaryService: 周报已更新并缓存');
+        debugPrint('SummaryService: 每日一语已更新并缓存');
         return result;
       }
     } catch (e) {
@@ -69,22 +71,22 @@ class SummaryService {
     return cachedText;
   }
 
-  /// 收集近 7 天的小本创建与数据添加记录
+  /// 收集近 1 天的小本创建与数据添加记录
   Future<String> _buildUserMessage() async {
     final l10n = _l10nForLocale(PlatformDispatcher.instance.locale);
     final now = DateTime.now();
-    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    final oneDayAgo = now.subtract(const Duration(days: 1));
 
-    // 近 7 天创建的小本
+    // 近 1 天创建的小本
     final allNotebooks = await _db.getAllNotebooks();
     final recentNotebooks = allNotebooks
-        .where((nb) => nb.createdAt.isAfter(sevenDaysAgo))
+        .where((nb) => nb.createdAt.isAfter(oneDayAgo))
         .toList();
 
-    // 近 7 天添加的记录
+    // 近 1 天添加的记录
     final recentRecords = await _db.getRecentRecords(limit: 200);
     final filteredRecords = recentRecords
-        .where((r) => r.createdAt.isAfter(sevenDaysAgo))
+        .where((r) => r.createdAt.isAfter(oneDayAgo))
         .toList();
 
     if (recentNotebooks.isEmpty && filteredRecords.isEmpty) {
@@ -159,7 +161,9 @@ class SummaryService {
     client.idleTimeout = const Duration(minutes: 2);
 
     try {
-      final history = [
+      final persona = await _personaService.getPersona();
+      final history = <ChatMessage>[
+        if (persona.isNotEmpty) ChatMessage.system(persona),
         ChatMessage.user(userMessage),
       ];
 
@@ -169,21 +173,27 @@ class SummaryService {
 
       final uri = Uri.parse('$_baseUrl/note/summary');
       final request = await client.postUrl(uri);
-      request.headers
-          .set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
+      request.headers.set(
+        HttpHeaders.contentTypeHeader,
+        'application/json; charset=utf-8',
+      );
       final ticketId = await TicketService().getTicketId();
       if (ticketId != null) {
         request.headers.set('X-Ticket-ID', ticketId);
       }
       final bodyBytes = utf8.encode(body);
-      request.headers
-          .set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
+      request.headers.set(
+        HttpHeaders.contentLengthHeader,
+        bodyBytes.length.toString(),
+      );
       request.add(bodyBytes);
       final response = await request.close();
 
       if (response.statusCode != 200) {
         final errorBody = await response.transform(utf8.decoder).join();
-        debugPrint('SummaryService: 服务器错误 (${response.statusCode}): $errorBody');
+        debugPrint(
+          'SummaryService: 服务器错误 (${response.statusCode}): $errorBody',
+        );
         return null;
       }
 

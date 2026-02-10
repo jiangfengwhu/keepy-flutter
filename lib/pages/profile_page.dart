@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../services/notification_service.dart';
 import '../services/ticket_service.dart';
+import '../services/assistant_persona_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/alarm_sound_picker.dart';
 import 'about_page.dart';
@@ -45,13 +46,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   final TicketService _ticketService = TicketService();
   final NotificationService _notifService = NotificationService();
+  final AssistantPersonaService _assistantPersonaService =
+      AssistantPersonaService();
   final InAppPurchase _iap = InAppPurchase.instance;
 
   String? _ticketId;
   int? _balance;
   bool _balanceLoading = true;
-  bool _balanceRefreshing = false;
   bool _notificationEnabled = true; // 默认 true，避免闪烁
+  String _assistantPersona = '';
 
   bool _iapAvailable = false;
   List<ProductDetails> _products = [];
@@ -64,6 +67,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadTicketAndBalance();
     _checkNotificationPermission();
+    _loadAssistantPersona();
     _initIAP();
   }
 
@@ -115,17 +119,42 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Future<void> _onRefresh() async {
-    setState(() => _balanceRefreshing = true);
     try {
       await Future.wait([
         _loadTicketAndBalance(showLoading: false),
         _checkNotificationPermission(),
+        _loadAssistantPersona(),
       ]);
     } finally {
-      if (mounted) {
-        setState(() => _balanceRefreshing = false);
-      }
+      if (mounted) {}
     }
+  }
+
+  Future<void> _loadAssistantPersona() async {
+    final persona = await _assistantPersonaService.getPersona();
+    if (!mounted) return;
+    setState(() => _assistantPersona = persona);
+  }
+
+  Future<void> _showAssistantPersonaSheet() async {
+    final l10n = context.l10n;
+
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AssistantPersonaSheet(
+        initialPersona: _assistantPersona,
+        onSave: (value) => _assistantPersonaService.setPersona(value),
+      ),
+    );
+
+    if (saved != true) return;
+    await _loadAssistantPersona();
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.assistantPersonaSaved)));
   }
 
   Future<void> _initIAP() async {
@@ -220,18 +249,14 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       _loadTicketAndBalance(); // 刷新余额
       if (mounted) {
         _purchasing.value = false;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.rechargeSuccess(result.amount))),
         );
       }
     } else {
       if (mounted) {
         _purchasing.value = false;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.rechargeVerifyFailed)),
         );
       }
@@ -242,9 +267,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     if (_ticketId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(
-        SnackBar(content: Text(context.l10n.ticketInitializing)),
-      );
+      ).showSnackBar(SnackBar(content: Text(context.l10n.ticketInitializing)));
       return;
     }
     _purchasing.value = true;
@@ -261,9 +284,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     } catch (e) {
       _purchasing.value = false;
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.purchaseFailed(e.toString()))),
         );
       }
@@ -297,17 +318,13 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           if (!mounted) return;
           if (ok) {
             _loadTicketAndBalance();
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(context.l10n.ticketImportSuccess)),
             );
           } else {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(
-              SnackBar(content: Text(context.l10n.ticketInvalid)),
-            );
+            ).showSnackBar(SnackBar(content: Text(context.l10n.ticketInvalid)));
           }
         },
       ),
@@ -561,23 +578,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFFD4A24C),
-                                fontFeatures: [
-                                  FontFeature.tabularFigures(),
-                                ],
+                                fontFeatures: [FontFeature.tabularFigures()],
                               ),
                             ),
-                            if (_balanceRefreshing)
-                              const Padding(
-                                padding: EdgeInsets.only(left: 8),
-                                child: SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Color(0xFFD4A24C),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                 ],
@@ -649,6 +652,15 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         onTap: () => showAlarmSoundPicker(context),
       ),
       _SettingItem(
+        Icons.psychology_alt_rounded,
+        context.l10n.assistantPersonaSetting,
+        const Color(0xFF6B8DD6),
+        subtitle: _assistantPersona.isEmpty
+            ? context.l10n.assistantPersonaDescription
+            : _assistantPersona,
+        onTap: _showAssistantPersonaSheet,
+      ),
+      _SettingItem(
         Icons.info_outline_rounded,
         context.l10n.aboutTitle,
         const Color(0xFF8B6BAD),
@@ -696,13 +708,30 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                       ),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: Text(
-                          item.label,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: MiaojiColors.textPrimary,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.label,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: MiaojiColors.textPrimary,
+                              ),
+                            ),
+                            if (item.subtitle != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                item.subtitle!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: MiaojiColors.textHint,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       Icon(
@@ -730,12 +759,170 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 }
 
+class _AssistantPersonaSheet extends StatefulWidget {
+  final String initialPersona;
+  final Future<void> Function(String value) onSave;
+
+  const _AssistantPersonaSheet({
+    required this.initialPersona,
+    required this.onSave,
+  });
+
+  @override
+  State<_AssistantPersonaSheet> createState() => _AssistantPersonaSheetState();
+}
+
+class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
+  late final TextEditingController _controller;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialPersona);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    await widget.onSave(_controller.text);
+    if (!mounted) return;
+    Navigator.of(context).pop(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 120),
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: MiaojiColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, bottomPad > 0 ? 12 : 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: MiaojiColors.textHint.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.assistantPersonaTitle,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: MiaojiColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.assistantPersonaHint,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: MiaojiColors.textTertiary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _controller,
+                  maxLines: 6,
+                  minLines: 4,
+                  decoration: InputDecoration(
+                    hintText: l10n.assistantPersonaHint,
+                    hintStyle: const TextStyle(
+                      color: MiaojiColors.textHint,
+                      fontSize: 13,
+                    ),
+                    filled: true,
+                    fillColor: MiaojiColors.surfaceVariant,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: MiaojiColors.borderLight,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: MiaojiColors.borderLight,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: MiaojiColors.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _saving
+                            ? null
+                            : () => Navigator.of(context).pop(false),
+                        child: Text(l10n.cancelAction),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: _saving ? null : _save,
+                        child: Text(l10n.saveAction),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SettingItem {
   final IconData icon;
   final String label;
   final Color color;
+  final String? subtitle;
   final VoidCallback? onTap;
-  const _SettingItem(this.icon, this.label, this.color, {this.onTap});
+  const _SettingItem(
+    this.icon,
+    this.label,
+    this.color, {
+    this.subtitle,
+    this.onTap,
+  });
 }
 
 class _PlanInfo {
@@ -782,9 +969,7 @@ class _RestoreSheetState extends State<_RestoreSheet> {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(
-      SnackBar(content: Text(context.l10n.ticketCopied)),
-    );
+    ).showSnackBar(SnackBar(content: Text(context.l10n.ticketCopied)));
   }
 
   Future<void> _doImport() async {
@@ -845,8 +1030,10 @@ class _RestoreSheetState extends State<_RestoreSheet> {
               const SizedBox(height: 6),
               Text(
                 context.l10n.restorePurchasesDesc,
-                style:
-                    const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: MiaojiColors.textHint,
+                ),
               ),
               const SizedBox(height: 20),
 

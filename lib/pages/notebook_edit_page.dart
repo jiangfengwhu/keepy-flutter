@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:sqflite/sqflite.dart';
 import '../l10n/l10n_ext.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
@@ -45,6 +49,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
   /// 图标和颜色选择
   late int _selectedIconIndex;
   late int _selectedColorIndex;
+  String? _iconImagePath;
 
   late AnimationController _enterController;
 
@@ -90,9 +95,11 @@ class _NotebookEditPageState extends State<NotebookEditPage>
           }
         }
       }
+      _iconImagePath = nb.iconImagePath;
     } else {
       _selectedIconIndex = 0;
       _selectedColorIndex = 0;
+      _iconImagePath = null;
     }
   }
 
@@ -155,12 +162,17 @@ class _NotebookEditPageState extends State<NotebookEditPage>
   Future<void> _createNotebook() async {
     final selectedIcon = NotebookItem.availableIcons[_selectedIconIndex];
     final selectedColor = NotebookItem.availableColors[_selectedColorIndex];
+    final hasCustomImage = _iconImagePath != null && _iconImagePath!.isNotEmpty;
+    final iconNameForSave = hasCustomImage
+        ? ''
+        : selectedIcon.icon.codePoint.toString();
 
     final notebook = Notebook(
       name: _nameController.text.trim(),
       description: _descController.text.trim(),
       schema: _fields.map((f) => f.toSchemaField()).toList(),
-      iconName: selectedIcon.icon.codePoint.toString(),
+      iconName: iconNameForSave,
+      iconImagePath: hasCustomImage ? _iconImagePath : null,
       colorValue: selectedColor.value,
     );
 
@@ -197,7 +209,12 @@ class _NotebookEditPageState extends State<NotebookEditPage>
 
     final selectedIcon = NotebookItem.availableIcons[_selectedIconIndex];
     final selectedColor = NotebookItem.availableColors[_selectedColorIndex];
-    final newIconName = selectedIcon.icon.codePoint.toString();
+    final hasCustomImage = _iconImagePath != null && _iconImagePath!.isNotEmpty;
+    final iconNameForSave = hasCustomImage
+        ? ''
+        : selectedIcon.icon.codePoint.toString();
+    final oldIconName = nb.iconName ?? '';
+    final normalizedImagePath = hasCustomImage ? _iconImagePath! : null;
     final newColorVal = selectedColor.value;
 
     try {
@@ -207,7 +224,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         newName: newName != nb.name ? newName : null,
         newDescription: newDesc != nb.description ? newDesc : null,
         newSchema: newSchema,
-        newIconName: newIconName != nb.iconName ? newIconName : null,
+        newIconName: iconNameForSave != oldIconName ? iconNameForSave : null,
+        newIconImagePath: normalizedImagePath == nb.iconImagePath
+            ? null
+            : (normalizedImagePath ?? ''),
         newColorValue: newColorVal != nb.colorValue ? newColorVal : null,
         renamedFields: renamedFields,
         removedFields: _removedFieldNames,
@@ -384,11 +404,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                         ),
                       ],
                     ),
-                    child: Icon(
-                      selectedIcon.icon,
-                      color: selectedColor.color,
-                      size: 30,
-                    ),
+                    child: _buildIconPreview(selectedIcon.icon, selectedColor),
                   ),
                   const SizedBox(height: 20),
 
@@ -455,7 +471,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                   ),
                   const SizedBox(height: 20),
 
-                  // 图标选择
+                  // 图标上传 + 选择
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -468,6 +484,38 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                     ),
                   ),
                   const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _pickIconImage,
+                          icon: const Icon(Icons.photo_library_outlined, size: 16),
+                          label: const Text('上传图片'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: MiaojiColors.textSecondary,
+                            side: const BorderSide(color: MiaojiColors.borderLight),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
+                      ),
+                      if (_iconImagePath != null && _iconImagePath!.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: '移除图片',
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _iconImagePath = null);
+                          },
+                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                          color: MiaojiColors.textTertiary,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -484,7 +532,10 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                       return GestureDetector(
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          setState(() => _selectedIconIndex = i);
+                          setState(() {
+                            _selectedIconIndex = i;
+                            _iconImagePath = null;
+                          });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -908,7 +959,7 @@ class _NotebookEditPageState extends State<NotebookEditPage>
                     const SizedBox(width: 10),
                     // 类型选择（已有字段不可修改类型）
                     SizedBox(
-                      width: 80,
+                      width: 96,
                       child: field.isExisting
                           ? _buildLockedTypeChip(field, accentColor)
                           : _buildTypeDropdown(field, accentColor),
@@ -977,12 +1028,16 @@ class _NotebookEditPageState extends State<NotebookEditPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            field.type.displayName(context.l10n),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: accentColor,
+          Expanded(
+            child: Text(
+              field.type.displayName(context.l10n),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: accentColor,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 4),
@@ -1050,5 +1105,60 @@ class _NotebookEditPageState extends State<NotebookEditPage>
         },
       ),
     );
+  }
+
+  Widget _buildIconPreview(IconData selectedIcon, NotebookColorOption selectedColor) {
+    if (_iconImagePath != null && _iconImagePath!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.file(
+          File(_iconImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return Icon(
+              selectedIcon,
+              color: selectedColor.color,
+              size: 30,
+            );
+          },
+        ),
+      );
+    }
+    return Icon(
+      selectedIcon,
+      color: selectedColor.color,
+      size: 30,
+    );
+  }
+
+  Future<void> _pickIconImage() async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (picked == null || !mounted) return;
+
+      final dbPath = await getDatabasesPath();
+      final iconDir = Directory(p.join(dbPath, 'notebook_icons'));
+      if (!await iconDir.exists()) {
+        await iconDir.create(recursive: true);
+      }
+      final ext = p.extension(picked.path).toLowerCase();
+      final fileName =
+          'icon_${DateTime.now().millisecondsSinceEpoch}${ext.isNotEmpty ? ext : '.jpg'}';
+      final savedFile = await File(picked.path).copy(p.join(iconDir.path, fileName));
+
+      HapticFeedback.selectionClick();
+      setState(() => _iconImagePath = savedFile.path);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.saveFailed(e.toString()))),
+      );
+    }
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:keepy_flutter/l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import 'api_config.dart';
+import 'assistant_persona_service.dart';
 import 'ticket_service.dart';
 
 /// 流式响应事件
@@ -45,6 +46,7 @@ class AiService {
   static const String _baseUrl = apiBaseUrl;
 
   final HttpClient _client = HttpClient();
+  final AssistantPersonaService _personaService = AssistantPersonaService();
 
   AiService() {
     // 设置超时
@@ -55,19 +57,31 @@ class AiService {
   /// 发送聊天请求，返回流式事件 Stream
   Stream<StreamEvent> sendMessage(List<ChatMessage> chatHistory) async* {
     try {
+      final persona = await _personaService.getPersona();
+      final payloadHistory = <ChatMessage>[...chatHistory];
+      if (persona.isNotEmpty &&
+          (payloadHistory.isEmpty || !payloadHistory.first.isSystem)) {
+        payloadHistory.insert(0, ChatMessage.system(persona));
+      }
       final body = jsonEncode({
-        'chat_history': chatHistory.map((m) => m.toJson()).toList(),
+        'chat_history': payloadHistory.map((m) => m.toJson()).toList(),
       });
 
       final uri = Uri.parse('$_baseUrl/note/process');
       final request = await _client.postUrl(uri);
-      request.headers.set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
+      request.headers.set(
+        HttpHeaders.contentTypeHeader,
+        'application/json; charset=utf-8',
+      );
       final ticketId = await TicketService().getTicketId();
       if (ticketId != null) {
         request.headers.set('X-Ticket-ID', ticketId);
       }
       final bodyBytes = utf8.encode(body);
-      request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
+      request.headers.set(
+        HttpHeaders.contentLengthHeader,
+        bodyBytes.length.toString(),
+      );
       request.add(bodyBytes);
       final response = await request.close();
 

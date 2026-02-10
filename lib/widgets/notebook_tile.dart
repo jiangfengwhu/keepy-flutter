@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../l10n/l10n_ext.dart';
 import '../models/notebook_item.dart';
@@ -72,11 +73,7 @@ class NotebookTile extends StatelessWidget {
                       width: 1.5,
                     ),
                   ),
-                  child: Icon(
-                    item.icon,
-                    color: item.iconColor,
-                    size: 22,
-                  ),
+                  child: _buildCoverIcon(),
                 ),
                 const SizedBox(width: 14),
 
@@ -153,6 +150,30 @@ class NotebookTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCoverIcon() {
+    if (item.iconImagePath != null && item.iconImagePath!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          File(item.iconImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return Icon(
+              item.icon,
+              color: item.iconColor,
+              size: 22,
+            );
+          },
+        ),
+      );
+    }
+    return Icon(
+      item.icon,
+      color: item.iconColor,
+      size: 22,
     );
   }
 }

@@ -90,6 +90,7 @@ class Notebook {
   final String description;
   final List<SchemaField> schema;
   final String? iconName;   // Material Icon 名称（如 'auto_stories_rounded'）
+  final String? iconImagePath; // 用户上传图标的本地路径
   final int? colorValue;    // 颜色值（如 0xFF8B5CF6）
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -100,6 +101,7 @@ class Notebook {
     this.description = '',
     required this.schema,
     this.iconName,
+    this.iconImagePath,
     this.colorValue,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -130,6 +132,7 @@ class Notebook {
           .map((f) => SchemaField.fromJson(f as Map<String, dynamic>))
           .toList(),
       iconName: _nonEmpty(row['icon_name']),
+      iconImagePath: _nonEmpty(row['icon_image_path']),
       colorValue: row['color_value'] as int?,
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),
@@ -144,6 +147,7 @@ class Notebook {
       'description': description,
       'schema_json': jsonEncode(schema.map((f) => f.toJson()).toList()),
       'icon_name': iconName ?? '',
+      'icon_image_path': iconImagePath ?? '',
       'color_value': colorValue,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../l10n/l10n_ext.dart';
 import '../models/data_record.dart';
@@ -298,11 +300,7 @@ class _SearchPageState extends State<SearchPage> {
                             .withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        nbItem?.icon ?? Icons.menu_book_rounded,
-                        size: 14,
-                        color: nbItem?.iconColor ?? MiaojiColors.textHint,
-                      ),
+                      child: _buildNotebookGroupIcon(nbItem),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -498,5 +496,31 @@ class _SearchPageState extends State<SearchPage> {
       return '${diff.inDays} 天前';
     }
     return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildNotebookGroupIcon(NotebookItem? item) {
+    final notebookItem = item;
+    final imagePath = notebookItem?.iconImagePath;
+    if (imagePath != null && imagePath.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(7),
+        child: Image.file(
+          File(imagePath),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return Icon(
+              notebookItem!.icon,
+              size: 14,
+              color: notebookItem.iconColor,
+            );
+          },
+        ),
+      );
+    }
+    return Icon(
+      item?.icon ?? Icons.menu_book_rounded,
+      size: 14,
+      color: item?.iconColor ?? MiaojiColors.textHint,
+    );
   }
 }

@@ -23,7 +23,7 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -37,6 +37,7 @@ class DatabaseService {
         description TEXT DEFAULT '',
         schema_json TEXT NOT NULL,
         icon_name TEXT DEFAULT '',
+        icon_image_path TEXT DEFAULT '',
         color_value INTEGER,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -94,6 +95,10 @@ class DatabaseService {
           value TEXT NOT NULL
         )
       ''');
+    }
+    if (oldVersion < 6) {
+      await db.execute(
+          "ALTER TABLE notebooks ADD COLUMN icon_image_path TEXT DEFAULT ''");
     }
   }
 
@@ -184,6 +189,7 @@ class DatabaseService {
     String? newDescription,
     List<SchemaField>? newSchema,
     String? newIconName,
+    String? newIconImagePath,
     int? newColorValue,
     Map<String, String> renamedFields = const {},
     List<String> removedFields = const [],
@@ -202,6 +208,7 @@ class DatabaseService {
             jsonEncode(newSchema.map((f) => f.toJson()).toList());
       }
       if (newIconName != null) updates['icon_name'] = newIconName;
+      if (newIconImagePath != null) updates['icon_image_path'] = newIconImagePath;
       if (newColorValue != null) updates['color_value'] = newColorValue;
       await txn.update('notebooks', updates,
           where: 'id = ?', whereArgs: [notebookId]);

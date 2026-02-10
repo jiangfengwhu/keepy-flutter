@@ -313,7 +313,7 @@ class ToolExecutor {
         'action': 'add_record',
         'record': saved ?? record,
         'type': type,
-        if (reminderAt != null) 'reminder_at': reminderAt,
+        'reminder_at': ?reminderAt,
       },
     );
   }
@@ -530,6 +530,7 @@ class ToolExecutor {
       description: nb.description,
       schema: nb.schema,
       iconName: nb.iconName ?? icon.icon.codePoint.toString(),
+      iconImagePath: nb.iconImagePath,
       colorValue: nb.colorValue ?? color.value,
       createdAt: nb.createdAt,
       updatedAt: nb.updatedAt,

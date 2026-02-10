@@ -382,7 +382,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get aiWeeklyTitle => 'AI Weekly';
+  String get aiWeeklyTitle => 'Daily Quote';
+
+  @override
+  String get aiWeeklyCardLabel => 'Dear Myself';
 
   @override
   String aiWeeklyBasedOnDays(num days) {
@@ -396,17 +399,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get aiWeeklyGenerating => 'Generating weekly report...';
+  String get aiWeeklyGenerating => 'Generating daily quote...';
 
   @override
   String get aiWeeklyEmpty =>
-      'No weekly data yet. Record more data to generate automatically.';
+      'No data yet. Record more data to generate automatically.';
 
   @override
   String get aiWeeklyStreaming => 'Generating...';
 
   @override
   String get upcomingRemindersTitle => 'Upcoming Reminders';
+
+  @override
+  String get checkinTitle => 'Daily Check-in';
+
+  @override
+  String get checkinAction => 'Check in';
+
+  @override
+  String get checkinDone => 'Checked in today';
+
+  @override
+  String get checkinSuccessFallback => 'Check-in successful';
+
+  @override
+  String get checkinFailedFallback =>
+      'Check-in failed. Please try again later.';
 
   @override
   String reminderCount(num count) {
@@ -781,7 +800,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summaryPromptHeader =>
-      'Below is my record data from the past 7 days. Please generate a weekly summary and suggestions:';
+      'Below is my record data from the past 1 day. Please start with \'Dear myself\' and write a warm, healing, and empowering daily quote to encourage me to keep going:';
 
   @override
   String summaryNewNotebooks(Object count) {
@@ -888,6 +907,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationSoundSetting => 'Notification Sound';
+
+  @override
+  String get assistantPersonaSetting => 'Assistant Persona';
+
+  @override
+  String get assistantPersonaDescription => 'Set the AI assistant style';
+
+  @override
+  String get assistantPersonaTitle => 'Assistant Persona';
+
+  @override
+  String get assistantPersonaHint =>
+      'Example: You are a warm and concise note assistant. Encourage first, then provide clear steps.';
+
+  @override
+  String get assistantPersonaSaved => 'Assistant persona saved';
 
   @override
   String purchaseFailed(Object message) {

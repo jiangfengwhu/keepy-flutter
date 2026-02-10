@@ -8,6 +8,7 @@ import 'theme/miaoji_theme.dart';
 import 'pages/main_shell.dart';
 import 'pages/onboarding_page.dart';
 import 'l10n/l10n_ext.dart';
+import 'widgets/confetti_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: ConfettiOverlay.navigatorKey,
       onGenerateTitle: (context) => context.l10n.appName,
       debugShowCheckedModeBanner: false,
       theme: MiaojiTheme.theme,

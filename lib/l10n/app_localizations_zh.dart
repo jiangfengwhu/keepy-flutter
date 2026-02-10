@@ -362,7 +362,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get aiWeeklyTitle => 'AI 周报';
+  String get aiWeeklyTitle => '每日一语';
+
+  @override
+  String get aiWeeklyCardLabel => '致亲爱的自己';
 
   @override
   String aiWeeklyBasedOnDays(num days) {
@@ -370,16 +373,31 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get aiWeeklyGenerating => '正在生成周报…';
+  String get aiWeeklyGenerating => '正在生成每日一语…';
 
   @override
-  String get aiWeeklyEmpty => '暂无周报数据，记录更多数据后自动生成';
+  String get aiWeeklyEmpty => '暂无数据，记录更多数据后自动生成';
 
   @override
   String get aiWeeklyStreaming => '生成中…';
 
   @override
   String get upcomingRemindersTitle => '近期提醒';
+
+  @override
+  String get checkinTitle => '签到';
+
+  @override
+  String get checkinAction => '去签到';
+
+  @override
+  String get checkinDone => '今日已签到';
+
+  @override
+  String get checkinSuccessFallback => '签到成功';
+
+  @override
+  String get checkinFailedFallback => '签到失败，请稍后重试';
 
   @override
   String reminderCount(num count) {
@@ -670,7 +688,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get summaryPromptHeader => '以下是我近 7 天的记录数据，请帮我生成本周总结和建议：';
+  String get summaryPromptHeader => '以下是我近 1 天的记录数据：';
 
   @override
   String summaryNewNotebooks(Object count) {
@@ -769,6 +787,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get notificationSoundSetting => '通知铃声';
+
+  @override
+  String get assistantPersonaSetting => '助手性格';
+
+  @override
+  String get assistantPersonaDescription => '设置 AI 助手的人设风格';
+
+  @override
+  String get assistantPersonaTitle => '助手性格设置';
+
+  @override
+  String get assistantPersonaHint => '例如：你是一个温柔且简洁的记录助手，回答时先鼓励用户，再给出清晰步骤。';
+
+  @override
+  String get assistantPersonaSaved => '助手性格已保存';
 
   @override
   String purchaseFailed(Object message) {

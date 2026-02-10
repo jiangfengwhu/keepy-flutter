@@ -1,3 +1,4 @@
+import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -445,8 +446,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                     width: 1.5,
                   ),
                 ),
-                child:
-                    Icon(_item.icon, color: _item.iconColor, size: 28),
+                child: _buildNotebookIcon(size: 28, radius: 14),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -542,6 +542,22 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
         ],
       ),
     );
+  }
+
+  Widget _buildNotebookIcon({required double size, required double radius}) {
+    if (_item.iconImagePath != null && _item.iconImagePath!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.file(
+          io.File(_item.iconImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) {
+            return Icon(_item.icon, color: _item.iconColor, size: size);
+          },
+        ),
+      );
+    }
+    return Icon(_item.icon, color: _item.iconColor, size: size);
   }
 
   (IconData, Color) _fieldTypeStyle(String type) {
@@ -711,11 +727,7 @@ class _NotebookDetailPageState extends State<NotebookDetailPage>
                             _item.iconColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(7),
                       ),
-                      child: Icon(
-                        _item.icon,
-                        size: 14,
-                        color: _item.iconColor,
-                      ),
+                      child: _buildNotebookIcon(size: 14, radius: 6),
                     ),
                     // 提醒状态标签（仅待提醒状态可点击修改）
                     if (record.reminderAt != null) ...[
@@ -1878,7 +1890,7 @@ class _StatsSheetState extends State<_StatsSheet> {
                 controller: scrollController,
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 itemCount: statsList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 28),
+                separatorBuilder: (_, _) => const SizedBox(height: 28),
                 itemBuilder: (_, i) =>
                     _buildFieldStats(statsList[i], filtered),
               ),

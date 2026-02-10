@@ -6,6 +6,7 @@ import 'notebook.dart';
 class NotebookItem {
   final int? dbId; // 数据库 ID
   final IconData icon;
+  final String? iconImagePath;
   final Color iconColor;
   final Color iconBg;
   final String title;
@@ -15,6 +16,7 @@ class NotebookItem {
   const NotebookItem({
     this.dbId,
     required this.icon,
+    this.iconImagePath,
     required this.iconColor,
     required this.iconBg,
     required this.title,
@@ -71,23 +73,23 @@ class NotebookItem {
     Notebook notebook, {
     AppLocalizations? l10n,
   }) {
-    // 优先使用存储的图标/颜色
-    final IconData icon;
+    // 图标和颜色独立解析：任一缺失时仅对缺失项走兜底
+    final hash = notebook.name.hashCode.abs();
+    final set = _defaultIconSets[hash % _defaultIconSets.length];
+
+    final icon = notebook.iconName != null
+        ? resolveIcon(notebook.iconName!)
+        : set.$1;
+
     final Color color;
     final Color bg;
-
-    if (notebook.iconName != null && notebook.colorValue != null) {
-      icon = resolveIcon(notebook.iconName!);
+    if (notebook.colorValue != null) {
       final colorOpt = availableColors
           .where((c) => c.value == notebook.colorValue)
           .firstOrNull;
       color = Color(notebook.colorValue!);
       bg = colorOpt?.bgColor ?? color.withValues(alpha: 0.12);
     } else {
-      // 兜底：按名称 hash 随机分配
-      final hash = notebook.name.hashCode.abs();
-      final set = _defaultIconSets[hash % _defaultIconSets.length];
-      icon = set.$1;
       color = set.$2;
       bg = set.$3;
     }
@@ -101,6 +103,7 @@ class NotebookItem {
     return NotebookItem(
       dbId: notebook.id,
       icon: icon,
+      iconImagePath: notebook.iconImagePath,
       iconColor: color,
       iconBg: bg,
       title: notebook.name,
@@ -112,6 +115,7 @@ class NotebookItem {
   NotebookItem withRecordCount(int count) => NotebookItem(
         dbId: dbId,
         icon: icon,
+        iconImagePath: iconImagePath,
         iconColor: iconColor,
         iconBg: iconBg,
         title: title,
