@@ -792,22 +792,29 @@ class HomePageState extends State<HomePage>
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color.fromARGB(255, 84, 68, 51),
-            Color.fromARGB(255, 134, 96, 62),
+            Color(0xFFFFF8E8),
+            Color(0xFFFFF1D4),
+            Color(0xFFFDEBC2),
           ],
+          stops: [0.0, 0.55, 1.0],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(MiaojiRadius.lg),
         border: Border.all(
-          color: const Color(0xFF8B7355).withValues(alpha: 0.3),
+          color: const Color(0xFFE8D09A),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3D3124).withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: const Color(0xFFD4A24C).withValues(alpha: 0.18),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: const Color(0xFFD4A24C).withValues(alpha: 0.06),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -819,28 +826,28 @@ class HomePageState extends State<HomePage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4A24C).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFFD4A24C).withValues(alpha: 0.3),
-                    width: 1,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFBF8A2E), Color(0xFFD4A24C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.auto_awesome,
                       size: 12,
-                      color: Color(0xFFD4A24C),
+                      color: Colors.white,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       context.l10n.aiWeeklyCardLabel,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFD4A24C),
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -849,9 +856,9 @@ class HomePageState extends State<HomePage>
               const Spacer(),
               Text(
                 context.l10n.aiWeeklyBasedOnDays(1),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.4),
+                  color: Color(0xFFC0A06A),
                 ),
               ),
             ],
@@ -867,15 +874,15 @@ class HomePageState extends State<HomePage>
                   height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: const Color(0xFFD4A24C).withValues(alpha: 0.6),
+                    color: const Color(0xFFD4A24C).withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Text(
                   context.l10n.aiWeeklyGenerating,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
-                    color: const Color(0xFFF5EFE0).withValues(alpha: 0.6),
+                    color: Color(0xFF9A8460),
                   ),
                 ),
               ],
@@ -885,33 +892,33 @@ class HomePageState extends State<HomePage>
             MarkdownBody(
               data: _summaryText!,
               styleSheet: MarkdownStyleSheet(
-                p: TextStyle(
+                p: const TextStyle(
                   fontSize: 14,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.85),
+                  color: Color(0xFF4A3B26),
                   height: 1.5,
                 ),
-                h1: TextStyle(
+                h1: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                  color: Color(0xFF3D3020),
                 ),
-                h2: TextStyle(
+                h2: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                  color: Color(0xFF3D3020),
                 ),
-                h3: TextStyle(
+                h3: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.9),
+                  color: Color(0xFF3D3020),
                 ),
-                strong: TextStyle(
+                strong: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFD4A24C).withValues(alpha: 0.9),
+                  color: Color(0xFFB8860B),
                 ),
-                listBullet: TextStyle(
+                listBullet: const TextStyle(
                   fontSize: 13,
-                  color: const Color(0xFFF5EFE0).withValues(alpha: 0.7),
+                  color: Color(0xFF6B5A3E),
                 ),
                 blockSpacing: 8,
               ),
@@ -921,9 +928,9 @@ class HomePageState extends State<HomePage>
             // 无内容或请求失败
             Text(
               context.l10n.aiWeeklyEmpty,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
-                color: const Color(0xFFF5EFE0).withValues(alpha: 0.5),
+                color: Color(0xFFB0996E),
               ),
             ),
           // 流式加载中提示
@@ -937,15 +944,15 @@ class HomePageState extends State<HomePage>
                     height: 10,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.2,
-                      color: const Color(0xFFD4A24C).withValues(alpha: 0.5),
+                      color: const Color(0xFFD4A24C).withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     context.l10n.aiWeeklyStreaming,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 10,
-                      color: const Color(0xFFF5EFE0).withValues(alpha: 0.4),
+                      color: Color(0xFFC0A06A),
                     ),
                   ),
                 ],

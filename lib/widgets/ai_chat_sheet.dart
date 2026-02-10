@@ -437,8 +437,8 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent> {
     });
     _scrollToBottom();
 
-    // 仅 AI 创建成功时播放庆祝动画（创建小本 / 创建记录）
-    const celebrateTools = {'create_data_schema', 'add_data_record'};
+    // 仅创建小本成功时播放庆祝动画
+    const celebrateTools = {'create_data_schema'};
     final shouldCelebrate = results.any(
       (r) => r.success && celebrateTools.contains(r.toolName),
     );
