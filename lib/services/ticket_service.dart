@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_config.dart';
@@ -45,16 +46,38 @@ class TicketService {
     return await generateTicket();
   }
 
+  /// 获取安卓设备 ID（用于卸载重装后恢复 ticket）
+  Future<String?> _getAndroidDeviceId() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      final id = androidInfo.id; // Settings.Secure.ANDROID_ID
+      debugPrint('TicketService: Android device id: $id');
+      return id.isNotEmpty ? id : null;
+    } catch (e) {
+      debugPrint('TicketService: 获取 Android device id 失败: $e');
+      return null;
+    }
+  }
+
   /// 调用 /ticket/generate 生成新 ticket
   Future<String?> generateTicket() async {
     final client = HttpClient();
     client.connectionTimeout = const Duration(seconds: 10);
     try {
+      // 安卓上附带 device_id，服务端可据此在卸载重装后返回同一 ticket
+      final deviceId = await _getAndroidDeviceId();
+      final payload = <String, dynamic>{};
+      if (deviceId != null) {
+        payload['device_id'] = deviceId;
+      }
+
       final uri = Uri.parse('$_baseUrl/ticket/generate');
       final request = await client.postUrl(uri);
       request.headers
           .set(HttpHeaders.contentTypeHeader, 'application/json; charset=utf-8');
-      request.add(utf8.encode('{}'));
+      request.add(utf8.encode(jsonEncode(payload)));
       final response = await request.close();
 
       if (response.statusCode != 200) {

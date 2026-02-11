@@ -105,6 +105,7 @@ class HomePageState extends State<HomePage>
 
   Future<void> _loadSummary() async {
     if (_notebooks.isEmpty) return;
+    if (_summaryLoading) return; // 防止重复调用
     setState(() => _summaryLoading = true);
     try {
       final text = await _summaryService.getSummary(
@@ -893,6 +894,7 @@ class HomePageState extends State<HomePage>
             // Markdown 渲染每日一语内容
             MarkdownBody(
               data: _summaryText!,
+              softLineBreak: true,
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(
                   fontSize: 14,

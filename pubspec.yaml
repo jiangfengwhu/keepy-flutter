@@ -53,6 +53,7 @@ dependencies:
   app_settings: ^7.0.0
   easy_refresh: ^3.4.0
   confetti: ^0.8.0
+  device_info_plus: ^12.3.0
 
 dev_dependencies:
   flutter_test:

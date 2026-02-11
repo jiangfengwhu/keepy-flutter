@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import '../l10n/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/notification_service.dart';
 import '../services/ticket_service.dart';
 import '../services/assistant_persona_service.dart';
@@ -278,7 +280,19 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
   }
 
+  /// 安卓充值跳转淘宝链接
+  static const _kAndroidRechargeUrl =
+      'https://m.intl.taobao.com/detail/detail.html?ft=t&id=1021064986912';
+
   void _showPurchaseSheet() {
+    if (Platform.isAndroid) {
+      // 安卓直接跳转外部充值链接
+      launchUrl(
+        Uri.parse(_kAndroidRechargeUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -632,7 +646,14 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         Icons.notifications_active_rounded,
         context.l10n.notificationSoundSetting,
         MiaojiColors.warning,
-        onTap: () => showAlarmSoundPicker(context),
+        onTap: () {
+          if (Platform.isAndroid) {
+            // 安卓直接跳转到系统通知设置页
+            AppSettings.openAppSettings(type: AppSettingsType.notification);
+          } else {
+            showAlarmSoundPicker(context);
+          }
+        },
       ),
       _SettingItem(
         Icons.psychology_alt_rounded,
