@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_markdown_plus_latex/flutter_markdown_plus_latex.dart';
+import 'package:markdown/markdown.dart' as md;
 import '../l10n/l10n_ext.dart';
 import '../models/data_record.dart';
 import '../models/notebook_item.dart';
@@ -895,6 +897,15 @@ class HomePageState extends State<HomePage>
             MarkdownBody(
               data: _summaryText!,
               softLineBreak: true,
+              builders: {
+                'latex': LatexElementBuilder(
+                  textStyle: const TextStyle(color: Color(0xFF4A3B26)),
+                ),
+              },
+              extensionSet: md.ExtensionSet(
+                [LatexBlockSyntax()],
+                [LatexInlineSyntax()],
+              ),
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(
                   fontSize: 14,

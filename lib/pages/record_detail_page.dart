@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:flutter_markdown_plus_latex/flutter_markdown_plus_latex.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/data_record.dart';
@@ -106,6 +108,17 @@ class RecordDetailPage extends StatelessWidget {
                           selectable: true,
                           shrinkWrap: true,
                           softLineBreak: true,
+                          builders: {
+                            'latex': LatexElementBuilder(
+                              textStyle: const TextStyle(
+                                color: MiaojiColors.textPrimary,
+                              ),
+                            ),
+                          },
+                          extensionSet: md.ExtensionSet(
+                            [LatexBlockSyntax()],
+                            [LatexInlineSyntax()],
+                          ),
                           onTapLink: (text, href, title) {
                             if (href != null) {
                               launchUrl(Uri.parse(href),
