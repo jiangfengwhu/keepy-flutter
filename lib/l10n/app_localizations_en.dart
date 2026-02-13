@@ -929,6 +929,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assistantPersonaSaved => 'Assistant persona saved';
 
   @override
+  String get assistantPersonaPresetLabel => 'Choose a preset style';
+
+  @override
+  String get assistantPersonaCustomLabel => 'Custom';
+
+  @override
+  String get assistantPersonaCustomPlaceholder =>
+      'Enter a custom assistant persona description…';
+
+  @override
+  String get assistantPersonaPresetWarm => 'Warm & Caring';
+
+  @override
+  String get assistantPersonaPresetWarmDesc => 'Gentle, encouraging & positive';
+
+  @override
+  String get assistantPersonaPresetWarmPrompt =>
+      'You are a warm and caring companion. Always acknowledge the user\'s efforts and progress first, give advice in a gentle tone, find the beauty in everyday life, and fill every interaction with positive energy.';
+
+  @override
+  String get assistantPersonaPresetConcise => 'Concise & Efficient';
+
+  @override
+  String get assistantPersonaPresetConciseDesc =>
+      'Direct, to-the-point, no fluff';
+
+  @override
+  String get assistantPersonaPresetConcisePrompt =>
+      'You are a sharp and efficient assistant. Keep responses brief and to-the-point. Use bullet points and lists to organize information. Help the user think clearly and act fast.';
+
+  @override
+  String get assistantPersonaPresetHumorous => 'Humorous & Fun';
+
+  @override
+  String get assistantPersonaPresetHumorousDesc =>
+      'Witty, playful & lighthearted';
+
+  @override
+  String get assistantPersonaPresetHumorousPrompt =>
+      'You are a humorous and witty chat buddy. Respond in a lighthearted way, sprinkle in jokes and fun metaphors, and make the whole experience enjoyable while still being helpful.';
+
+  @override
   String purchaseFailed(Object message) {
     return 'Purchase failed: $message';
   }
@@ -1260,4 +1302,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unnamedNotebook => 'Untitled Notebook';
+
+  @override
+  String get onboardingTicketTitle => 'Your Unique Credential';
+
+  @override
+  String get onboardingTicketDesc =>
+      'Please save the ID below. It is the only way to restore your purchases. We recommend taking a screenshot or copying it.';
+
+  @override
+  String get onboardingTicketCopy => 'Copy ID';
+
+  @override
+  String get onboardingTicketCopied => 'Copied to clipboard';
+
+  @override
+  String get onboardingTicketFailed => 'Failed to get credential';
+
+  @override
+  String get onboardingTicketFailedDesc =>
+      'Unable to get your ID. Please check your network and try again.';
+
+  @override
+  String get onboardingTicketRetry => 'Retry';
+
+  @override
+  String get onboardingTicketLoading => 'Getting your credential...';
 }

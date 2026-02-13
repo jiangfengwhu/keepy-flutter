@@ -44,6 +44,17 @@ class CheckinService {
         return CheckinResult(success: true, message: message);
       }
 
+      if (response.statusCode == 409) {
+        // 服务端返回 409 表示今天已签到，同步本地状态
+        await _db.setKv(_kLastCheckinDate, _formatDate(DateTime.now()));
+        final message = _extractMessage(body);
+        return CheckinResult(
+          success: false,
+          message: message,
+          errorType: CheckinErrorType.alreadyCheckedIn,
+        );
+      }
+
       final message = _extractMessage(body);
       debugPrint('CheckinService: checkin 失败 (${response.statusCode}): $body');
       return CheckinResult(
@@ -91,4 +102,4 @@ class CheckinResult {
   const CheckinResult({required this.success, this.message, this.errorType});
 }
 
-enum CheckinErrorType { ticketUnavailable, requestFailed }
+enum CheckinErrorType { ticketUnavailable, requestFailed, alreadyCheckedIn }

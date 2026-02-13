@@ -458,6 +458,18 @@
   "assistantPersonaTitle": "助手性格设置",
   "assistantPersonaHint": "例如：你是一个温柔且简洁的记录助手，回答时先鼓励用户，再给出清晰步骤。",
   "assistantPersonaSaved": "助手性格已保存",
+  "assistantPersonaPresetLabel": "选择预设风格",
+  "assistantPersonaCustomLabel": "自定义",
+  "assistantPersonaCustomPlaceholder": "输入自定义助手性格描述…",
+  "assistantPersonaPresetWarm": "温暖鼓励",
+  "assistantPersonaPresetWarmDesc": "温柔体贴，善于鼓励",
+  "assistantPersonaPresetWarmPrompt": "你是一个温暖体贴的记录伙伴。回复时先肯定用户的努力和进步，用温柔的语气给出建议，善于发现生活中的美好，让每次互动都充满正能量。",
+  "assistantPersonaPresetConcise": "简洁高效",
+  "assistantPersonaPresetConciseDesc": "干练直接，不废话",
+  "assistantPersonaPresetConcisePrompt": "你是一个干练高效的助手。回复简洁明了，直奔重点，不废话。用清单和要点组织信息，帮助用户快速理清思路、高效行动。",
+  "assistantPersonaPresetHumorous": "幽默风趣",
+  "assistantPersonaPresetHumorousDesc": "轻松诙谐，妙语连珠",
+  "assistantPersonaPresetHumorousPrompt": "你是一个幽默风趣的聊天搭子。喜欢用轻松诙谐的方式回应，偶尔来点俏皮话或有趣的比喻，在帮助用户的同时让整个过程变得有趣好玩。",
   "purchaseFailed": "购买失败：{message}",
   "@purchaseFailed": {
     "placeholders": {
@@ -614,5 +626,13 @@
   "fieldTypeText": "文本",
   "fieldTypeNumber": "数字",
   "fieldTypeDate": "日期",
-  "unnamedNotebook": "未命名小本"
+  "unnamedNotebook": "未命名小本",
+  "onboardingTicketTitle": "您的专属凭证",
+  "onboardingTicketDesc": "请妥善保存以下 ID，它是您恢复内购的唯一凭证。建议截图或复制保存。",
+  "onboardingTicketCopy": "复制 ID",
+  "onboardingTicketCopied": "已复制到剪贴板",
+  "onboardingTicketFailed": "凭证获取失败",
+  "onboardingTicketFailedDesc": "无法获取您的 ID，请检查网络后重试",
+  "onboardingTicketRetry": "重试",
+  "onboardingTicketLoading": "正在获取您的专属凭证…"
 }

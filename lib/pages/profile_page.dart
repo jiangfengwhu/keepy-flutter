@@ -24,18 +24,18 @@ const _kProductIds = <String>{
 
 /// 产品展示信息（作为 fallback）
 const _kProductFallback = [
-  _PlanInfo(id: 'miaojidou_500', times: 500, price: '¥25', unitPrice: '0.05'),
+  _PlanInfo(id: 'miaojidou_500', times: 500, price: '¥12', unitPrice: '0.024'),
   _PlanInfo(
     id: 'miaojidou_1000',
     times: 1000,
-    price: '¥45',
-    unitPrice: '0.045',
+    price: '¥22',
+    unitPrice: '0.022',
   ),
   _PlanInfo(
     id: 'miaojidou_5000',
     times: 5000,
-    price: '¥215',
-    unitPrice: '0.043',
+    price: '¥100',
+    unitPrice: '0.02',
   ),
 ];
 
@@ -763,6 +763,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 }
 
+/// 预设助手性格选项
+enum _PersonaPreset { warm, concise, humorous, custom }
+
 class _AssistantPersonaSheet extends StatefulWidget {
   final String initialPersona;
   final Future<void> Function(String value) onSave;
@@ -779,6 +782,37 @@ class _AssistantPersonaSheet extends StatefulWidget {
 class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
   late final TextEditingController _controller;
   bool _saving = false;
+  _PersonaPreset _selected = _PersonaPreset.custom;
+
+  /// 获取预设对应的 prompt 文本
+  String _presetPrompt(_PersonaPreset preset) {
+    final l10n = context.l10n;
+    switch (preset) {
+      case _PersonaPreset.warm:
+        return l10n.assistantPersonaPresetWarmPrompt;
+      case _PersonaPreset.concise:
+        return l10n.assistantPersonaPresetConcisePrompt;
+      case _PersonaPreset.humorous:
+        return l10n.assistantPersonaPresetHumorousPrompt;
+      case _PersonaPreset.custom:
+        return '';
+    }
+  }
+
+  /// 根据当前已保存的 persona 文本，匹配预设项
+  _PersonaPreset _matchPreset(String persona) {
+    final l10n = context.l10n;
+    if (persona == l10n.assistantPersonaPresetWarmPrompt) {
+      return _PersonaPreset.warm;
+    }
+    if (persona == l10n.assistantPersonaPresetConcisePrompt) {
+      return _PersonaPreset.concise;
+    }
+    if (persona == l10n.assistantPersonaPresetHumorousPrompt) {
+      return _PersonaPreset.humorous;
+    }
+    return _PersonaPreset.custom;
+  }
 
   @override
   void initState() {
@@ -787,15 +821,41 @@ class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _selected = _matchPreset(widget.initialPersona);
+    // 自定义模式时保留原文本，预设模式时不需要编辑框文本
+    if (_selected != _PersonaPreset.custom) {
+      _controller.text = '';
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  void _selectPreset(_PersonaPreset preset) {
+    setState(() {
+      _selected = preset;
+      if (preset != _PersonaPreset.custom) {
+        _controller.text = '';
+      }
+    });
+  }
+
+  String get _currentPersonaValue {
+    if (_selected == _PersonaPreset.custom) {
+      return _controller.text;
+    }
+    return _presetPrompt(_selected);
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     setState(() => _saving = true);
-    await widget.onSave(_controller.text);
+    await widget.onSave(_currentPersonaValue);
     if (!mounted) return;
     Navigator.of(context).pop(true);
   }
@@ -805,6 +865,30 @@ class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
     final l10n = context.l10n;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPad = MediaQuery.of(context).padding.bottom;
+
+    final presets = [
+      (
+        key: _PersonaPreset.warm,
+        icon: Icons.favorite_rounded,
+        color: const Color(0xFFE8836B),
+        title: l10n.assistantPersonaPresetWarm,
+        desc: l10n.assistantPersonaPresetWarmDesc,
+      ),
+      (
+        key: _PersonaPreset.concise,
+        icon: Icons.bolt_rounded,
+        color: const Color(0xFF5B8C5A),
+        title: l10n.assistantPersonaPresetConcise,
+        desc: l10n.assistantPersonaPresetConciseDesc,
+      ),
+      (
+        key: _PersonaPreset.humorous,
+        icon: Icons.sentiment_very_satisfied_rounded,
+        color: const Color(0xFFD4A24C),
+        title: l10n.assistantPersonaPresetHumorous,
+        desc: l10n.assistantPersonaPresetHumorousDesc,
+      ),
+    ];
 
     return AnimatedPadding(
       duration: const Duration(milliseconds: 120),
@@ -822,6 +906,7 @@ class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 拖拽条
                 Center(
                   child: Container(
                     width: 36,
@@ -849,43 +934,94 @@ class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
                     color: MiaojiColors.textTertiary,
                   ),
                 ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: _controller,
-                  maxLines: 6,
-                  minLines: 4,
-                  decoration: InputDecoration(
-                    hintText: l10n.assistantPersonaHint,
-                    hintStyle: const TextStyle(
-                      color: MiaojiColors.textHint,
-                      fontSize: 13,
-                    ),
-                    filled: true,
-                    fillColor: MiaojiColors.surfaceVariant,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: MiaojiColors.borderLight,
-                        width: 1,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: MiaojiColors.borderLight,
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: MiaojiColors.primary,
-                        width: 1.5,
-                      ),
+                const SizedBox(height: 16),
+
+                // ── 预设选项 ──
+                Text(
+                  l10n.assistantPersonaPresetLabel,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: MiaojiColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ...presets.map(
+                  (p) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _PresetCard(
+                      icon: p.icon,
+                      color: p.color,
+                      title: p.title,
+                      description: p.desc,
+                      selected: _selected == p.key,
+                      onTap: () => _selectPreset(p.key),
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+
+                // ── 自定义选项 ──
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _PresetCard(
+                    icon: Icons.edit_rounded,
+                    color: const Color(0xFF6B8DD6),
+                    title: l10n.assistantPersonaCustomLabel,
+                    description: null,
+                    selected: _selected == _PersonaPreset.custom,
+                    onTap: () => _selectPreset(_PersonaPreset.custom),
+                  ),
+                ),
+
+                // 自定义输入框（仅选中自定义时展示）
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: _selected == _PersonaPreset.custom
+                      ? Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: TextField(
+                            controller: _controller,
+                            maxLines: 4,
+                            minLines: 3,
+                            style: const TextStyle(fontSize: 13),
+                            decoration: InputDecoration(
+                              hintText: l10n.assistantPersonaCustomPlaceholder,
+                              hintStyle: const TextStyle(
+                                color: MiaojiColors.textHint,
+                                fontSize: 13,
+                              ),
+                              filled: true,
+                              fillColor: MiaojiColors.surfaceVariant,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: MiaojiColors.borderLight,
+                                  width: 1,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: MiaojiColors.borderLight,
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: MiaojiColors.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
@@ -908,6 +1044,90 @@ class _AssistantPersonaSheetState extends State<_AssistantPersonaSheet> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 预设性格选项卡片
+class _PresetCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String? description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PresetCard({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.08) : MiaojiColors.card,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? color.withValues(alpha: 0.5)
+                : MiaojiColors.borderLight,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: selected ? 0.15 : 0.08),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(icon, size: 18, color: color),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: selected ? color : MiaojiColors.textPrimary,
+                    ),
+                  ),
+                  if (description != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      description!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: MiaojiColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            AnimatedOpacity(
+              opacity: selected ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 150),
+              child: Icon(Icons.check_circle_rounded, size: 20, color: color),
+            ),
+          ],
         ),
       ),
     );

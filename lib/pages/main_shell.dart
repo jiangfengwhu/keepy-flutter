@@ -43,10 +43,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: _BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -60,10 +57,7 @@ class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _BottomNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -84,42 +78,39 @@ class _BottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 8,
-            right: 8,
-            top: 16,
-            bottom: 8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                icon: Icons.menu_book_outlined,
-                activeIcon: Icons.menu_book_rounded,
-                label: context.l10n.navHome,
-                isSelected: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
-              _NavItem(
-                icon: Icons.edit_note_outlined,
-                activeIcon: Icons.edit_note_rounded,
-                label: context.l10n.navAssistant,
-                isSelected: false,
-                isSpecial: true,
-                onTap: () => onTap(1),
-              ),
-              _NavItem(
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: context.l10n.navProfile,
-                isSelected: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-            ],
-          ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 8,
+          right: 8,
+          top: 8,
+          bottom: MediaQuery.of(context).viewPadding.bottom * 0.55,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _NavItem(
+              icon: Icons.menu_book_outlined,
+              activeIcon: Icons.menu_book_rounded,
+              label: context.l10n.navHome,
+              isSelected: currentIndex == 0,
+              onTap: () => onTap(0),
+            ),
+            _NavItem(
+              icon: Icons.edit_note_outlined,
+              activeIcon: Icons.edit_note_rounded,
+              label: context.l10n.navAssistant,
+              isSelected: false,
+              isSpecial: true,
+              onTap: () => onTap(1),
+            ),
+            _NavItem(
+              icon: Icons.person_outline_rounded,
+              activeIcon: Icons.person_rounded,
+              label: context.l10n.navProfile,
+              isSelected: currentIndex == 2,
+              onTap: () => onTap(2),
+            ),
+          ],
         ),
       ),
     );
@@ -169,8 +160,7 @@ class _NavItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF5A4532)
-                              .withValues(alpha: 0.3),
+                          color: const Color(0xFF5A4532).withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -188,8 +178,8 @@ class _NavItem extends StatelessWidget {
                 color: isSpecial
                     ? const Color(0xFFD4A24C)
                     : isSelected
-                        ? MiaojiColors.primary
-                        : MiaojiColors.textTertiary,
+                    ? MiaojiColors.primary
+                    : MiaojiColors.textTertiary,
               ),
             ),
             const SizedBox(height: 3),
@@ -203,8 +193,8 @@ class _NavItem extends StatelessWidget {
                 color: isSpecial
                     ? MiaojiColors.primaryDark
                     : isSelected
-                        ? MiaojiColors.primary
-                        : MiaojiColors.textTertiary,
+                    ? MiaojiColors.primary
+                    : MiaojiColors.textTertiary,
               ),
             ),
           ],

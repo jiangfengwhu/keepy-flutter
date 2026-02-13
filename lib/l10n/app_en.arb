@@ -428,6 +428,18 @@
   "assistantPersonaTitle": "Assistant Persona",
   "assistantPersonaHint": "Example: You are a warm and concise note assistant. Encourage first, then provide clear steps.",
   "assistantPersonaSaved": "Assistant persona saved",
+  "assistantPersonaPresetLabel": "Choose a preset style",
+  "assistantPersonaCustomLabel": "Custom",
+  "assistantPersonaCustomPlaceholder": "Enter a custom assistant persona description…",
+  "assistantPersonaPresetWarm": "Warm & Caring",
+  "assistantPersonaPresetWarmDesc": "Gentle, encouraging & positive",
+  "assistantPersonaPresetWarmPrompt": "You are a warm and caring companion. Always acknowledge the user's efforts and progress first, give advice in a gentle tone, find the beauty in everyday life, and fill every interaction with positive energy.",
+  "assistantPersonaPresetConcise": "Concise & Efficient",
+  "assistantPersonaPresetConciseDesc": "Direct, to-the-point, no fluff",
+  "assistantPersonaPresetConcisePrompt": "You are a sharp and efficient assistant. Keep responses brief and to-the-point. Use bullet points and lists to organize information. Help the user think clearly and act fast.",
+  "assistantPersonaPresetHumorous": "Humorous & Fun",
+  "assistantPersonaPresetHumorousDesc": "Witty, playful & lighthearted",
+  "assistantPersonaPresetHumorousPrompt": "You are a humorous and witty chat buddy. Respond in a lighthearted way, sprinkle in jokes and fun metaphors, and make the whole experience enjoyable while still being helpful.",
   "purchaseFailed": "Purchase failed: {message}",
   "@purchaseFailed": {
     "placeholders": {
@@ -574,5 +586,13 @@
   "fieldTypeText": "Text",
   "fieldTypeNumber": "Number",
   "fieldTypeDate": "Date",
-  "unnamedNotebook": "Untitled Notebook"
+  "unnamedNotebook": "Untitled Notebook",
+  "onboardingTicketTitle": "Your Unique Credential",
+  "onboardingTicketDesc": "Please save the ID below. It is the only way to restore your purchases. We recommend taking a screenshot or copying it.",
+  "onboardingTicketCopy": "Copy ID",
+  "onboardingTicketCopied": "Copied to clipboard",
+  "onboardingTicketFailed": "Failed to get credential",
+  "onboardingTicketFailedDesc": "Unable to get your ID. Please check your network and try again.",
+  "onboardingTicketRetry": "Retry",
+  "onboardingTicketLoading": "Getting your credential..."
 }

@@ -807,6 +807,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get assistantPersonaSaved => '助手性格已保存';
 
   @override
+  String get assistantPersonaPresetLabel => '选择预设风格';
+
+  @override
+  String get assistantPersonaCustomLabel => '自定义';
+
+  @override
+  String get assistantPersonaCustomPlaceholder => '输入自定义助手性格描述…';
+
+  @override
+  String get assistantPersonaPresetWarm => '温暖鼓励';
+
+  @override
+  String get assistantPersonaPresetWarmDesc => '温柔体贴，善于鼓励';
+
+  @override
+  String get assistantPersonaPresetWarmPrompt =>
+      '你是一个温暖体贴的记录伙伴。回复时先肯定用户的努力和进步，用温柔的语气给出建议，善于发现生活中的美好，让每次互动都充满正能量。';
+
+  @override
+  String get assistantPersonaPresetConcise => '简洁高效';
+
+  @override
+  String get assistantPersonaPresetConciseDesc => '干练直接，不废话';
+
+  @override
+  String get assistantPersonaPresetConcisePrompt =>
+      '你是一个干练高效的助手。回复简洁明了，直奔重点，不废话。用清单和要点组织信息，帮助用户快速理清思路、高效行动。';
+
+  @override
+  String get assistantPersonaPresetHumorous => '幽默风趣';
+
+  @override
+  String get assistantPersonaPresetHumorousDesc => '轻松诙谐，妙语连珠';
+
+  @override
+  String get assistantPersonaPresetHumorousPrompt =>
+      '你是一个幽默风趣的聊天搭子。喜欢用轻松诙谐的方式回应，偶尔来点俏皮话或有趣的比喻，在帮助用户的同时让整个过程变得有趣好玩。';
+
+  @override
   String purchaseFailed(Object message) {
     return '购买失败：$message';
   }
@@ -1100,4 +1139,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unnamedNotebook => '未命名小本';
+
+  @override
+  String get onboardingTicketTitle => '您的专属凭证';
+
+  @override
+  String get onboardingTicketDesc => '请妥善保存以下 ID，它是您恢复内购的唯一凭证。建议截图或复制保存。';
+
+  @override
+  String get onboardingTicketCopy => '复制 ID';
+
+  @override
+  String get onboardingTicketCopied => '已复制到剪贴板';
+
+  @override
+  String get onboardingTicketFailed => '凭证获取失败';
+
+  @override
+  String get onboardingTicketFailedDesc => '无法获取您的 ID，请检查网络后重试';
+
+  @override
+  String get onboardingTicketRetry => '重试';
+
+  @override
+  String get onboardingTicketLoading => '正在获取您的专属凭证…';
 }

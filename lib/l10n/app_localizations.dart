@@ -1460,6 +1460,78 @@ abstract class AppLocalizations {
   /// **'Assistant persona saved'**
   String get assistantPersonaSaved;
 
+  /// No description provided for @assistantPersonaPresetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a preset style'**
+  String get assistantPersonaPresetLabel;
+
+  /// No description provided for @assistantPersonaCustomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get assistantPersonaCustomLabel;
+
+  /// No description provided for @assistantPersonaCustomPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a custom assistant persona description…'**
+  String get assistantPersonaCustomPlaceholder;
+
+  /// No description provided for @assistantPersonaPresetWarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm & Caring'**
+  String get assistantPersonaPresetWarm;
+
+  /// No description provided for @assistantPersonaPresetWarmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle, encouraging & positive'**
+  String get assistantPersonaPresetWarmDesc;
+
+  /// No description provided for @assistantPersonaPresetWarmPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a warm and caring companion. Always acknowledge the user\'s efforts and progress first, give advice in a gentle tone, find the beauty in everyday life, and fill every interaction with positive energy.'**
+  String get assistantPersonaPresetWarmPrompt;
+
+  /// No description provided for @assistantPersonaPresetConcise.
+  ///
+  /// In en, this message translates to:
+  /// **'Concise & Efficient'**
+  String get assistantPersonaPresetConcise;
+
+  /// No description provided for @assistantPersonaPresetConciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct, to-the-point, no fluff'**
+  String get assistantPersonaPresetConciseDesc;
+
+  /// No description provided for @assistantPersonaPresetConcisePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a sharp and efficient assistant. Keep responses brief and to-the-point. Use bullet points and lists to organize information. Help the user think clearly and act fast.'**
+  String get assistantPersonaPresetConcisePrompt;
+
+  /// No description provided for @assistantPersonaPresetHumorous.
+  ///
+  /// In en, this message translates to:
+  /// **'Humorous & Fun'**
+  String get assistantPersonaPresetHumorous;
+
+  /// No description provided for @assistantPersonaPresetHumorousDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Witty, playful & lighthearted'**
+  String get assistantPersonaPresetHumorousDesc;
+
+  /// No description provided for @assistantPersonaPresetHumorousPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a humorous and witty chat buddy. Respond in a lighthearted way, sprinkle in jokes and fun metaphors, and make the whole experience enjoyable while still being helpful.'**
+  String get assistantPersonaPresetHumorousPrompt;
+
   /// No description provided for @purchaseFailed.
   ///
   /// In en, this message translates to:
@@ -2005,6 +2077,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled Notebook'**
   String get unnamedNotebook;
+
+  /// No description provided for @onboardingTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Unique Credential'**
+  String get onboardingTicketTitle;
+
+  /// No description provided for @onboardingTicketDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please save the ID below. It is the only way to restore your purchases. We recommend taking a screenshot or copying it.'**
+  String get onboardingTicketDesc;
+
+  /// No description provided for @onboardingTicketCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy ID'**
+  String get onboardingTicketCopy;
+
+  /// No description provided for @onboardingTicketCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get onboardingTicketCopied;
+
+  /// No description provided for @onboardingTicketFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to get credential'**
+  String get onboardingTicketFailed;
+
+  /// No description provided for @onboardingTicketFailedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to get your ID. Please check your network and try again.'**
+  String get onboardingTicketFailedDesc;
+
+  /// No description provided for @onboardingTicketRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get onboardingTicketRetry;
+
+  /// No description provided for @onboardingTicketLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your credential...'**
+  String get onboardingTicketLoading;
 }
 
 class _AppLocalizationsDelegate

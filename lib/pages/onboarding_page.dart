@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_ext.dart';
 import '../theme/miaoji_theme.dart';
+import '../services/ticket_service.dart';
 import 'user_agreement_page.dart';
 import 'privacy_policy_page.dart';
 import 'main_shell.dart';
@@ -17,6 +19,11 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+
+  // Ticket 相关状态
+  String? _ticketId;
+  bool _ticketLoading = false;
+  bool _ticketFailed = false;
 
   List<_OnboardingData> get _pages => _getPages();
 
@@ -51,6 +58,46 @@ class _OnboardingPageState extends State<OnboardingPage> {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  /// 当滑到最后一页时获取 ticket
+  void _fetchTicketIfNeeded() {
+    if (_ticketId != null || _ticketLoading) return;
+    _fetchTicket();
+  }
+
+  Future<void> _fetchTicket() async {
+    setState(() {
+      _ticketLoading = true;
+      _ticketFailed = false;
+    });
+    try {
+      final id = await TicketService().getTicketId();
+      if (!mounted) return;
+      setState(() {
+        _ticketId = id;
+        _ticketLoading = false;
+        _ticketFailed = id == null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _ticketLoading = false;
+        _ticketFailed = true;
+      });
+    }
+  }
+
+  void _copyTicketId() {
+    if (_ticketId == null) return;
+    Clipboard.setData(ClipboardData(text: _ticketId!));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.onboardingTicketCopied),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _completeOnboarding() async {
@@ -114,12 +161,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 itemCount: pages.length,
                 onPageChanged: (index) {
                   setState(() => _currentPage = index);
+                  // 滑到最后一页时自动获取 ticket
+                  if (index == pages.length - 1) {
+                    _fetchTicketIfNeeded();
+                  }
                 },
                 itemBuilder: (context, index) {
-                  return _buildPage(pages[index], index == pages.length - 1);
+                  final isLastPage = index == pages.length - 1;
+                  if (isLastPage) {
+                    return _buildLastPageContent(pages[index]);
+                  }
+                  return _buildPage(pages[index]);
                 },
               ),
             ),
+
+            // 最后一页：协议文字放在指示器上方
+            if (_currentPage == pages.length - 1) _buildAgreementText(),
 
             // 页面指示器
             _buildPageIndicator(),
@@ -130,7 +188,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: _currentPage == pages.length - 1
-                  ? _buildLastPageButtons()
+                  ? _buildStartButton()
                   : _buildNextButton(),
             ),
 
@@ -141,7 +199,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _buildPage(_OnboardingData data, bool isLastPage) {
+  Widget _buildPage(_OnboardingData data) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
@@ -207,6 +265,256 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
+  /// 最后一页：展示 ticket ID 凭证信息
+  Widget _buildLastPageContent(_OnboardingData data) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 图标
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: MiaojiColors.card,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: MiaojiColors.borderLight,
+                width: 1,
+              ),
+              boxShadow: MiaojiShadows.md,
+            ),
+            child: Icon(
+              data.icon,
+              size: 56,
+              color: MiaojiColors.primary,
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // 标题
+          Text(
+            data.title,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: MiaojiColors.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // 副标题
+          Text(
+            data.subtitle,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: MiaojiColors.primary,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Ticket 凭证区域
+          _buildTicketSection(l10n),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 Ticket 凭证展示区域
+  Widget _buildTicketSection(dynamic l10n) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: MiaojiColors.card,
+        borderRadius: BorderRadius.circular(MiaojiRadius.md),
+        border: Border.all(
+          color: MiaojiColors.borderLight,
+          width: 1,
+        ),
+        boxShadow: MiaojiShadows.sm,
+      ),
+      child: Column(
+        children: [
+          // 凭证标题
+          Row(
+            children: [
+              Icon(
+                Icons.vpn_key_rounded,
+                size: 18,
+                color: MiaojiColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.onboardingTicketTitle,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: MiaojiColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // 说明文字
+          Text(
+            l10n.onboardingTicketDesc,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: MiaojiColors.textTertiary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Ticket ID 显示区域
+          if (_ticketLoading)
+            _buildTicketLoading(l10n)
+          else if (_ticketFailed || _ticketId == null)
+            _buildTicketError(l10n)
+          else
+            _buildTicketDisplay(l10n),
+        ],
+      ),
+    );
+  }
+
+  /// 加载中状态
+  Widget _buildTicketLoading(dynamic l10n) {
+    return Column(
+      children: [
+        const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: MiaojiColors.primary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.onboardingTicketLoading,
+          style: const TextStyle(
+            fontSize: 13,
+            color: MiaojiColors.textTertiary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 失败状态
+  Widget _buildTicketError(dynamic l10n) {
+    return Column(
+      children: [
+        Icon(
+          Icons.error_outline_rounded,
+          size: 36,
+          color: Colors.red.shade400,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.onboardingTicketFailed,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.red.shade400,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.onboardingTicketFailedDesc,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 12,
+            color: MiaojiColors.textTertiary,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 36,
+          child: OutlinedButton.icon(
+            onPressed: _fetchTicket,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: Text(l10n.onboardingTicketRetry),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: MiaojiColors.primary,
+              side: BorderSide(color: MiaojiColors.primary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(MiaojiRadius.sm),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 成功展示 Ticket ID
+  Widget _buildTicketDisplay(dynamic l10n) {
+    return Column(
+      children: [
+        // Ticket ID 展示框
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: MiaojiColors.background,
+            borderRadius: BorderRadius.circular(MiaojiRadius.sm),
+            border: Border.all(
+              color: MiaojiColors.primary.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            _ticketId!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: MiaojiColors.textPrimary,
+              fontFamily: 'monospace',
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // 复制按钮
+        SizedBox(
+          height: 36,
+          child: OutlinedButton.icon(
+            onPressed: _copyTicketId,
+            icon: const Icon(Icons.copy_rounded, size: 16),
+            label: Text(l10n.onboardingTicketCopy),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: MiaojiColors.primary,
+              side: BorderSide(color: MiaojiColors.primary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(MiaojiRadius.sm),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPageIndicator() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -253,93 +561,95 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _buildLastPageButtons() {
-    return Column(
-      children: [
-        // 协议文字
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            children: [
-              Text(
-                context.l10n.onboardingAgreementPrefix,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: MiaojiColors.textTertiary,
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UserAgreementPage(),
-                    ),
-                  );
-                },
-                child: Text(
-                  context.l10n.onboardingAgreementUserAgreement,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: MiaojiColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Text(
-                context.l10n.onboardingAgreementAnd,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: MiaojiColors.textTertiary,
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PrivacyPolicyPage(),
-                    ),
-                  );
-                },
-                child: Text(
-                  context.l10n.onboardingAgreementPrivacyPolicy,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: MiaojiColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // 同意并开始按钮
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: _completeOnboarding,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MiaojiColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(MiaojiRadius.md),
-              ),
+  /// 协议文字（放在页面指示器上方）
+  Widget _buildAgreementText() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        children: [
+          Text(
+            context.l10n.onboardingAgreementPrefix,
+            style: TextStyle(
+              fontSize: 12,
+              color: MiaojiColors.textTertiary,
             ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const UserAgreementPage(),
+                ),
+              );
+            },
             child: Text(
-              context.l10n.onboardingAgreeAndStart,
+              context.l10n.onboardingAgreementUserAgreement,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
+                color: MiaojiColors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
+          Text(
+            context.l10n.onboardingAgreementAnd,
+            style: TextStyle(
+              fontSize: 12,
+              color: MiaojiColors.textTertiary,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyPolicyPage(),
+                ),
+              );
+            },
+            child: Text(
+              context.l10n.onboardingAgreementPrivacyPolicy,
+              style: TextStyle(
+                fontSize: 12,
+                color: MiaojiColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 同意并开始按钮（ticket 失败时禁用）
+  Widget _buildStartButton() {
+    final canProceed = _ticketId != null && !_ticketLoading;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: canProceed ? _completeOnboarding : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: MiaojiColors.primary,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: MiaojiColors.primary.withValues(alpha: 0.4),
+          disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(MiaojiRadius.md),
+          ),
         ),
-      ],
+        child: Text(
+          context.l10n.onboardingAgreeAndStart,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }

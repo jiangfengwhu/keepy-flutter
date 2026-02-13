@@ -144,14 +144,16 @@ class HomePageState extends State<HomePage>
             : (result.success
                   ? l10n.checkinSuccessFallback
                   : l10n.checkinFailedFallback));
+    final isAlreadyCheckedIn =
+        result.errorType == CheckinErrorType.alreadyCheckedIn;
     setState(() {
       _checkinSubmitting = false;
-      if (result.success) {
+      if (result.success || isAlreadyCheckedIn) {
         _checkedInToday = true;
-        _checkinSuccessAnimating = true;
+        if (result.success) _checkinSuccessAnimating = true;
       }
     });
-    AppToast.show(toastMessage);
+    if (!isAlreadyCheckedIn) AppToast.show(toastMessage);
     if (result.success) {
       _checkinLikeController.forward(from: 0);
       Future.delayed(const Duration(milliseconds: 900), () {
@@ -752,37 +754,44 @@ class HomePageState extends State<HomePage>
               ),
             ),
             const SizedBox(width: 8),
-            if (_checkinSubmitting)
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 1.8,
-                  color: Color(0xFFD4A24C),
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDone
-                      ? const Color(0xFFECFDF5)
-                      : const Color.fromARGB(255, 229, 192, 192),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  isDone
-                      ? context.l10n.checkinDone
-                      : context.l10n.checkinAction,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: isDone
-                        ? const Color(0xFF22C55E)
-                        : const Color.fromARGB(255, 131, 77, 105),
-                  ),
-                ),
-              ),
+            SizedBox(
+              height: 20,
+              child: _checkinSubmitting
+                  ? const Center(
+                      child: SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.8,
+                          color: Color(0xFFD4A24C),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDone
+                            ? const Color(0xFFECFDF5)
+                            : const Color.fromARGB(255, 229, 192, 192),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        isDone
+                            ? context.l10n.checkinDone
+                            : context.l10n.checkinAction,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: isDone
+                              ? const Color(0xFF22C55E)
+                              : const Color.fromARGB(255, 131, 77, 105),
+                        ),
+                      ),
+                    ),
+            ),
           ],
         ),
       ),
