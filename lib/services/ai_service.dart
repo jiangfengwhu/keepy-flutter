@@ -18,17 +18,28 @@ class TextEvent extends StreamEvent {
   TextEvent(this.text);
 }
 
-/// Tool call 开始
+/// Tool call 开始（本地或服务端）
 class ToolCallStartEvent extends StreamEvent {
   final String name;
-  ToolCallStartEvent(this.name);
+  final bool isServer;
+  final String message; // 服务端 tool 的提示文案
+  ToolCallStartEvent(this.name, {this.isServer = false, this.message = ''});
 }
 
-/// Tool call 数据（完整参数）
+/// Tool call 数据（本地执行用 args，服务端用 message/success）
 class ToolCallEvent extends StreamEvent {
   final String name;
   final String args;
-  ToolCallEvent(this.name, this.args);
+  final bool isServer;
+  final String message; // 服务端 tool 的结果描述
+  final bool success; // 服务端 tool 是否成功
+  ToolCallEvent(
+    this.name,
+    this.args, {
+    this.isServer = false,
+    this.message = '',
+    this.success = false,
+  });
 }
 
 /// 流结束
@@ -145,11 +156,18 @@ class AiService {
         case 'text':
           return TextEvent(json['data'] as String? ?? '');
         case 'toolcall_start':
-          return ToolCallStartEvent(json['name'] as String? ?? '');
+          return ToolCallStartEvent(
+            json['name'] as String? ?? '',
+            isServer: json['is_server'] as bool? ?? false,
+            message: json['message'] as String? ?? '',
+          );
         case 'toolcall':
           return ToolCallEvent(
             json['name'] as String? ?? '',
             json['args'] as String? ?? '',
+            isServer: json['is_server'] as bool? ?? false,
+            message: json['message'] as String? ?? '',
+            success: json['success'] as bool? ?? false,
           );
         default:
           debugPrint('未知流事件类型: $type → $line');

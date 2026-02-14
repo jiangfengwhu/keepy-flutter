@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:convert';
-import '../services/tool_executor.dart';
+import '../services/tool_executor.dart' show ToolResult, ServerToolStatus;
 
 /// 多模态消息内容部分
 class ContentPart {
@@ -69,6 +69,9 @@ class ChatMessage {
   /// Tool call 执行结果（UI 展示用，不序列化）
   List<ToolResult>? toolResults;
 
+  /// 服务端 Tool 执行状态列表（UI 展示用，不序列化）
+  List<ServerToolStatus>? serverToolStatuses;
+
   ChatMessage({
     required this.role,
     this.content = '',
@@ -78,6 +81,7 @@ class ChatMessage {
     this.isStreaming = false,
     this.displayContent,
     this.toolResults,
+    this.serverToolStatuses,
   });
 
   bool get isUser => role == 'user';

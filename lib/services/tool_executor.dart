@@ -23,6 +23,28 @@ class ToolResult {
   });
 }
 
+/// 服务端 Tool 执行状态（用于 UI 展示）
+class ServerToolStatus {
+  final String name;
+  String message;
+  bool isRunning;
+  bool? success; // null = 运行中, true = 成功, false = 失败
+
+  ServerToolStatus({
+    required this.name,
+    required this.message,
+    this.isRunning = true,
+    this.success,
+  });
+
+  /// 标记执行完成
+  void complete({required bool succeeded, required String endMessage}) {
+    isRunning = false;
+    success = succeeded;
+    message = endMessage;
+  }
+}
+
 /// 本地 Tool 执行器
 class ToolExecutor {
   final DatabaseService _db = DatabaseService();

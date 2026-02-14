@@ -50,6 +50,11 @@ class ChatMessageBubble extends StatelessWidget {
                 // 文本消息
                 if (message.content.isNotEmpty || message.isStreaming)
                   _buildTextBubble(isUser),
+                // 服务端 tool 状态指示
+                if (message.serverToolStatuses != null &&
+                    message.serverToolStatuses!.isNotEmpty)
+                  _ServerToolStatusList(
+                      statuses: message.serverToolStatuses!),
                 if (message.toolResults != null &&
                     message.toolResults!.isNotEmpty)
                   ...message.toolResults!
@@ -1058,6 +1063,131 @@ class _ToolCardWrapper extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  服务端 Tool 状态列表（搜索、URL 抓取等）
+// ═══════════════════════════════════════════════
+
+class _ServerToolStatusList extends StatelessWidget {
+  final List<ServerToolStatus> statuses;
+  const _ServerToolStatusList({required this.statuses});
+
+  /// 根据 tool name 返回对应图标
+  static IconData _iconForTool(String name) {
+    return switch (name) {
+      'web_search' => Icons.search_rounded,
+      'url_to_markdown' => Icons.link_rounded,
+      _ => Icons.build_circle_outlined,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: statuses.map((s) => _buildItem(s)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildItem(ServerToolStatus status) {
+    final Color color;
+    final IconData stateIcon;
+
+    if (status.isRunning) {
+      color = const Color(0xFFD4A24C); // 运行中 — 主题金色
+      stateIcon = _iconForTool(status.name);
+    } else if (status.success == true) {
+      color = MiaojiColors.success;
+      stateIcon = Icons.check_circle_rounded;
+    } else {
+      color = MiaojiColors.error;
+      stateIcon = Icons.error_rounded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: color.withValues(alpha: 0.15),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (status.isRunning)
+              _ServerToolSpinner(color: color)
+            else
+              Icon(stateIcon, size: 14, color: color),
+            const SizedBox(width: 8),
+            Icon(_iconForTool(status.name), size: 13, color: color),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                status.message,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 服务端 tool 运行中旋转指示器
+class _ServerToolSpinner extends StatefulWidget {
+  final Color color;
+  const _ServerToolSpinner({required this.color});
+
+  @override
+  State<_ServerToolSpinner> createState() => _ServerToolSpinnerState();
+}
+
+class _ServerToolSpinnerState extends State<_ServerToolSpinner>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 14,
+      height: 14,
+      child: CircularProgressIndicator(
+        strokeWidth: 1.6,
+        color: widget.color,
       ),
     );
   }

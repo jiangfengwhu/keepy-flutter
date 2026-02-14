@@ -350,7 +350,7 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
     setState(() => _chatHistory.add(assistantMsg));
     _scrollToBottom();
 
-    // 收集本次流中的所有 tool calls
+    // 收集本次流中的本地 tool calls
     final pendingToolCalls = <(String id, String name, String args)>[];
 
     final completer = Completer<void>();
@@ -366,25 +366,53 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
                 setState(() => assistantMsg.content += text);
                 _scrollToBottom();
 
-              case ToolCallStartEvent():
-                break;
+              case ToolCallStartEvent(:final isServer, :final name, :final message):
+                if (isServer) {
+                  // 服务端 tool 开始 → 显示状态
+                  setState(() {
+                    assistantMsg.serverToolStatuses ??= [];
+                    assistantMsg.serverToolStatuses!.add(
+                      ServerToolStatus(name: name, message: message),
+                    );
+                  });
+                  _scrollToBottom();
+                }
 
-              case ToolCallEvent(:final name, :final args):
-                final toolCallId =
-                    'call_${DateTime.now().microsecondsSinceEpoch}';
-                pendingToolCalls.add((toolCallId, name, args));
+              case ToolCallEvent(:final isServer, :final name, :final args, :final message, :final success):
+                if (isServer) {
+                  // 服务端 tool 完成 → 更新状态
+                  setState(() {
+                    final statuses = assistantMsg.serverToolStatuses;
+                    if (statuses != null) {
+                      final idx = statuses.lastIndexWhere(
+                        (s) => s.name == name && s.isRunning,
+                      );
+                      if (idx != -1) {
+                        statuses[idx].complete(
+                          succeeded: success,
+                          endMessage: message,
+                        );
+                      }
+                    }
+                  });
+                  _scrollToBottom();
+                } else {
+                  // 本地 tool → 收集待执行
+                  final toolCallId =
+                      'call_${DateTime.now().microsecondsSinceEpoch}';
+                  pendingToolCalls.add((toolCallId, name, args));
 
-                // 在 assistant 消息上记录 tool calls（用于序列化给 AI）
-                setState(() {
-                  assistantMsg.toolCalls ??= [];
-                  assistantMsg.toolCalls!.add(
-                    ToolCallInfo(
-                      id: toolCallId,
-                      function: ToolCallFunction(name: name, arguments: args),
-                    ),
-                  );
-                });
-                _scrollToBottom();
+                  setState(() {
+                    assistantMsg.toolCalls ??= [];
+                    assistantMsg.toolCalls!.add(
+                      ToolCallInfo(
+                        id: toolCallId,
+                        function: ToolCallFunction(name: name, arguments: args),
+                      ),
+                    );
+                  });
+                  _scrollToBottom();
+                }
 
               case StreamDoneEvent():
                 setState(() => assistantMsg.isStreaming = false);
