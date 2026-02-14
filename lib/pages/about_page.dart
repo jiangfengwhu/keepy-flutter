@@ -81,10 +81,7 @@ class _AboutPageState extends State<AboutPage> {
             // 版本号
             Text(
               _version.isNotEmpty
-                  ? context.l10n.aboutVersionInfo(
-                      _version,
-                      _buildNumber,
-                    )
+                  ? context.l10n.aboutVersionInfo(_version, _buildNumber)
                   : context.l10n.aboutVersionLoading,
               style: const TextStyle(
                 fontSize: 14,
@@ -220,10 +217,10 @@ class _AboutPageState extends State<AboutPage> {
           style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
         ),
         const SizedBox(height: 6),
-        Text(
-          context.l10n.aboutIcp,
-          style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
-        ),
+        // Text(
+        //   context.l10n.aboutIcp,
+        //   style: const TextStyle(fontSize: 12, color: MiaojiColors.textHint),
+        // ),
         const SizedBox(height: 4),
         Text(
           context.l10n.aboutSupportEmail,

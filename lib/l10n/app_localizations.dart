@@ -269,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutSupportEmail.
   ///
   /// In en, this message translates to:
-  /// **'Support Email: support@miaoji.app'**
+  /// **'Support Email: 809740942@qq.com'**
   String get aboutSupportEmail;
 
   /// No description provided for @privacyPolicyHeader.
@@ -683,7 +683,7 @@ abstract class AppLocalizations {
   /// No description provided for @userAgreementSection9Content.
   ///
   /// In en, this message translates to:
-  /// **'If you have any questions or suggestions about this Agreement, please contact us:\n\nApp name: Miaoji\nEmail: support@miaoji.app\n\nThank you for choosing Miaoji. Enjoy!'**
+  /// **'If you have any questions or suggestions about this Agreement, please contact us:\n\nApp name: Miaoji\nEmail: 809740942@qq.com\n\nThank you for choosing Miaoji. Enjoy!'**
   String get userAgreementSection9Content;
 
   /// No description provided for @homeTitle.

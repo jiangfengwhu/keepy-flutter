@@ -97,7 +97,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutIcp => 'ICP备案号：京ICP备XXXXXXXX号-X';
 
   @override
-  String get aboutSupportEmail => '联系邮箱：support@miaoji.app';
+  String get aboutSupportEmail => '联系邮箱：809740942@qq.com';
 
   @override
   String get privacyPolicyHeader => '妙记隐私政策';
@@ -343,7 +343,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get userAgreementSection9Content =>
-      '如您对本协议有任何疑问或建议，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：support@miaoji.app\n\n感谢您选择妙记，祝您使用愉快！';
+      '如您对本协议有任何疑问或建议，请通过以下方式联系我们：\n\n应用名称：妙记\n邮箱：809740942@qq.com\n\n感谢您选择妙记，祝您使用愉快！';
 
   @override
   String get homeTitle => '妙记';

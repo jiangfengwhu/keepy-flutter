@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutIcp => 'ICP Filing No.: Jing ICP XXXXXXXX-X';
 
   @override
-  String get aboutSupportEmail => 'Support Email: support@miaoji.app';
+  String get aboutSupportEmail => 'Support Email: 809740942@qq.com';
 
   @override
   String get privacyPolicyHeader => 'Miaoji Privacy Policy';
@@ -349,7 +349,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userAgreementSection9Content =>
-      'If you have any questions or suggestions about this Agreement, please contact us:\n\nApp name: Miaoji\nEmail: support@miaoji.app\n\nThank you for choosing Miaoji. Enjoy!';
+      'If you have any questions or suggestions about this Agreement, please contact us:\n\nApp name: Miaoji\nEmail: 809740942@qq.com\n\nThank you for choosing Miaoji. Enjoy!';
 
   @override
   String get homeTitle => 'Miaoji Pocket';

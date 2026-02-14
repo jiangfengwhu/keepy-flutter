@@ -912,8 +912,8 @@ class HomePageState extends State<HomePage>
                 ),
               },
               extensionSet: md.ExtensionSet(
-                [LatexBlockSyntax()],
-                [LatexInlineSyntax()],
+                [LatexBlockSyntax(), ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
+                [LatexInlineSyntax(), ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
               ),
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(

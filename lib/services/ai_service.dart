@@ -26,19 +26,21 @@ class ToolCallStartEvent extends StreamEvent {
   ToolCallStartEvent(this.name, {this.isServer = false, this.message = ''});
 }
 
-/// Tool call 数据（本地执行用 args，服务端用 message/success）
+/// Tool call 数据（本地执行用 args，服务端用 message/success/result）
 class ToolCallEvent extends StreamEvent {
   final String name;
   final String args;
   final bool isServer;
   final String message; // 服务端 tool 的结果描述
   final bool success; // 服务端 tool 是否成功
+  final String result; // 服务端 tool 的执行结果（JSON 字符串）
   ToolCallEvent(
     this.name,
     this.args, {
     this.isServer = false,
     this.message = '',
     this.success = false,
+    this.result = '',
   });
 }
 
@@ -168,6 +170,7 @@ class AiService {
             isServer: json['is_server'] as bool? ?? false,
             message: json['message'] as String? ?? '',
             success: json['success'] as bool? ?? false,
+            result: json['result'] as String? ?? '',
           );
         default:
           debugPrint('未知流事件类型: $type → $line');

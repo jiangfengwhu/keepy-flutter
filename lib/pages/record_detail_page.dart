@@ -116,8 +116,8 @@ class RecordDetailPage extends StatelessWidget {
                             ),
                           },
                           extensionSet: md.ExtensionSet(
-                            [LatexBlockSyntax()],
-                            [LatexInlineSyntax()],
+                            [LatexBlockSyntax(), ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
+                            [LatexInlineSyntax(), ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
                           ),
                           onTapLink: (text, href, title) {
                             if (href != null) {

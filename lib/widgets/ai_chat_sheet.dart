@@ -378,9 +378,11 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
                   _scrollToBottom();
                 }
 
-              case ToolCallEvent(:final isServer, :final name, :final args, :final message, :final success):
+              case ToolCallEvent(:final isServer, :final name, :final args, :final message, :final success, :final result):
                 if (isServer) {
-                  // 服务端 tool 完成 → 更新状态
+                  // 服务端 tool 完成 → 更新 UI 状态
+                  final toolCallId =
+                      'server_${DateTime.now().microsecondsSinceEpoch}';
                   setState(() {
                     final statuses = assistantMsg.serverToolStatuses;
                     if (statuses != null) {
@@ -394,7 +396,23 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
                         );
                       }
                     }
+                    // 将服务端 toolcall 写入 assistant 消息的 toolCalls
+                    assistantMsg.toolCalls ??= [];
+                    assistantMsg.toolCalls!.add(
+                      ToolCallInfo(
+                        id: toolCallId,
+                        function: ToolCallFunction(
+                            name: name, arguments: args),
+                      ),
+                    );
                   });
+                  // 将服务端 tool 结果写入 chatHistory，避免后续重复调用
+                  _chatHistory.add(
+                    ChatMessage.tool(
+                      content: result.isNotEmpty ? result : message,
+                      toolCallId: toolCallId,
+                    ),
+                  );
                   _scrollToBottom();
                 } else {
                   // 本地 tool → 收集待执行
