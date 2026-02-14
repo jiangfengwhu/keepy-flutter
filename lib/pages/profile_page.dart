@@ -1204,203 +1204,208 @@ class _RestoreSheetState extends State<_RestoreSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPad = MediaQuery.of(context).padding.bottom;
-    return Container(
-      decoration: const BoxDecoration(
-        color: MiaojiColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPad > 0 ? 0 : 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 拖拽条
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 20),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: MiaojiColors.textHint.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              // 标题
-              Row(
-                children: [
-                  Icon(
-                    Icons.restore_rounded,
-                    size: 18,
-                    color: MiaojiColors.info,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    context.l10n.restorePurchasesTitle,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: MiaojiColors.textPrimary,
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 120),
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: MiaojiColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(24, 0, 24, bottomPad > 0 ? 0 : 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 拖拽条
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 20),
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: MiaojiColors.textHint.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                context.l10n.restorePurchasesDesc,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: MiaojiColors.textHint,
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // ── 导出 ──
-              Text(
-                context.l10n.ticketExportTitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: MiaojiColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: _copyTicket,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: MiaojiColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: MiaojiColors.borderLight,
-                      width: 1,
+                // 标题
+                Row(
+                  children: [
+                    Icon(
+                      Icons.restore_rounded,
+                      size: 18,
+                      color: MiaojiColors.info,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.ticketId ?? context.l10n.loadingShort,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: MiaojiColors.textPrimary,
-                            fontFamily: 'monospace',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: MiaojiColors.textHint,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // ── 导入 ──
-              Text(
-                context.l10n.ticketImportTitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: MiaojiColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
+                    SizedBox(width: 8),
+                    Text(
+                      context.l10n.restorePurchasesTitle,
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontFamily: 'monospace',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: MiaojiColors.textPrimary,
                       ),
-                      decoration: InputDecoration(
-                        hintText: context.l10n.ticketPasteHint,
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.restorePurchasesDesc,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: MiaojiColors.textHint,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── 导出 ──
+                Text(
+                  context.l10n.ticketExportTitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: MiaojiColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _copyTicket,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: MiaojiColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: MiaojiColors.borderLight,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.ticketId ?? context.l10n.loadingShort,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: MiaojiColors.textPrimary,
+                              fontFamily: 'monospace',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.copy_rounded,
+                          size: 16,
                           color: MiaojiColors.textHint,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // ── 导入 ──
+                Text(
+                  context.l10n.ticketImportTitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: MiaojiColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                        ),
+                        decoration: InputDecoration(
+                          hintText: context.l10n.ticketPasteHint,
+                          hintStyle: const TextStyle(
+                            fontSize: 13,
+                            color: MiaojiColors.textHint,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          filled: true,
+                          fillColor: MiaojiColors.surfaceVariant,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: MiaojiColors.borderLight,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: MiaojiColors.borderLight,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: MiaojiColors.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: _importing ? null : _doImport,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
                           vertical: 12,
                         ),
-                        filled: true,
-                        fillColor: MiaojiColors.surfaceVariant,
-                        border: OutlineInputBorder(
+                        decoration: BoxDecoration(
+                          color: MiaojiColors.primary,
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: MiaojiColors.borderLight,
-                            width: 1,
-                          ),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: MiaojiColors.borderLight,
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: MiaojiColors.primary,
-                            width: 1.5,
-                          ),
-                        ),
+                        child: _importing
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                context.l10n.ticketImportAction,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _importing ? null : _doImport,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: MiaojiColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: _importing
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
-                              context.l10n.ticketImportAction,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
       ),
