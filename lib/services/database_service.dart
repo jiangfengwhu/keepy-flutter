@@ -302,10 +302,9 @@ class DatabaseService {
     return db.insert('records', record.toDbRow());
   }
 
-  /// 获取记录（可按 notebook_name 过滤，支持分页）
+  /// 获取记录（纯 DB 过滤，不含正则；正则搜索请用 GrepSearchService）
   Future<List<DataRecord>> getRecords({
     String? notebookName,
-    String? query,
     int? limit,
     int? offset,
   }) async {
@@ -313,15 +312,9 @@ class DatabaseService {
     String? where;
     List<dynamic>? whereArgs;
 
-    if (notebookName != null && query != null) {
-      where = 'notebook_name = ? AND data_json LIKE ?';
-      whereArgs = [notebookName, '%$query%'];
-    } else if (notebookName != null) {
+    if (notebookName != null) {
       where = 'notebook_name = ?';
       whereArgs = [notebookName];
-    } else if (query != null) {
-      where = 'data_json LIKE ?';
-      whereArgs = ['%$query%'];
     }
 
     final rows = await db.query(
@@ -440,20 +433,6 @@ class DatabaseService {
       map[row['notebook_name'] as String] = row['count'] as int;
     }
     return map;
-  }
-
-  /// 搜索记录（同时匹配 data_json 和 notebook_name）
-  Future<List<DataRecord>> searchRecords(String keyword,
-      {int limit = 50}) async {
-    final db = await database;
-    final rows = await db.query(
-      'records',
-      where: 'data_json LIKE ? OR notebook_name LIKE ?',
-      whereArgs: ['%$keyword%', '%$keyword%'],
-      orderBy: 'updated_at DESC',
-      limit: limit,
-    );
-    return rows.map((row) => DataRecord.fromDbRow(row)).toList();
   }
 
   /// 获取即将到来的提醒（未来 7 天内）

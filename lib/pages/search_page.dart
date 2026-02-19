@@ -7,10 +7,11 @@ import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
 import '../services/database_service.dart';
+import '../services/grep_search_service.dart';
 import '../theme/miaoji_theme.dart';
 import 'notebook_detail_page.dart';
 
-/// 全局搜索页面 — 纯文字搜索 record 数据
+/// 全局搜索页面 — grep 风格正则搜索
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
@@ -22,20 +23,21 @@ class _SearchPageState extends State<SearchPage> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   final _db = DatabaseService();
+  final _grep = GrepSearchService();
 
   Timer? _debounce;
   List<DataRecord> _results = [];
+  RegExp? _highlightRegex;
   bool _hasSearched = false;
   bool _isSearching = false;
+  int _searchGeneration = 0;
 
-  // 缓存 notebook 信息用于展示
   final Map<String, Notebook> _notebookCache = {};
 
   @override
   void initState() {
     super.initState();
     _loadNotebooks();
-    // 自动弹出键盘
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -61,6 +63,7 @@ class _SearchPageState extends State<SearchPage> {
     if (text.trim().isEmpty) {
       setState(() {
         _results = [];
+        _highlightRegex = null;
         _hasSearched = false;
         _isSearching = false;
       });
@@ -68,10 +71,13 @@ class _SearchPageState extends State<SearchPage> {
     }
     setState(() => _isSearching = true);
     _debounce = Timer(const Duration(milliseconds: 300), () async {
-      final results = await _db.searchRecords(text.trim());
-      if (!mounted) return;
+      final gen = ++_searchGeneration;
+      final pattern = text.trim();
+      final records = await _grep.grep(pattern: pattern, limit: 50);
+      if (!mounted || gen != _searchGeneration) return;
       setState(() {
-        _results = results;
+        _results = records;
+        _highlightRegex = GrepSearchService.buildRegex(pattern);
         _hasSearched = true;
         _isSearching = false;
       });
@@ -97,7 +103,6 @@ class _SearchPageState extends State<SearchPage> {
       backgroundColor: MiaojiColors.background,
       body: Column(
         children: [
-          // ── 搜索栏 ──
           Container(
             padding: EdgeInsets.fromLTRB(16, safePadding.top + 8, 16, 12),
             decoration: BoxDecoration(
@@ -112,7 +117,6 @@ class _SearchPageState extends State<SearchPage> {
             ),
             child: Row(
               children: [
-                // 返回按钮
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
@@ -129,7 +133,6 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // 搜索输入框
                 Expanded(
                   child: Container(
                     height: 42,
@@ -178,7 +181,6 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
 
-          // ── 搜索结果 ──
           Expanded(
             child: _isSearching
                 ? const Center(
@@ -197,8 +199,6 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
-
-  // ── 初始提示 ──
 
   Widget _buildEmptyHint() {
     return Center(
@@ -220,8 +220,6 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
-
-  // ── 无结果 ──
 
   Widget _buildNoResults() {
     return Center(
@@ -252,10 +250,9 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  // ── 结果列表 ──
+  // ── 结果列表（按 notebook 分组）──
 
   Widget _buildResultList() {
-    // 按 notebook 分组
     final grouped = <String, List<DataRecord>>{};
     for (final r in _results) {
       grouped.putIfAbsent(r.notebookName, () => []).add(r);
@@ -276,7 +273,6 @@ class _SearchPageState extends State<SearchPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (groupIndex > 0) const SizedBox(height: 16),
-            // 分组标题
             GestureDetector(
               onTap: () {
                 if (nbItem != null) {
@@ -326,7 +322,6 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             ),
-            // 记录卡片
             ...records.map((record) => _buildRecordCard(record, nbItem)),
           ],
         );
@@ -334,26 +329,13 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  // ── 单条记录卡片 ──
+
   Widget _buildRecordCard(DataRecord record, NotebookItem? nbItem) {
-    final keyword = _controller.text.trim();
-    // 从 data 中提取匹配的字段
-    final matchedEntries = <MapEntry<String, String>>[];
-    final otherEntries = <MapEntry<String, String>>[];
-
-    for (final entry in record.data.entries) {
-      final val = entry.value?.toString() ?? '';
-      if (val.isEmpty) continue;
-      if (keyword.isNotEmpty &&
-          val.toLowerCase().contains(keyword.toLowerCase())) {
-        matchedEntries.add(MapEntry(entry.key, val));
-      } else {
-        otherEntries.add(MapEntry(entry.key, val));
-      }
-    }
-
-    // 优先展示匹配的字段，再展示其他字段
-    final displayEntries = [...matchedEntries, ...otherEntries];
-    if (displayEntries.isEmpty) return const SizedBox.shrink();
+    final entries = record.data.entries
+        .where((e) => (e.value?.toString() ?? '').isNotEmpty)
+        .toList();
+    if (entries.isEmpty) return const SizedBox.shrink();
 
     return GestureDetector(
       onTap: () => _openNotebookDetail(record),
@@ -369,9 +351,9 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 最多展示 3 个字段
-            ...displayEntries.take(3).map((entry) {
-              final isMatch = matchedEntries.contains(entry);
+            ...entries.take(3).map((entry) {
+              final value = entry.value.toString();
+              final hasMatch = _highlightRegex?.hasMatch(value) ?? false;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
@@ -381,9 +363,11 @@ class _SearchPageState extends State<SearchPage> {
                       width: 60,
                       child: Text(
                         entry.key,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: MiaojiColors.textHint,
+                          color: hasMatch
+                              ? MiaojiColors.primary.withValues(alpha: 0.7)
+                              : MiaojiColors.textHint,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -392,10 +376,10 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: isMatch
-                          ? _buildHighlightText(entry.value, keyword)
+                      child: hasMatch
+                          ? _buildHighlightText(value, _highlightRegex!)
                           : Text(
-                              entry.value,
+                              value,
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: MiaojiColors.textSecondary,
@@ -409,15 +393,14 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               );
             }),
-            if (displayEntries.length > 3)
+            if (entries.length > 3)
               Text(
-                context.l10n.searchMoreFields(displayEntries.length - 3),
+                context.l10n.searchMoreFields(entries.length - 3),
                 style: const TextStyle(
                   fontSize: 11,
                   color: MiaojiColors.textHint,
                 ),
               ),
-            // 底部时间
             const SizedBox(height: 4),
             Text(
               _formatTime(record.updatedAt),
@@ -432,9 +415,10 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// 关键词高亮文本
-  Widget _buildHighlightText(String text, String keyword) {
-    if (keyword.isEmpty) {
+  /// 用正则在文本中做高亮
+  Widget _buildHighlightText(String text, RegExp regex) {
+    final matches = regex.allMatches(text).where((m) => m.start != m.end).toList();
+    if (matches.isEmpty) {
       return Text(
         text,
         style: const TextStyle(
@@ -444,30 +428,19 @@ class _SearchPageState extends State<SearchPage> {
       );
     }
 
-    final lowerText = text.toLowerCase();
-    final lowerKeyword = keyword.toLowerCase();
     final spans = <InlineSpan>[];
-    int start = 0;
+    var cursor = 0;
 
-    while (true) {
-      final idx = lowerText.indexOf(lowerKeyword, start);
-      if (idx == -1) {
+    for (final m in matches) {
+      if (m.start > cursor) {
         spans.add(TextSpan(
-          text: text.substring(start),
-          style: const TextStyle(
-              fontSize: 13, color: MiaojiColors.textSecondary, height: 1.3),
-        ));
-        break;
-      }
-      if (idx > start) {
-        spans.add(TextSpan(
-          text: text.substring(start, idx),
+          text: text.substring(cursor, m.start),
           style: const TextStyle(
               fontSize: 13, color: MiaojiColors.textSecondary, height: 1.3),
         ));
       }
       spans.add(TextSpan(
-        text: text.substring(idx, idx + keyword.length),
+        text: text.substring(m.start, m.end),
         style: const TextStyle(
           fontSize: 13,
           color: MiaojiColors.primary,
@@ -475,7 +448,15 @@ class _SearchPageState extends State<SearchPage> {
           height: 1.3,
         ),
       ));
-      start = idx + keyword.length;
+      cursor = m.end;
+    }
+
+    if (cursor < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(cursor),
+        style: const TextStyle(
+            fontSize: 13, color: MiaojiColors.textSecondary, height: 1.3),
+      ));
     }
 
     return RichText(

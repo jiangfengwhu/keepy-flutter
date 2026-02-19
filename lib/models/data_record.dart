@@ -25,12 +25,12 @@ class DataRecord {
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
-  factory DataRecord.fromDbRow(Map<String, dynamic> row) {
+  factory DataRecord.fromDbRow(Map<String, dynamic> row, {Map<String, dynamic>? parsedData}) {
     final reminderStr = row['reminder_at'] as String?;
     return DataRecord(
       id: row['id'] as int,
       notebookName: row['notebook_name'] as String,
-      data: jsonDecode(row['data_json'] as String) as Map<String, dynamic>,
+      data: parsedData ?? (jsonDecode(row['data_json'] as String) as Map<String, dynamic>),
       createdAt: DateTime.parse(row['created_at'] as String),
       updatedAt: DateTime.parse(row['updated_at'] as String),
       reminderAt:

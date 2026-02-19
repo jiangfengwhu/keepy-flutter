@@ -6,6 +6,7 @@ import '../models/data_record.dart';
 import '../models/notebook.dart';
 import '../models/notebook_item.dart';
 import 'database_service.dart';
+import 'grep_search_service.dart';
 import 'notification_service.dart';
 
 /// Tool 执行结果
@@ -48,6 +49,7 @@ class ServerToolStatus {
 /// 本地 Tool 执行器
 class ToolExecutor {
   final DatabaseService _db = DatabaseService();
+  final GrepSearchService _grep = GrepSearchService();
   final NotificationService _notify = NotificationService();
 
   /// 根据 tool name 和 args 执行对应操作
@@ -466,7 +468,7 @@ class ToolExecutor {
     );
   }
 
-  /// get_data_record: 查询记录
+  /// get_data_record: 查询记录（支持正则 grep 搜索）
   Future<ToolResult> _getDataRecord(String argsJson) async {
     final args = jsonDecode(argsJson) as Map<String, dynamic>;
     final query = args['query'] as String?;
@@ -515,10 +517,35 @@ class ToolExecutor {
       );
     }
 
-    // 否则按条件搜索
+    // 有 query 时走 grep 引擎（直接在 data_json 上正则匹配）
+    if (query != null && query.isNotEmpty) {
+      final records = await _grep.grep(
+        pattern: query,
+        notebookName: type,
+        limit: 20,
+      );
+
+      return ToolResult(
+        toolName: 'get_data_record',
+        success: true,
+        responseForAi: jsonEncode({
+          'status': 'success',
+          'count': records.length,
+          'pattern': query,
+          'records': records.map((r) => r.toSummaryJson()).toList(),
+        }),
+        uiData: {
+          'action': 'get_record',
+          'records': records,
+          'query': query,
+          'type': type,
+        },
+      );
+    }
+
+    // 无 query 时简单列出记录
     final records = await _db.getRecords(
       notebookName: type,
-      query: query,
       limit: 20,
     );
 
@@ -533,7 +560,6 @@ class ToolExecutor {
       uiData: {
         'action': 'get_record',
         'records': records,
-        'query': query,
         'type': type,
       },
     );
