@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import '../l10n/l10n_ext.dart';
 import '../models/chat_message.dart';
@@ -267,13 +268,9 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
 
       if (pickedFile == null || !mounted) return;
 
-      // 读取文件并转为 base64
-      final bytes = await File(pickedFile.path).readAsBytes();
-      final rawBase64 = base64Encode(bytes);
-
-      // 推断 MIME 类型
+      var bytes = await File(pickedFile.path).readAsBytes();
       final ext = pickedFile.path.split('.').last.toLowerCase();
-      final mimeType = switch (ext) {
+      var mimeType = switch (ext) {
         'png' => 'image/png',
         'gif' => 'image/gif',
         'webp' => 'image/webp',
@@ -281,7 +278,16 @@ class _AiChatSheetContentState extends State<_AiChatSheetContent>
         _ => 'image/jpeg',
       };
 
-      // 带前缀的 base64 数据
+      // 非 JPEG 统一转 JPEG：imageQuality 参数仅对 JPEG 生效，其余格式需手动压缩
+      if (mimeType != 'image/jpeg') {
+        final decoded = img.decodeImage(bytes);
+        if (decoded != null) {
+          bytes = img.encodeJpg(decoded, quality: 80);
+          mimeType = 'image/jpeg';
+        }
+      }
+
+      final rawBase64 = base64Encode(bytes);
       final base64Data = 'data:$mimeType;base64,$rawBase64';
 
       // 创建图片消息并添加到历史

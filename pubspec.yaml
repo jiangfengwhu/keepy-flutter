@@ -48,6 +48,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   speech_to_text: ^7.3.0
   image_picker: ^1.2.1
+  image: ^4.5.3
   shared_preferences: ^2.5.4
   package_info_plus: ^9.0.0
   app_settings: ^7.0.0

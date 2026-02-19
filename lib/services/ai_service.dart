@@ -172,6 +172,8 @@ class AiService {
             success: json['success'] as bool? ?? false,
             result: json['result'] as String? ?? '',
           );
+        case 'heartbeat':
+          return null;
         default:
           debugPrint('未知流事件类型: $type → $line');
           return null;
