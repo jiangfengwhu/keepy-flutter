@@ -22,6 +22,7 @@
 		F1A2B3C4D5E6F7A800000032 /* alarm_chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A800000031 /* alarm_chime.caf */; };
 		F1A2B3C4D5E6F7A800000042 /* alarm_pulse.caf in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F7A800000041 /* alarm_pulse.caf */; };
 		E5F60718293A400000000004 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E5F60718293A400000000003 /* InfoPlist.strings */; };
+		P1VACY018293A40000000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = P1VACY018293A40000000002 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		P1VACY018293A40000000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5C /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Configuration.storekit; sourceTree = "<group>"; };
 		F1A2B3C4D5E6F7A800000001 /* alarm_sound.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = alarm_sound.caf; sourceTree = "<group>"; };
 		F1A2B3C4D5E6F7A800000011 /* alarm_radar.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = alarm_radar.caf; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
+				P1VACY018293A40000000002 /* PrivacyInfo.xcprivacy */,
 				E5F60718293A400000000003 /* InfoPlist.strings */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
@@ -291,6 +294,7 @@
 				F1A2B3C4D5E6F7A800000032 /* alarm_chime.caf in Resources */,
 				F1A2B3C4D5E6F7A800000042 /* alarm_pulse.caf in Resources */,
 				E5F60718293A400000000004 /* InfoPlist.strings in Resources */,
+				P1VACY018293A40000000001 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

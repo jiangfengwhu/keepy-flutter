@@ -107,10 +107,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicyHeader => 'Miaoji Privacy Policy';
 
   @override
-  String get privacyPolicyUpdatedAt => 'Updated: Feb 9, 2026';
+  String get privacyPolicyUpdatedAt => 'Updated: Feb 21, 2026';
 
   @override
-  String get privacyPolicyEffectiveAt => 'Effective: Feb 9, 2026';
+  String get privacyPolicyEffectiveAt => 'Effective: Feb 21, 2026';
 
   @override
   String get privacyPolicyIntro1 =>
@@ -143,7 +143,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacySection1_3Content =>
-      'When you use the AI assistant, notes or conversation content you send to AI may be transmitted to secure cloud servers for processing. We use this data only as necessary to provide AI services and do not use it for other purposes.';
+      'When you use the AI assistant, we send the following personal data to third-party AI providers to implement app functionality:\n\n(a) Images: photos you select or capture for AI understanding and recording.\n\n(b) Text content: notes, conversation input, and other text you provide to the AI assistant.\n\n(c) Voice-to-text results: text converted from your voice input, which is sent to AI for processing.\n\nWe use AI providers based on your region: Alibaba Qwen (通义千问) for users in mainland China, and OpenAI for users in other regions. This data is transmitted securely (HTTPS) and used only to provide AI features. We do not use it for advertising, tracking, or other purposes. See Section 4 for sharing details.';
 
   @override
   String get privacySection2Title => '2. How We Use Information';
@@ -181,7 +181,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacySection4Content =>
-      'We will not sell your personal information to any third party. We may share your information in the following cases:\n\n(a) With your explicit consent.\n\n(b) To provide AI services, necessary data may be sent to AI service providers for processing. We require them to comply with data protection agreements.\n\n(c) As required by laws, legal processes, or government requests.\n\n(d) As reasonably necessary to protect our users, the public, or our legitimate rights and interests.';
+      'We will not sell your personal information to any third party. We may share your information in the following cases:\n\n(a) With your explicit consent.\n\n(b) Third-party AI providers: To provide AI features, we send images, text content, and voice-to-text results to AI service providers. We use Alibaba Qwen (通义千问) for users in mainland China and OpenAI for users in other regions. These providers process data solely to deliver AI functionality. We require them to comply with data protection agreements and do not permit use for advertising or tracking.\n\n(c) As required by laws, legal processes, or government requests.\n\n(d) As reasonably necessary to protect our users, the public, or our legitimate rights and interests.';
 
   @override
   String get privacySection5Title => '5. Your Rights';

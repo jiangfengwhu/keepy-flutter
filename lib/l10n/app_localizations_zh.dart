@@ -103,10 +103,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacyPolicyHeader => '妙记隐私政策';
 
   @override
-  String get privacyPolicyUpdatedAt => '更新日期：2026年2月9日';
+  String get privacyPolicyUpdatedAt => '更新日期：2026年2月21日';
 
   @override
-  String get privacyPolicyEffectiveAt => '生效日期：2026年2月9日';
+  String get privacyPolicyEffectiveAt => '生效日期：2026年2月21日';
 
   @override
   String get privacyPolicyIntro1 =>
@@ -138,7 +138,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacySection1_3Content =>
-      '当您使用 AI 智能助手功能时，您主动发送给 AI 的笔记内容或对话信息可能会被传输至安全的云端服务器进行处理。我们仅在提供 AI 服务所必需的范围内使用这些数据，不会将其用于其他目的。';
+      '当您使用 AI 智能助手功能时，我们会将以下个人信息发送给第三方 AI 服务提供商，以实现应用功能：\n\n(a) 图片：您选择或拍摄的照片，用于 AI 理解与记录。\n\n(b) 文本内容：您提供给 AI 助手的笔记、对话输入及其他文字内容。\n\n(c) 语音转文字结果：您的语音转换成的文字，会发送至 AI 进行处理。\n\n我们根据您所在地区选择 AI 提供商：中国大陆用户使用阿里巴巴通义千问（Qwen），其他地区用户使用 OpenAI。上述数据通过安全传输（HTTPS）发送，仅用于提供 AI 功能，不会用于广告、追踪或其他目的。详见第四节关于信息共享的说明。';
 
   @override
   String get privacySection2Title => '二、信息的使用';
@@ -176,7 +176,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacySection4Content =>
-      '我们承诺不会将您的个人信息出售给任何第三方。在以下情况下，我们可能会共享您的信息：\n\n(a) 经您明确同意后共享。\n\n(b) 为提供 AI 服务，将必要数据传输至 AI 服务提供商进行处理。我们要求 AI 服务提供商严格遵守数据保护协议。\n\n(c) 根据法律法规、法律程序或政府机关的强制性要求。\n\n(d) 为保护我们的用户、公众或我们的合法权益所合理必需。';
+      '我们承诺不会将您的个人信息出售给任何第三方。在以下情况下，我们可能会共享您的信息：\n\n(a) 经您明确同意后共享。\n\n(b) 第三方 AI 服务提供商：为提供 AI 功能，我们会将图片、文本内容及语音转文字结果发送至 AI 服务提供商。中国大陆用户使用阿里巴巴通义千问（Qwen），其他地区用户使用 OpenAI。上述提供商仅将数据用于实现 AI 功能，我们要求其遵守数据保护协议，不得用于广告或追踪。\n\n(c) 根据法律法规、法律程序或政府机关的强制性要求。\n\n(d) 为保护我们的用户、公众或我们的合法权益所合理必需。';
 
   @override
   String get privacySection5Title => '五、您的权利';
