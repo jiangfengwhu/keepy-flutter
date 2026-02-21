@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection1_3Content.
   ///
   /// In en, this message translates to:
-  /// **'Yes. When you use the AI assistant, we send the following personal data to third-party AI providers to implement app functionality:\n\n(a) Images: photos you select or capture for AI understanding and recording.\n\n(b) Text content: notes, conversation input, and other text you provide to the AI assistant.\n\n(c) Voice-to-text results: text converted from your voice input, which is sent to AI for processing.\n\nWe use AI providers based on your region: Alibaba Qwen (通义千问) for users in mainland China, and OpenAI for users in other regions. This data is transmitted securely (HTTPS) and used only to provide AI features. We do not use it for advertising, tracking, or other purposes. See Section 4 for sharing details.'**
+  /// **'When you use the AI assistant, we send the following personal data to third-party AI providers to implement app functionality:\n\n(a) Images: photos you select or capture for AI understanding and recording.\n\n(b) Text content: notes, conversation input, and other text you provide to the AI assistant.\n\n(c) Voice-to-text results: text converted from your voice input, which is sent to AI for processing.\n\nWe use AI providers based on your region: Alibaba Qwen (通义千问) for users in mainland China, and OpenAI for users in other regions. This data is transmitted securely (HTTPS) and used only to provide AI features. We do not use it for advertising, tracking, or other purposes. See Section 4 for sharing details.'**
   String get privacySection1_3Content;
 
   /// No description provided for @privacySection2Title.
