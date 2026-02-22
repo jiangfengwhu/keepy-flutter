@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/notification_service.dart';
 import '../services/ticket_service.dart';
 import '../services/assistant_persona_service.dart';
+import '../services/update_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/alarm_sound_picker.dart';
 import '../widgets/app_toast.dart';
@@ -280,17 +281,41 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     }
   }
 
-  /// 安卓充值跳转淘宝链接
-  static const _kAndroidRechargeUrl =
+  // ══════════════════════════════════════════
+  //  检查更新（仅安卓）
+  // ══════════════════════════════════════════
+
+  Future<void> _checkUpdate() =>
+      UpdateService.checkAndShowIfNeeded(context, showFeedback: true);
+
+  /// 安卓充值：优先打开淘宝 App，否则回退 H5
+  static const _kAndroidRechargeTaobaoApp =
+      'taobao://item.taobao.com/item.htm?id=1021064986912';
+  static const _kAndroidRechargeH5 =
       'https://m.intl.taobao.com/detail/detail.html?ft=t&id=1021064986912';
 
-  void _showPurchaseSheet() {
+  Future<void> _showPurchaseSheet() async {
     if (Platform.isAndroid) {
-      // 安卓直接跳转外部充值链接
-      launchUrl(
-        Uri.parse(_kAndroidRechargeUrl),
-        mode: LaunchMode.externalApplication,
-      );
+      final taobaoAppUri = Uri.parse(_kAndroidRechargeTaobaoApp);
+      try {
+        final launched = await launchUrl(
+          taobaoAppUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched && mounted) {
+          await launchUrl(
+            Uri.parse(_kAndroidRechargeH5),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          await launchUrl(
+            Uri.parse(_kAndroidRechargeH5),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      }
       return;
     }
     showModalBottomSheet(
@@ -673,6 +698,13 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           MaterialPageRoute(builder: (_) => const AboutPage()),
         ),
       ),
+      if (Platform.isAndroid)
+        _SettingItem(
+          Icons.system_update_rounded,
+          context.l10n.checkUpdateTitle,
+          const Color(0xFF4CAF50),
+          onTap: _checkUpdate,
+        ),
     ];
 
     return Container(
@@ -1162,6 +1194,7 @@ class _PlanInfo {
     required this.unitPrice,
   });
 }
+
 
 // ═══════════════════════════════════════════
 //  内购恢复 BottomSheet

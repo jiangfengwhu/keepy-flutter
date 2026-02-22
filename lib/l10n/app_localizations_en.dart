@@ -1328,4 +1328,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingTicketLoading => 'Getting your credential...';
+
+  @override
+  String get checkUpdateTitle => 'Check for Updates';
+
+  @override
+  String get checkUpdateChecking => 'Checking for updates...';
+
+  @override
+  String get checkUpdateLatest => 'Already up to date';
+
+  @override
+  String get checkUpdateFailed => 'Check failed, please try again later';
+
+  @override
+  String get checkUpdateAvailableTitle => 'New version available';
+
+  @override
+  String checkUpdateAvailableVersion(Object version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get checkUpdateInstallNow => 'Update Now';
+
+  @override
+  String get checkUpdateLater => 'Later';
+
+  @override
+  String get checkUpdateDownloading => 'Downloading update...';
+
+  @override
+  String checkUpdateDownloadProgress(Object percent) {
+    return 'Downloading $percent%';
+  }
+
+  @override
+  String get checkUpdateInstalling => 'Installing...';
+
+  @override
+  String checkUpdateDownloadFailed(Object error) {
+    return 'Download failed: $error';
+  }
 }

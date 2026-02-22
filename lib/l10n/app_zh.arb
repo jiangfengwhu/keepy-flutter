@@ -634,5 +634,38 @@
   "onboardingTicketFailed": "凭证获取失败",
   "onboardingTicketFailedDesc": "无法获取您的 ID，请检查网络后重试",
   "onboardingTicketRetry": "重试",
-  "onboardingTicketLoading": "正在获取您的专属凭证…"
+  "onboardingTicketLoading": "正在获取您的专属凭证…",
+  "checkUpdateTitle": "检查更新",
+  "checkUpdateChecking": "正在检查更新…",
+  "checkUpdateLatest": "已是最新版本",
+  "checkUpdateFailed": "检查失败，请稍后再试",
+  "checkUpdateAvailableTitle": "发现新版本",
+  "checkUpdateAvailableVersion": "版本 {version}",
+  "@checkUpdateAvailableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "Object"
+      }
+    }
+  },
+  "checkUpdateInstallNow": "立即更新",
+  "checkUpdateLater": "稍后再说",
+  "checkUpdateDownloading": "正在下载更新…",
+  "checkUpdateDownloadProgress": "下载中 {percent}%",
+  "@checkUpdateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "Object"
+      }
+    }
+  },
+  "checkUpdateInstalling": "安装中…",
+  "checkUpdateDownloadFailed": "下载失败：{error}",
+  "@checkUpdateDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  }
 }

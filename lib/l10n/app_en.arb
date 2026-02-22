@@ -594,5 +594,38 @@
   "onboardingTicketFailed": "Failed to get credential",
   "onboardingTicketFailedDesc": "Unable to get your ID. Please check your network and try again.",
   "onboardingTicketRetry": "Retry",
-  "onboardingTicketLoading": "Getting your credential..."
+  "onboardingTicketLoading": "Getting your credential...",
+  "checkUpdateTitle": "Check for Updates",
+  "checkUpdateChecking": "Checking for updates...",
+  "checkUpdateLatest": "Already up to date",
+  "checkUpdateFailed": "Check failed, please try again later",
+  "checkUpdateAvailableTitle": "New version available",
+  "checkUpdateAvailableVersion": "Version {version}",
+  "@checkUpdateAvailableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "Object"
+      }
+    }
+  },
+  "checkUpdateInstallNow": "Update Now",
+  "checkUpdateLater": "Later",
+  "checkUpdateDownloading": "Downloading update...",
+  "checkUpdateDownloadProgress": "Downloading {percent}%",
+  "@checkUpdateDownloadProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "Object"
+      }
+    }
+  },
+  "checkUpdateInstalling": "Installing...",
+  "checkUpdateDownloadFailed": "Download failed: {error}",
+  "@checkUpdateDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  }
 }

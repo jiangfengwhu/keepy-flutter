@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../l10n/l10n_ext.dart';
+import '../services/update_service.dart';
 import '../theme/miaoji_theme.dart';
 import '../widgets/ai_chat_sheet.dart';
 import 'home_page.dart';
@@ -28,6 +30,18 @@ class _MainShellState extends State<MainShell> {
       const SizedBox.expand(), // 助手 tab 占位（点击时弹出 BottomSheet）
       const ProfilePage(),
     ];
+    if (Platform.isAndroid) {
+      // 延迟到首帧渲染完成后再检查，避免阻塞启动
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 2), _autoCheckUpdate);
+      });
+    }
+  }
+
+  Future<void> _autoCheckUpdate() async {
+    if (!mounted) return;
+    // showFeedback: false —— 自动检查，无更新时静默，不打扰用户
+    await UpdateService.checkAndShowIfNeeded(context, showFeedback: false);
   }
 
   void _onTabTapped(int index) {

@@ -1163,4 +1163,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingTicketLoading => '正在获取您的专属凭证…';
+
+  @override
+  String get checkUpdateTitle => '检查更新';
+
+  @override
+  String get checkUpdateChecking => '正在检查更新…';
+
+  @override
+  String get checkUpdateLatest => '已是最新版本';
+
+  @override
+  String get checkUpdateFailed => '检查失败，请稍后再试';
+
+  @override
+  String get checkUpdateAvailableTitle => '发现新版本';
+
+  @override
+  String checkUpdateAvailableVersion(Object version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get checkUpdateInstallNow => '立即更新';
+
+  @override
+  String get checkUpdateLater => '稍后再说';
+
+  @override
+  String get checkUpdateDownloading => '正在下载更新…';
+
+  @override
+  String checkUpdateDownloadProgress(Object percent) {
+    return '下载中 $percent%';
+  }
+
+  @override
+  String get checkUpdateInstalling => '安装中…';
+
+  @override
+  String checkUpdateDownloadFailed(Object error) {
+    return '下载失败：$error';
+  }
 }

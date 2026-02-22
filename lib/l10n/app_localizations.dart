@@ -2125,6 +2125,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Getting your credential...'**
   String get onboardingTicketLoading;
+
+  /// No description provided for @checkUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for Updates'**
+  String get checkUpdateTitle;
+
+  /// No description provided for @checkUpdateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates...'**
+  String get checkUpdateChecking;
+
+  /// No description provided for @checkUpdateLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Already up to date'**
+  String get checkUpdateLatest;
+
+  /// No description provided for @checkUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Check failed, please try again later'**
+  String get checkUpdateFailed;
+
+  /// No description provided for @checkUpdateAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New version available'**
+  String get checkUpdateAvailableTitle;
+
+  /// No description provided for @checkUpdateAvailableVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String checkUpdateAvailableVersion(Object version);
+
+  /// No description provided for @checkUpdateInstallNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Now'**
+  String get checkUpdateInstallNow;
+
+  /// No description provided for @checkUpdateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get checkUpdateLater;
+
+  /// No description provided for @checkUpdateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update...'**
+  String get checkUpdateDownloading;
+
+  /// No description provided for @checkUpdateDownloadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {percent}%'**
+  String checkUpdateDownloadProgress(Object percent);
+
+  /// No description provided for @checkUpdateInstalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing...'**
+  String get checkUpdateInstalling;
+
+  /// No description provided for @checkUpdateDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String checkUpdateDownloadFailed(Object error);
 }
 
 class _AppLocalizationsDelegate
